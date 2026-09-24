@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Detail — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .event-hero { height: 240px; background: linear-gradient(135deg, #1e3a5f 0%, #4f6ef7 60%, #7c3aed 100%); display: flex; align-items: flex-end; padding: 32px; position: relative; }
+    .event-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,17,23,0.85) 0%, transparent 60%); }
+    .event-hero-content { position: relative; z-index: 1; }
+    .event-tabs { display: flex; border-bottom: 1px solid var(--border-subtle); margin-bottom: 32px; }
+    .event-tab { font-size: 14px; font-weight: 500; color: var(--text-tertiary); padding: 14px 20px; border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.15s; }
+    .event-tab:hover { color: var(--text-secondary); }
+    .event-tab.active { color: var(--text-primary); border-bottom-color: var(--brand-500); }
+    .info-row { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+    .info-icon { width: 16px; height: 16px; color: var(--text-tertiary); flex-shrink: 0; }
+    .track-chip { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: var(--radius-full); background: var(--bg-elevated); border: 1px solid var(--border-default); font-size: 12px; color: var(--text-secondary); margin: 4px 4px 4px 0; }
+    .stat-block { background: var(--bg-elevated); border-radius: var(--radius-lg); padding: 16px 20px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); }
+    .stat-label { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+    .countdown { background: linear-gradient(135deg, rgba(79,110,247,0.12), rgba(79,110,247,0.04)); border: 1px solid rgba(79,110,247,0.2); border-radius: var(--radius-lg); padding: 20px 24px; }
+    .countdown-units { display: flex; gap: 16px; margin-top: 12px; }
+    .countdown-unit { text-align: center; }
+    .countdown-num { font-size: 32px; font-weight: 700; color: var(--brand-400); font-family: 'JetBrains Mono', monospace; }
+    .countdown-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+    .team-mini-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-elevated); border-radius: var(--radius-md); margin-bottom: 8px; }
+    .judge-mini-card { display: flex; align-items: center; gap: 10px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo"><div class="navbar-logo-dot"></div>Dogfood</div>
+      <div class="navbar-links">
+        <a href="01-events-listing.html" class="navbar-link">Events</a>
+        <a href="#" class="navbar-link">My Team</a>
+        <a href="#" class="navbar-link">Judging</a>
+      </div>
+      <div class="navbar-actions">
+        <div class="avatar avatar-sm" style="background: var(--brand-500); color: #fff;">AJ</div>
+        <button class="btn btn-ghost btn-sm">Alex Johnson</button>
+      </div>
+    </div>
+  </nav>
+
+  <div style="padding-top: 60px;">
+    <!-- EVENT HERO BANNER -->
+    <div class="event-hero">
+      <div class="event-hero-content">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <span class="badge badge-registration"><span class="badge-dot"></span>Registration Open</span>
+          <span class="badge badge-draft" style="background: rgba(255,255,255,0.08);">3 tracks</span>
+        </div>
+        <h1 class="text-display">Spring Hackathon 2025</h1>
+        <p class="text-body-lg text-secondary" style="margin-top: 6px;">Organised by Dogfood Platform Team · April 1 – April 30, 2025</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- TABS -->
+      <div class="event-tabs">
+        <div class="event-tab active">Overview</div>
+        <div class="event-tab">Submissions <span style="font-size:11px; background: var(--bg-subtle); padding: 2px 6px; border-radius: 99px; margin-left: 4px;">48</span></div>
+        <div class="event-tab">Leaderboard</div>
+        <div class="event-tab">Judges</div>
+      </div>
+
+      <!-- OVERVIEW TAB CONTENT -->
+      <div class="grid-layout">
+        <!-- MAIN CONTENT -->
+        <div>
+          <!-- Stats row -->
+          <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 32px;">
+            <div class="stat-block"><div class="stat-value">48</div><div class="stat-label">Teams registered</div></div>
+            <div class="stat-block"><div class="stat-value">6</div><div class="stat-label">Max team size</div></div>
+            <div class="stat-block"><div class="stat-value">3</div><div class="stat-label">Tracks</div></div>
+            <div class="stat-block"><div class="stat-value" style="color: var(--success);">$5K</div><div class="stat-label">Prize pool</div></div>
+          </div>
+
+          <!-- Description -->
+          <h2 class="text-h3" style="margin-bottom: 12px;">About this event</h2>
+          <p class="text-body text-secondary" style="line-height: 1.8;">
+            Spring Hackathon 2025 is a month-long hackathon open to teams of up to 6 members. Projects can fall under any of our 3 tracks: Web &amp; Mobile, AI &amp; Machine Learning, and Open Innovation.
+          </p>
+          <p class="text-body text-secondary" style="margin-top: 12px; line-height: 1.8;">
+            Submissions will be reviewed by a panel of 12 expert judges. Winners will be announced during the live results ceremony on May 5th.
+          </p>
+
+          <hr class="divider" />
+
+          <!-- Tracks -->
+          <h2 class="text-h3" style="margin-bottom: 12px;">Tracks</h2>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="stat-block" style="display: flex; align-items: flex-start; gap: 16px;">
+              <div style="width: 40px; height: 40px; border-radius: var(--radius-md); background: rgba(79,110,247,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink:0;">🌐</div>
+              <div>
+                <p class="text-h4">Web &amp; Mobile</p>
+                <p class="text-sm text-secondary" style="margin-top: 4px;">Build production-ready web or mobile applications. Any framework, any stack.</p>
+              </div>
+            </div>
+            <div class="stat-block" style="display: flex; align-items: flex-start; gap: 16px;">
+              <div style="width: 40px; height: 40px; border-radius: var(--radius-md); background: rgba(168,85,247,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink:0;">🤖</div>
+              <div>
+                <p class="text-h4">AI &amp; Machine Learning</p>
+                <p class="text-sm text-secondary" style="margin-top: 4px;">Leverage models, fine-tuning, or custom training to solve real problems.</p>
+              </div>
+            </div>
+            <div class="stat-block" style="display: flex; align-items: flex-start; gap: 16px;">
+              <div style="width: 40px; height: 40px; border-radius: var(--radius-md); background: rgba(34,197,94,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink:0;">💡</div>
+              <div>
+                <p class="text-h4">Open Innovation</p>
+                <p class="text-sm text-secondary" style="margin-top: 4px;">Any category. Any problem. The most creative submission wins.</p>
+              </div>
+            </div>
+          </div>
+
+          <hr class="divider" />
+
+          <!-- Timeline -->
+          <h2 class="text-h3" style="margin-bottom: 16px;">Timeline</h2>
+          <div style="display: flex; flex-direction: column; gap: 0;">
+            <div style="display: flex; gap: 16px; padding-bottom: 20px; border-left: 2px solid var(--brand-500); margin-left: 8px; padding-left: 20px; position: relative;">
+              <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--brand-500); position: absolute; left: -7px; top: 2px;"></div>
+              <div>
+                <p class="text-h4">Apr 1 — Registration Opens</p>
+                <p class="text-sm text-secondary">Teams can register and form. Invite codes generated on team creation.</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 16px; padding-bottom: 20px; border-left: 2px solid var(--border-subtle); margin-left: 8px; padding-left: 20px; position: relative;">
+              <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--bg-subtle); border: 2px solid var(--border-default); position: absolute; left: -7px; top: 2px;"></div>
+              <div>
+                <p class="text-h4">Apr 5 — Submissions Open</p>
+                <p class="text-sm text-secondary">Teams can begin submitting draft projects. Editable until deadline.</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 16px; padding-bottom: 20px; border-left: 2px solid var(--border-subtle); margin-left: 8px; padding-left: 20px; position: relative;">
+              <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--bg-subtle); border: 2px solid var(--border-default); position: absolute; left: -7px; top: 2px;"></div>
+              <div>
+                <p class="text-h4">Apr 30 — Submission Deadline</p>
+                <p class="text-sm text-secondary">All submissions must be finalised. No edits after this date. (Invariant I11)</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 16px; margin-left: 8px; padding-left: 20px; position: relative;">
+              <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--bg-subtle); border: 2px solid var(--border-default); position: absolute; left: -7px; top: 2px;"></div>
+              <div>
+                <p class="text-h4">May 5 — Results Published</p>
+                <p class="text-sm text-secondary">Winners announced. Certificates generated and emailed.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="annotation" style="margin-top: 16px;">
+            <strong>API:</strong> GET /api/v1/events/{slug} → single event DTO with tracks, stats, judges, timeline.
+          </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div>
+          <!-- CTA card -->
+          <div class="card card-body" style="margin-bottom: 16px; border-color: rgba(79,110,247,0.3); background: linear-gradient(135deg, rgba(79,110,247,0.06), var(--bg-surface));">
+            <p class="text-h4" style="margin-bottom: 4px;">Ready to participate?</p>
+            <p class="text-sm text-secondary" style="margin-bottom: 16px;">Registration closes in 23 days.</p>
+            <button class="btn btn-primary w-full" style="justify-content: center;">Register for this event</button>
+            <p class="text-sm text-tertiary" style="text-align: center; margin-top: 10px;">Already registered? <a href="06-team-dashboard.html" style="color: var(--brand-400);">Go to your team</a></p>
+          </div>
+
+          <!-- Countdown -->
+          <div class="countdown" style="margin-bottom: 16px;">
+            <p class="text-label text-tertiary">Registration closes in</p>
+            <div class="countdown-units">
+              <div class="countdown-unit"><div class="countdown-num">23</div><div class="countdown-label">Days</div></div>
+              <div class="countdown-unit" style="color: var(--text-tertiary); font-size: 24px; padding-top: 4px;">:</div>
+              <div class="countdown-unit"><div class="countdown-num">14</div><div class="countdown-label">Hours</div></div>
+              <div class="countdown-unit" style="color: var(--text-tertiary); font-size: 24px; padding-top: 4px;">:</div>
+              <div class="countdown-unit"><div class="countdown-num">32</div><div class="countdown-label">Mins</div></div>
+            </div>
+          </div>
+
+          <!-- Top teams preview -->
+          <div class="card card-body" style="margin-bottom: 16px;">
+            <p class="text-h4" style="margin-bottom: 12px;">Top teams</p>
+            <div class="team-mini-card">
+              <div class="avatar avatar-sm" style="background: rgba(79,110,247,0.3); color: var(--brand-400);">AB</div>
+              <div><p class="text-sm font-medium">Alpha Builders</p><p class="text-label text-tertiary">4 members · Web &amp; Mobile</p></div>
+            </div>
+            <div class="team-mini-card">
+              <div class="avatar avatar-sm" style="background: rgba(168,85,247,0.3); color: #c084fc;">NX</div>
+              <div><p class="text-sm font-medium">Neural Nexus</p><p class="text-label text-tertiary">6 members · AI &amp; ML</p></div>
+            </div>
+            <div class="team-mini-card">
+              <div class="avatar avatar-sm" style="background: rgba(34,197,94,0.3); color: var(--success);">BS</div>
+              <div><p class="text-sm font-medium">ByteStorm</p><p class="text-label text-tertiary">3 members · Open</p></div>
+            </div>
+            <a href="08-submission-gallery.html" class="btn btn-ghost btn-sm" style="margin-top: 8px; width: 100%; justify-content: center;">View all 48 teams →</a>
+          </div>
+
+          <!-- Judges preview -->
+          <div class="card card-body">
+            <p class="text-h4" style="margin-bottom: 12px;">Judges</p>
+            <div class="judge-mini-card">
+              <div class="avatar avatar-sm" style="background: var(--bg-subtle);">SR</div>
+              <div><p class="text-sm">Sarah Reynolds</p><p class="text-label text-tertiary">Engineering Lead, Acme Corp</p></div>
+            </div>
+            <div class="judge-mini-card">
+              <div class="avatar avatar-sm" style="background: var(--bg-subtle);">MK</div>
+              <div><p class="text-sm">Marcus Kim</p><p class="text-label text-tertiary">Product Director, TechFlow</p></div>
+            </div>
+            <p class="text-sm text-tertiary" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">+10 more judges</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+        <a href="index.html" class="btn btn-ghost btn-sm">← Hub</a>
+        <a href="01-events-listing.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">← Events</a>
+        <a href="05-team-setup.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">Team Setup →</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

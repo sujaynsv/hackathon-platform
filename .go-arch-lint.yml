@@ -1,0 +1,60 @@
+version: 3
+workdir: .
+allow:
+  depOnAnyVendor: true
+  deepScan: false
+
+exclude:
+  - web
+  - migrations
+
+components:
+  domain:
+    in: internal/*/domain
+  port:
+    in: internal/*/port
+  usecase:
+    in: internal/*/usecase
+  handler:
+    in: internal/*/handler
+  repository:
+    in: internal/*/repository
+  shared:
+    in: internal/shared/**
+  config:
+    in: internal/config/**
+  cmd:
+    in: cmd/**
+
+deps:
+  shared:
+    anyProjectDeps: true
+  port:
+
+    mayDependOn:
+      - domain
+      - shared
+  usecase:
+    mayDependOn:
+      - domain
+      - port
+      - shared
+  handler:
+    mayDependOn:
+      - domain
+      - port
+      - shared
+  repository:
+    mayDependOn:
+      - domain
+      - port
+      - shared
+  cmd:
+    mayDependOn:
+      - domain
+      - port
+      - usecase
+      - handler
+      - repository
+      - shared
+      - config

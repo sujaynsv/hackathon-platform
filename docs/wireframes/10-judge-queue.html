@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Judge Queue — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .queue-header { padding: 28px 0 20px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 28px; }
+    .assignment-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 20px; display: grid; grid-template-columns: 100px 1fr auto; gap: 20px; align-items: center; transition: all 0.2s; margin-bottom: 12px; }
+    .assignment-card:hover { border-color: var(--border-default); box-shadow: var(--shadow-1); }
+    .assignment-card.completed { opacity: 0.6; }
+    .assignment-cover { width: 100px; height: 70px; border-radius: var(--radius-md); background: linear-gradient(135deg, #1e3a5f, #4f6ef7); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+    .assignment-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+    .status-pending { color: var(--warning); }
+    .status-done { color: var(--success); }
+    .progress-ring { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
+    .judge-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+    .judge-stat { background: var(--bg-elevated); border-radius: var(--radius-lg); padding: 16px 18px; }
+    .judge-stat-val { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+    .judge-stat-label { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+    .filter-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    .filter-tab { font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border-default); color: var(--text-tertiary); cursor: pointer; background: var(--bg-surface); }
+    .filter-tab.active { background: var(--brand-500); border-color: var(--brand-500); color: #fff; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo"><div class="navbar-logo-dot"></div>Dogfood</div>
+      <div class="navbar-links">
+        <a href="01-events-listing.html" class="navbar-link">Events</a>
+        <a href="#" class="navbar-link active">Judging</a>
+      </div>
+      <div class="navbar-actions">
+        <span class="badge badge-judging" style="font-size: 11px;">Judge</span>
+        <div class="avatar avatar-sm" style="background: rgba(168,85,247,0.3); color: #c084fc;">SR</div>
+        <button class="btn btn-ghost btn-sm">Sarah Reynolds</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <div class="container" style="max-width: 900px;">
+
+      <div class="queue-header">
+        <p class="text-label text-tertiary" style="margin-bottom: 6px;">Judge Portal</p>
+        <h1 class="text-h2" style="margin-bottom: 4px;">My Assignments</h1>
+        <p class="text-sm text-secondary">Spring Hackathon 2025 · AI &amp; Machine Learning track</p>
+      </div>
+
+      <!-- Judge progress stats -->
+      <div class="judge-stats">
+        <div class="judge-stat">
+          <div class="judge-stat-val" style="color: var(--warning);">13</div>
+          <div class="judge-stat-label">Pending review</div>
+        </div>
+        <div class="judge-stat">
+          <div class="judge-stat-val" style="color: var(--success);">3</div>
+          <div class="judge-stat-label">Completed</div>
+        </div>
+        <div class="judge-stat">
+          <div class="judge-stat-val">16</div>
+          <div class="judge-stat-label">Total assigned</div>
+        </div>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="filter-row">
+        <span class="filter-tab active">All (16)</span>
+        <span class="filter-tab">Pending (13)</span>
+        <span class="filter-tab">Completed (3)</span>
+      </div>
+
+      <!-- Assignment list -->
+      <div>
+
+        <!-- Pending assignments -->
+        <p class="wireframe-label" style="margin-bottom: 8px;">Pending</p>
+
+        <div class="assignment-card">
+          <div class="assignment-cover">🤖</div>
+          <div>
+            <div class="assignment-status status-pending" style="margin-bottom: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--warning); display: inline-block;"></span>
+              Pending review
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">EventBot — AI Matchmaker</h3>
+            <p class="text-sm text-secondary" style="margin-bottom: 8px;">Alpha Builders · 4 members · Web &amp; Mobile</p>
+            <div class="flex gap-12" style="font-size: 12px; color: var(--text-tertiary);">
+              <span>Submitted Apr 28</span>
+              <span>·</span>
+              <span><a href="#" style="color: var(--brand-400);">GitHub</a></span>
+              <span>·</span>
+              <span><a href="#" style="color: var(--brand-400);">Demo</a></span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+            <a href="11-judge-scoring.html" class="btn btn-primary btn-sm">Start scoring</a>
+            <span class="text-sm text-tertiary">4 criteria · 0/4 scored</span>
+          </div>
+        </div>
+
+        <div class="assignment-card">
+          <div class="assignment-cover" style="background: linear-gradient(135deg, #2e1065, #7c3aed);">🧠</div>
+          <div>
+            <div class="assignment-status status-pending" style="margin-bottom: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--warning); display: inline-block;"></span>
+              Pending review
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">NeuralNote — Smart Notes</h3>
+            <p class="text-sm text-secondary" style="margin-bottom: 8px;">MindBuilders · 5 members · AI &amp; ML</p>
+            <div class="flex gap-12" style="font-size: 12px; color: var(--text-tertiary);">
+              <span>Submitted Apr 29</span>
+              <span>·</span>
+              <span><a href="#" style="color: var(--brand-400);">GitHub</a></span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+            <a href="11-judge-scoring.html" class="btn btn-primary btn-sm">Start scoring</a>
+            <span class="text-sm text-tertiary">4 criteria · 0/4 scored</span>
+          </div>
+        </div>
+
+        <div class="assignment-card">
+          <div class="assignment-cover" style="background: linear-gradient(135deg, #064e3b, #059669);">📊</div>
+          <div>
+            <div class="assignment-status status-pending" style="margin-bottom: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--warning); display: inline-block;"></span>
+              Pending review
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">DataLens — Analytics Platform</h3>
+            <p class="text-sm text-secondary" style="margin-bottom: 8px;">DataTeam · 3 members · AI &amp; ML</p>
+            <div class="flex gap-12" style="font-size: 12px; color: var(--text-tertiary);">
+              <span>Submitted Apr 27</span>
+              <span>·</span>
+              <span><a href="#" style="color: var(--brand-400);">GitHub</a></span>
+              <span>·</span>
+              <span><a href="#" style="color: var(--brand-400);">Demo</a></span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+            <a href="11-judge-scoring.html" class="btn btn-primary btn-sm">Start scoring</a>
+            <span class="text-sm text-tertiary">4 criteria · 0/4 scored</span>
+          </div>
+        </div>
+
+        <!-- Completed assignments -->
+        <p class="wireframe-label" style="margin-top: 28px; margin-bottom: 8px;">Completed</p>
+
+        <div class="assignment-card completed">
+          <div class="assignment-cover" style="background: linear-gradient(135deg, #1a1d27, #374151);">🔐</div>
+          <div>
+            <div class="assignment-status status-done" style="margin-bottom: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--success); display: inline-block;"></span>
+              Scored
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">VaultKey — Password Manager</h3>
+            <p class="text-sm text-secondary">CryptoBuilders · 2 members · AI &amp; ML</p>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+            <button class="btn btn-secondary btn-sm">Edit scores</button>
+            <span class="text-sm text-tertiary" style="color: var(--success);">Avg: 8.2 / 10</span>
+          </div>
+        </div>
+
+        <div class="assignment-card completed">
+          <div class="assignment-cover" style="background: linear-gradient(135deg, #1e1b4b, #4338ca);">📝</div>
+          <div>
+            <div class="assignment-status status-done" style="margin-bottom: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--success); display: inline-block;"></span>
+              Scored
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">NoteGenius — AI Writing</h3>
+            <p class="text-sm text-secondary">WriteTeam · 4 members · AI &amp; ML</p>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+            <button class="btn btn-secondary btn-sm">Edit scores</button>
+            <span class="text-sm text-tertiary" style="color: var(--success);">Avg: 7.5 / 10</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state: All done -->
+      <div style="margin-top: 32px; border-top: 1px solid var(--border-subtle); padding-top: 28px;">
+        <p class="wireframe-label">Empty state — all assignments scored</p>
+        <div class="empty-state" style="margin: 0 auto; max-width: 380px;">
+          <div class="empty-state-icon" style="color: var(--success); font-size: 44px;">✓</div>
+          <p class="empty-state-title">All caught up!</p>
+          <p class="empty-state-desc">You've scored all 16 assigned submissions. The organizer will be notified.</p>
+        </div>
+      </div>
+
+      <div class="annotation" style="margin-top: 24px;">
+        <strong>API:</strong> GET /judging/assignments?status=pending|completed — judge's own assignments only<br/>
+        <strong>Invariant I16:</strong> Assignment list excludes any submission where judge is a team member<br/>
+        <strong>Invariant I10:</strong> Only users with role=judge on this event can access this page
+      </div>
+
+      <div style="margin-top: 24px; padding: 16px 0; border-top: 1px solid var(--border-subtle);">
+        <a href="index.html" class="btn btn-ghost btn-sm">← Hub</a>
+        <a href="09-organizer-dashboard.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">← Organizer</a>
+        <a href="11-judge-scoring.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">Judge Scoring →</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

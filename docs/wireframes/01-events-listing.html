@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Events Listing — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .hero { padding: 64px 0 48px; background: linear-gradient(135deg, rgba(79,110,247,0.08) 0%, rgba(15,17,23,0) 60%); border-bottom: 1px solid var(--border-subtle); }
+    .filter-bar { display: flex; gap: 12px; align-items: center; padding: 20px 0; flex-wrap: wrap; }
+    .filter-select { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 8px 14px; font-size: 13px; color: var(--text-primary); cursor: pointer; min-width: 160px; }
+    .search-input { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 8px 14px; font-size: 13px; color: var(--text-primary); flex: 1; min-width: 200px; }
+    .search-input::placeholder { color: var(--text-tertiary); }
+    .event-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); overflow: hidden; transition: all 0.2s; }
+    .event-card:hover { border-color: var(--border-default); box-shadow: var(--shadow-2); transform: translateY(-2px); }
+    .event-banner { height: 100px; display: flex; align-items: flex-end; padding: 12px; }
+    .event-body { padding: 16px; }
+    .event-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-tertiary); margin-top: 8px; }
+    .event-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .skeleton-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); overflow: hidden; }
+    .section-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo"><div class="navbar-logo-dot"></div>Dogfood</div>
+      <div class="navbar-links">
+        <a href="#" class="navbar-link active">Events</a>
+        <a href="#" class="navbar-link">My Team</a>
+        <a href="#" class="navbar-link">Judging</a>
+      </div>
+      <div class="navbar-actions">
+        <a href="03-login.html" class="btn btn-ghost btn-sm">Sign in</a>
+        <a href="04-register.html" class="btn btn-primary btn-sm">Get started</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <!-- HERO -->
+    <div class="hero">
+      <div class="container">
+        <p class="text-label text-tertiary" style="margin-bottom: 10px;">Hackathon Platform</p>
+        <h1 class="text-display" style="max-width: 560px;">Build something that matters.</h1>
+        <p class="text-body-lg text-secondary" style="margin-top: 12px; max-width: 480px;">Join events, form teams, submit projects, and compete for recognition.</p>
+        <div class="flex gap-12" style="margin-top: 24px;">
+          <button class="btn btn-primary btn-lg">Browse Events</button>
+          <button class="btn btn-secondary btn-lg">How it works</button>
+        </div>
+        <div class="annotation" style="max-width:480px; margin-top: 24px;">
+          <strong>API:</strong> No call — hero is static content. Below grid calls <code>GET /api/v1/events?page=1&amp;limit=9</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <select class="filter-select"><option>All statuses</option><option>Registration Open</option><option>Submissions Open</option><option>Judging</option><option>Voting</option><option>Results</option></select>
+        <select class="filter-select"><option>All tracks</option><option>Web / Mobile</option><option>AI / ML</option><option>Open Innovation</option></select>
+        <input class="search-input" placeholder="Search events by name…" />
+        <div class="annotation" style="margin:0; flex: 0 0 auto;">
+          <strong>API:</strong> GET /events?status=&amp;track=&amp;q=
+        </div>
+      </div>
+
+      <!-- ACTIVE EVENTS GRID -->
+      <div class="section-title-row">
+        <div>
+          <h2 class="text-h3">Active Events</h2>
+          <p class="text-sm text-secondary">Events currently open for participation</p>
+        </div>
+        <span class="text-sm text-tertiary">3 events</span>
+      </div>
+
+      <div class="grid-3">
+        <!-- Card 1: Registration Open -->
+        <div class="event-card">
+          <div class="event-banner" style="background: linear-gradient(135deg, #1e3a5f, #4f6ef7);">
+            <span class="badge badge-registration"><span class="badge-dot"></span>Registration Open</span>
+          </div>
+          <div class="event-body">
+            <h3 class="text-h4">Spring Hackathon 2025</h3>
+            <div class="event-meta">
+              <span>Apr 1 – Apr 30</span>
+              <span>·</span>
+              <span>48 teams</span>
+              <span>·</span>
+              <span>3 tracks</span>
+            </div>
+            <p class="text-sm text-secondary" style="margin-top: 10px;">Build innovative solutions across Web, AI, and Open categories. $5,000 in prizes.</p>
+            <div class="event-actions">
+              <button class="btn btn-primary btn-sm">View Details</button>
+              <button class="btn btn-secondary btn-sm">Register →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Submissions Open -->
+        <div class="event-card">
+          <div class="event-banner" style="background: linear-gradient(135deg, #1a1d27, #2563eb);">
+            <span class="badge badge-submissions"><span class="badge-dot"></span>Submissions Open</span>
+          </div>
+          <div class="event-body">
+            <h3 class="text-h4">AI Innovation Challenge</h3>
+            <div class="event-meta">
+              <span>May 1 – May 31</span>
+              <span>·</span>
+              <span>23 teams</span>
+              <span>·</span>
+              <span>2 tracks</span>
+            </div>
+            <p class="text-sm text-secondary" style="margin-top: 10px;">Focus on practical AI applications with real-world impact. Submit by May 31.</p>
+            <div class="event-actions">
+              <button class="btn btn-primary btn-sm">View Details</button>
+              <button class="btn btn-secondary btn-sm" disabled>Registered ✓</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Judging -->
+        <div class="event-card">
+          <div class="event-banner" style="background: linear-gradient(135deg, #2e1065, #7c3aed);">
+            <span class="badge badge-judging"><span class="badge-dot"></span>Judging</span>
+          </div>
+          <div class="event-body">
+            <h3 class="text-h4">Build-A-Thon Season 3</h3>
+            <div class="event-meta">
+              <span>Mar 1 – Mar 31</span>
+              <span>·</span>
+              <span>61 teams</span>
+              <span>·</span>
+              <span>5 tracks</span>
+            </div>
+            <p class="text-sm text-secondary" style="margin-top: 10px;">Submission window closed. Expert judges reviewing 61 projects.</p>
+            <div class="event-actions">
+              <button class="btn btn-primary btn-sm">View Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAST EVENTS -->
+      <div class="section-title-row" style="margin-top: 48px;">
+        <div>
+          <h2 class="text-h3">Past Events</h2>
+          <p class="text-sm text-secondary">Results published</p>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="event-card" style="opacity: 0.7;">
+          <div class="event-banner" style="background: linear-gradient(135deg, #1a1d27, #374151);">
+            <span class="badge badge-archived">Archived</span>
+          </div>
+          <div class="event-body">
+            <h3 class="text-h4">Winter Hackathon 2024</h3>
+            <div class="event-meta"><span>Dec 2024</span><span>·</span><span>35 teams</span></div>
+            <div class="event-actions">
+              <button class="btn btn-ghost btn-sm">View Results</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SKELETON LOADING STATE -->
+      <div style="margin-top: 48px; border-top: 1px solid var(--border-subtle); padding-top: 32px;">
+        <p class="wireframe-label">Skeleton loading state (3 cards while API responds)</p>
+        <div class="grid-3" style="margin-top: 16px;">
+          <div class="skeleton-card">
+            <div class="skeleton" style="height: 100px;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+              <div class="skeleton" style="height: 14px; width: 60%;"></div>
+              <div class="skeleton" style="height: 12px; width: 40%;"></div>
+              <div class="skeleton" style="height: 12px; width: 80%;"></div>
+              <div class="skeleton" style="height: 12px; width: 70%;"></div>
+              <div class="flex gap-8" style="margin-top: 4px;">
+                <div class="skeleton" style="height: 30px; width: 100px;"></div>
+                <div class="skeleton" style="height: 30px; width: 100px;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton" style="height: 100px;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+              <div class="skeleton" style="height: 14px; width: 70%;"></div>
+              <div class="skeleton" style="height: 12px; width: 35%;"></div>
+              <div class="skeleton" style="height: 12px; width: 85%;"></div>
+              <div class="skeleton" style="height: 12px; width: 65%;"></div>
+              <div class="skeleton" style="height: 30px; width: 100px; margin-top: 4px;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton" style="height: 100px;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+              <div class="skeleton" style="height: 14px; width: 55%;"></div>
+              <div class="skeleton" style="height: 12px; width: 45%;"></div>
+              <div class="skeleton" style="height: 12px; width: 75%;"></div>
+              <div class="skeleton" style="height: 12px; width: 60%;"></div>
+              <div class="skeleton" style="height: 30px; width: 100px; margin-top: 4px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div style="margin-top: 32px; border-top: 1px solid var(--border-subtle); padding-top: 32px;">
+        <p class="wireframe-label">Empty state (no events match filter)</p>
+        <div class="empty-state" style="max-width: 400px; margin: 0 auto;">
+          <div class="empty-state-icon">📭</div>
+          <p class="empty-state-title">No events found</p>
+          <p class="empty-state-desc">No events match your current filters. Try clearing them or check back soon.</p>
+          <button class="btn btn-secondary btn-sm" style="margin-top: 8px;">Clear filters</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 32px; padding: 16px 0; border-top: 1px solid var(--border-subtle);">
+        <a href="index.html" class="btn btn-ghost btn-sm">← Back to hub</a>
+        <a href="02-event-detail.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">Event Detail →</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

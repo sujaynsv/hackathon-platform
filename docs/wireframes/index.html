@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dogfood Platform — Wireframe Hub</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+    .hub-card {
+      background: var(--bg-surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: 20px;
+      transition: all 0.2s; cursor: pointer; text-decoration: none;
+      display: block;
+    }
+    .hub-card:hover { border-color: var(--brand-500); box-shadow: var(--shadow-2); transform: translateY(-2px); }
+    .hub-card-num { font-size: 11px; font-weight: 600; color: var(--text-tertiary); letter-spacing: 0.08em; margin-bottom: 8px; }
+    .hub-card-title { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .hub-card-route { font-size: 12px; color: var(--brand-400); font-family: 'JetBrains Mono', monospace; }
+    .hub-card-owner { font-size: 11px; color: var(--text-tertiary); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-subtle); }
+    .epic-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 32px; margin-bottom: 12px; }
+    .hub-hero { padding: 48px 0 32px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo"><div class="navbar-logo-dot"></div>Dogfood Platform</div>
+      <div style="margin-left: auto; font-size: 12px; color: var(--text-tertiary);">Wireframe Hub — 12 pages</div>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <div class="container">
+      <div class="hub-hero">
+        <p class="wireframe-label">Design Reference</p>
+        <h1 class="text-h1">UI Wireframes</h1>
+        <p class="text-body-lg text-secondary" style="margin-top: 8px; max-width: 560px;">
+          Dark-theme wireframes for all 12 pages. Each page uses the design tokens from
+          <code class="text-code" style="color: var(--brand-400);">docs/frontend-standards.md</code> and annotates API calls, invariants, and loading states.
+        </p>
+        <div class="annotation" style="max-width: 560px; margin-top: 16px;">
+          <strong>For developers:</strong> Hover states, focus rings, and badge colors are real CSS — lift directly into Next.js components.
+          Every page annotates which API endpoint populates each section.
+        </div>
+      </div>
+
+      <div class="epic-label">Auth</div>
+      <div class="hub-grid" style="grid-template-columns: repeat(2,1fr);">
+        <a href="03-login.html" class="hub-card">
+          <div class="hub-card-num">03</div>
+          <div class="hub-card-title">Login</div>
+          <div class="hub-card-route">/login</div>
+          <div class="hub-card-owner">FE-A-001 · Sujay</div>
+        </a>
+        <a href="04-register.html" class="hub-card">
+          <div class="hub-card-num">04</div>
+          <div class="hub-card-title">Register</div>
+          <div class="hub-card-route">/register</div>
+          <div class="hub-card-owner">FE-A-001 · Sujay</div>
+        </a>
+      </div>
+
+      <div class="epic-label">Events</div>
+      <div class="hub-grid">
+        <a href="01-events-listing.html" class="hub-card">
+          <div class="hub-card-num">01</div>
+          <div class="hub-card-title">Events Listing</div>
+          <div class="hub-card-route">/events</div>
+          <div class="hub-card-owner">FE-E-001 · Keerthika</div>
+        </a>
+        <a href="02-event-detail.html" class="hub-card">
+          <div class="hub-card-num">02</div>
+          <div class="hub-card-title">Event Detail</div>
+          <div class="hub-card-route">/events/[slug]</div>
+          <div class="hub-card-owner">FE-E-001 · Keerthika</div>
+        </a>
+        <a href="09-organizer-dashboard.html" class="hub-card">
+          <div class="hub-card-num">09</div>
+          <div class="hub-card-title">Organizer Dashboard</div>
+          <div class="hub-card-route">/events/[slug]/manage</div>
+          <div class="hub-card-owner">FE-E-002 · Keerthika</div>
+        </a>
+      </div>
+
+      <div class="epic-label">Teams</div>
+      <div class="hub-grid" style="grid-template-columns: repeat(2,1fr);">
+        <a href="05-team-setup.html" class="hub-card">
+          <div class="hub-card-num">05</div>
+          <div class="hub-card-title">Team Setup Flow</div>
+          <div class="hub-card-route">/events/[slug]/participate</div>
+          <div class="hub-card-owner">FE-T-001 · Ridhima</div>
+        </a>
+        <a href="06-team-dashboard.html" class="hub-card">
+          <div class="hub-card-num">06</div>
+          <div class="hub-card-title">Team Dashboard</div>
+          <div class="hub-card-route">/events/[slug]/team</div>
+          <div class="hub-card-owner">FE-T-001 · Ridhima</div>
+        </a>
+      </div>
+
+      <div class="epic-label">Submissions</div>
+      <div class="hub-grid" style="grid-template-columns: repeat(2,1fr);">
+        <a href="07-submission-editor.html" class="hub-card">
+          <div class="hub-card-num">07</div>
+          <div class="hub-card-title">Submission Editor</div>
+          <div class="hub-card-route">/events/[slug]/submit</div>
+          <div class="hub-card-owner">FE-S-001 · Sujay</div>
+        </a>
+        <a href="08-submission-gallery.html" class="hub-card">
+          <div class="hub-card-num">08</div>
+          <div class="hub-card-title">Submission Gallery</div>
+          <div class="hub-card-route">/events/[slug]/submissions</div>
+          <div class="hub-card-owner">FE-S-001 · Sujay</div>
+        </a>
+      </div>
+
+      <div class="epic-label">Judging</div>
+      <div class="hub-grid" style="grid-template-columns: repeat(2,1fr);">
+        <a href="10-judge-queue.html" class="hub-card">
+          <div class="hub-card-num">10</div>
+          <div class="hub-card-title">Judge Queue</div>
+          <div class="hub-card-route">/judging</div>
+          <div class="hub-card-owner">FE-J-001 · Keerthika</div>
+        </a>
+        <a href="11-judge-scoring.html" class="hub-card">
+          <div class="hub-card-num">11</div>
+          <div class="hub-card-title">Judge Scoring</div>
+          <div class="hub-card-route">/judging/assignments/[id]</div>
+          <div class="hub-card-owner">FE-J-001 · Keerthika</div>
+        </a>
+      </div>
+
+      <div class="epic-label">Voting &amp; Results</div>
+      <div class="hub-grid" style="grid-template-columns: 1fr;">
+        <a href="12-voting-leaderboard.html" class="hub-card">
+          <div class="hub-card-num">12</div>
+          <div class="hub-card-title">Voting + Leaderboard</div>
+          <div class="hub-card-route">/events/[slug]/results</div>
+          <div class="hub-card-owner">FE-V-001 · Ridhima</div>
+        </a>
+      </div>
+
+      <div class="section-sm" style="border-top: 1px solid var(--border-subtle); margin-top: 48px; padding-top: 24px;">
+        <p class="text-sm text-tertiary">Design tokens: <code class="text-code">docs/frontend-standards.md</code> · Architecture: <code class="text-code">docs/diagrams.md</code> · Stories: <code class="text-code">stories/README.md</code></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

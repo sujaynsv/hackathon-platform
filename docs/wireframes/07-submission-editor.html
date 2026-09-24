@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submission Editor — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .editor-layout { display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+    .upload-zone { border: 2px dashed var(--border-default); border-radius: var(--radius-lg); padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg-surface); }
+    .upload-zone:hover { border-color: var(--brand-500); background: rgba(79,110,247,0.04); }
+    .upload-zone-icon { font-size: 32px; margin-bottom: 10px; }
+    .char-count { font-size: 11px; color: var(--text-tertiary); text-align: right; margin-top: 4px; }
+    .field-section { margin-bottom: 24px; }
+    .cover-preview { border-radius: var(--radius-lg); overflow: hidden; height: 140px; background: linear-gradient(135deg, #1e3a5f, #4f6ef7); display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 12px; }
+    .sidebar-checklist { display: flex; flex-direction: column; gap: 8px; }
+    .check-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .check-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+    .check-done { background: var(--success); color: #fff; }
+    .check-pending { background: var(--bg-subtle); border: 1.5px solid var(--border-default); }
+    .check-warn { background: rgba(245,158,11,0.2); border: 1.5px solid var(--warning); color: var(--warning); }
+    .submit-gate { background: linear-gradient(135deg, rgba(79,110,247,0.08), rgba(79,110,247,0.03)); border: 1px solid rgba(79,110,247,0.2); border-radius: var(--radius-lg); padding: 20px; margin-top: 16px; }
+    .deadline-warning { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: var(--radius-md); padding: 12px 14px; font-size: 13px; color: var(--warning); margin-bottom: 16px; }
+    .autosave { font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 5px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo"><div class="navbar-logo-dot"></div>Dogfood</div>
+      <div class="navbar-links">
+        <a href="06-team-dashboard.html" class="navbar-link">My Team</a>
+      </div>
+      <div class="navbar-actions">
+        <span class="autosave">✓ Saved 2 min ago</span>
+        <button class="btn btn-ghost btn-sm">Preview</button>
+        <div class="avatar avatar-sm" style="background: var(--brand-500); color:#fff;">AJ</div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <div class="container">
+      <!-- Page header -->
+      <div class="flex justify-between items-center" style="padding-top: 24px; margin-bottom: 24px;">
+        <div>
+          <div class="flex items-center gap-8" style="margin-bottom: 4px; font-size: 13px; color: var(--text-tertiary);">
+            <a href="01-events-listing.html" style="color: var(--text-tertiary);">Spring Hackathon 2025</a>
+            <span>/</span>
+            <span style="color: var(--text-primary);">Submission</span>
+          </div>
+          <h1 class="text-h2" style="margin-bottom: 4px;">Edit Submission</h1>
+          <div class="flex items-center gap-12">
+            <span class="badge badge-draft">Draft</span>
+            <span class="text-sm text-tertiary">Team: Alpha Builders</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-layout">
+        <!-- MAIN FORM -->
+        <div>
+          <div class="deadline-warning">
+            Submission deadline: <strong>April 30, 2025 at 11:59 PM UTC</strong> — 23 days remaining. Finalise before this date.
+          </div>
+
+          <!-- Title -->
+          <div class="field-section">
+            <div class="form-group">
+              <label class="form-label">Project title <span style="color: var(--error);">*</span></label>
+              <input class="form-input" type="text" value="AI-Powered Event Matchmaker" style="font-size: 16px; font-weight: 500;" />
+              <div class="char-count">26 / 80</div>
+            </div>
+          </div>
+
+          <!-- Track -->
+          <div class="field-section">
+            <div class="form-group">
+              <label class="form-label">Track <span style="color: var(--error);">*</span></label>
+              <select class="form-input">
+                <option selected>Web &amp; Mobile</option>
+                <option>AI &amp; Machine Learning</option>
+                <option>Open Innovation</option>
+              </select>
+              <span class="form-hint">Track can be changed until you hit "Submit". Locked after final submission.</span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="field-section">
+            <div class="form-group">
+              <label class="form-label">Project description <span style="color: var(--error);">*</span></label>
+              <textarea class="form-input" rows="6">An ML-driven tool that matches hackathon participants with the right events based on their skills, interests, and availability. Built with Next.js, Go, and a custom recommendation engine using collaborative filtering.</textarea>
+              <div class="char-count">248 / 2000</div>
+            </div>
+          </div>
+
+          <!-- URLs -->
+          <div class="field-section">
+            <p class="text-h4" style="margin-bottom: 12px;">Links</p>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label">Repository URL</label>
+                <input class="form-input error" type="url" placeholder="https://github.com/your-org/project" />
+                <span class="form-error">Repository URL is required to submit.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Demo / live URL <span style="color: var(--text-tertiary);">(optional)</span></label>
+                <input class="form-input" type="url" placeholder="https://your-demo.vercel.app" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Demo video URL <span style="color: var(--text-tertiary);">(optional)</span></label>
+                <input class="form-input" type="url" placeholder="https://youtube.com/watch?v=..." />
+              </div>
+            </div>
+          </div>
+
+          <!-- Cover image -->
+          <div class="field-section">
+            <p class="text-h4" style="margin-bottom: 12px;">Cover image</p>
+            <div class="cover-preview">
+              <div style="text-align: center; color: rgba(255,255,255,0.6);">
+                <div style="font-size: 32px; margin-bottom: 6px;">🖼</div>
+                <p style="font-size: 12px;">cover.png (uploaded)</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" style="position: absolute; top: 10px; right: 10px; font-size: 11px;">Change</button>
+            </div>
+            <div class="annotation">
+              <strong>API:</strong> POST /api/v1/submissions/{id}/files — multipart upload → MinIO → cover_url stored in submissions table.<br/>
+              Max 5MB, formats: JPG, PNG, WebP.
+            </div>
+          </div>
+
+          <!-- Upload zone (when no cover yet) -->
+          <div style="border-top: 1px solid var(--border-subtle); padding-top: 24px; margin-top: 0;">
+            <p class="wireframe-label">Alternate: No cover uploaded yet</p>
+            <div class="upload-zone" style="margin-top: 12px;">
+              <div class="upload-zone-icon">📁</div>
+              <p class="text-sm" style="font-weight: 500; margin-bottom: 4px;">Drop your cover image here</p>
+              <p class="text-sm text-tertiary">or <span style="color: var(--brand-400); cursor: pointer;">browse files</span> · JPG, PNG, WebP · Max 5MB</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div>
+          <!-- Completion checklist -->
+          <div class="card card-body" style="margin-bottom: 16px;">
+            <p class="text-h4" style="margin-bottom: 14px;">Submission checklist</p>
+            <div class="sidebar-checklist">
+              <div class="check-item">
+                <div class="check-icon check-done">✓</div>
+                <span>Project title</span>
+              </div>
+              <div class="check-item">
+                <div class="check-icon check-done">✓</div>
+                <span>Description</span>
+              </div>
+              <div class="check-item">
+                <div class="check-icon check-done">✓</div>
+                <span>Track selected</span>
+              </div>
+              <div class="check-item">
+                <div class="check-icon check-done">✓</div>
+                <span>Cover image</span>
+              </div>
+              <div class="check-item">
+                <div class="check-icon check-warn">!</div>
+                <span style="color: var(--warning);">Repository URL</span>
+              </div>
+              <div class="check-item">
+                <div class="check-icon check-pending"></div>
+                <span class="text-secondary">Demo URL (optional)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit gate -->
+          <div class="submit-gate">
+            <p class="text-h4" style="margin-bottom: 6px;">Ready to submit?</p>
+            <p class="text-sm text-secondary" style="margin-bottom: 16px;">Once submitted, your project is locked. No edits after this point. (Invariant I11, I13)</p>
+            <button class="btn btn-primary w-full" style="justify-content: center;" disabled>
+              Submit project
+            </button>
+            <p class="text-sm text-tertiary" style="text-align: center; margin-top: 8px;">Fix missing fields to enable submit</p>
+          </div>
+
+          <!-- Submit unlocked state -->
+          <div style="margin-top: 16px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+            <p class="wireframe-label">When all fields complete</p>
+            <div class="submit-gate" style="margin-top: 8px; border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.05);">
+              <button class="btn btn-primary w-full" style="justify-content: center; background: var(--success);">
+                Submit project
+              </button>
+              <p class="text-sm text-tertiary" style="text-align: center; margin-top: 8px;">This action cannot be undone.</p>
+            </div>
+          </div>
+
+          <!-- Deadline -->
+          <div class="card card-body" style="margin-top: 16px;">
+            <p class="text-label text-tertiary" style="margin-bottom: 8px;">Deadline</p>
+            <p class="text-sm" style="font-weight: 600;">April 30, 2025</p>
+            <p class="text-sm text-secondary">23 days 14 hours remaining</p>
+          </div>
+
+          <div class="annotation">
+            <strong>APIs:</strong><br/>
+            PATCH /submissions/{id} — auto-save on blur<br/>
+            POST /submissions/{id}/files — cover upload<br/>
+            POST /submissions/{id}/submit — final lock<br/>
+            <strong>Auto-save:</strong> triggered on input blur, debounced 800ms
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 32px; padding: 16px 0; border-top: 1px solid var(--border-subtle);">
+        <a href="index.html" class="btn btn-ghost btn-sm">← Hub</a>
+        <a href="06-team-dashboard.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">← Team Dashboard</a>
+        <a href="08-submission-gallery.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">Gallery →</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

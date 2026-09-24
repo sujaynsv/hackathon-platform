@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voting + Leaderboard — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .results-hero { padding: 48px 0 32px; background: linear-gradient(135deg, rgba(79,110,247,0.1) 0%, rgba(15,17,23,0) 70%); border-bottom: 1px solid var(--border-subtle); margin-bottom: 32px; }
+    .result-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 28px; }
+    .result-tab { font-size: 14px; font-weight: 500; color: var(--text-tertiary); padding: 12px 20px; border-bottom: 2px solid transparent; cursor: pointer; }
+    .result-tab.active { color: var(--text-primary); border-bottom-color: var(--brand-500); }
+    .podium { display: flex; align-items: flex-end; justify-content: center; gap: 16px; margin-bottom: 40px; padding: 24px 0; }
+    .podium-place { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .podium-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 16px 20px; text-align: center; width: 180px; }
+    .podium-card.first { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.05); }
+    .podium-card.second { border-color: rgba(148,163,184,0.3); }
+    .podium-card.third { border-color: rgba(180,83,9,0.3); }
+    .podium-medal { font-size: 28px; margin-bottom: 4px; }
+    .podium-bar { border-radius: var(--radius-md) var(--radius-md) 0 0; width: 120px; }
+    .rank-row { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: var(--radius-lg); background: var(--bg-surface); border: 1px solid var(--border-subtle); margin-bottom: 8px; transition: all 0.15s; }
+    .rank-row:hover { border-color: var(--border-default); }
+    .rank-num { font-size: 16px; font-weight: 700; color: var(--text-tertiary); min-width: 28px; text-align: center; font-family: 'JetBrains Mono', monospace; }
+    .rank-num.top3 { color: var(--warning); }
+    .rank-cover { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .score-bars { display: flex; flex-direction: column; gap: 3px; min-width: 120px; }
+    .score-bar-row { display: flex; align-items: center; gap-6px; gap: 6px; }
+    .score-bar-label { font-size: 10px; color: var(--text-tertiary); width: 48px; flex-shrink: 0; text-align: right; }
+    .score-bar-track { flex: 1; height: 3px; background: var(--bg-subtle); border-radius: 2px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 2px; background: var(--brand-500); }
+    .vote-btn-lg { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; padding: 8px 18px; border-radius: var(--radius-full); border: 1px solid var(--border-default); background: var(--bg-surface); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .vote-btn-lg:hover { border-color: rgba(239,68,68,0.4); color: #f87171; background: rgba(239,68,68,0.06); }
+    .vote-btn-lg.voted { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: #f87171; }
+    .voting-banner { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.03)); border: 1px solid rgba(245,158,11,0.2); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+    .countdown-inline { display: flex; gap: 16px; }
+    .count-unit { text-align: center; }
+    .count-num { font-size: 24px; font-weight: 700; color: var(--warning); font-family: 'JetBrains Mono', monospace; }
+    .count-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+    .cert-banner { background: linear-gradient(135deg, rgba(79,110,247,0.12), rgba(168,85,247,0.08)); border: 1px solid rgba(79,110,247,0.2); border-radius: var(--radius-xl); padding: 28px 32px; text-align: center; margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo"><div class="navbar-logo-dot"></div>Dogfood</div>
+      <div class="navbar-links">
+        <a href="01-events-listing.html" class="navbar-link">Events</a>
+        <a href="06-team-dashboard.html" class="navbar-link">My Team</a>
+      </div>
+      <div class="navbar-actions">
+        <div class="avatar avatar-sm" style="background: var(--brand-500); color:#fff;">AJ</div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <!-- HERO -->
+    <div class="results-hero">
+      <div class="container">
+        <div class="flex items-center gap-8" style="margin-bottom: 8px; font-size: 13px; color: var(--text-tertiary);">
+          <a href="01-events-listing.html" style="color: var(--text-tertiary);">Events</a>
+          <span>/</span>
+          <a href="02-event-detail.html" style="color: var(--text-tertiary);">Spring Hackathon 2025</a>
+          <span>/</span>
+          <span style="color: var(--text-primary);">Results</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-h2" style="margin-bottom: 4px;">Results &amp; Voting</h1>
+            <p class="text-sm text-secondary">Spring Hackathon 2025 · 48 teams · 3 tracks</p>
+          </div>
+          <span class="badge badge-voting"><span class="badge-dot"></span>Voting Open</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Voting countdown banner -->
+      <div class="voting-banner">
+        <div>
+          <p class="text-sm" style="font-weight: 600; margin-bottom: 2px;">Public voting is open</p>
+          <p class="text-sm text-secondary">Vote for your favourite projects. One vote per submission per account.</p>
+        </div>
+        <div>
+          <p class="text-label text-tertiary" style="margin-bottom: 6px; text-align: center;">Voting closes in</p>
+          <div class="countdown-inline">
+            <div class="count-unit"><div class="count-num">02</div><div class="count-label">Days</div></div>
+            <div class="count-unit" style="color: var(--text-tertiary); font-size: 20px; padding-top: 4px;">:</div>
+            <div class="count-unit"><div class="count-num">08</div><div class="count-label">Hours</div></div>
+            <div class="count-unit" style="color: var(--text-tertiary); font-size: 20px; padding-top: 4px;">:</div>
+            <div class="count-unit"><div class="count-num">43</div><div class="count-label">Mins</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="result-tabs">
+        <div class="result-tab active">Overall</div>
+        <div class="result-tab">Web &amp; Mobile</div>
+        <div class="result-tab">AI &amp; ML</div>
+        <div class="result-tab">Open Innovation</div>
+      </div>
+
+      <!-- PODIUM — TOP 3 -->
+      <div class="podium">
+        <!-- 2nd place -->
+        <div class="podium-place">
+          <div class="podium-card second">
+            <div class="podium-medal">🥈</div>
+            <p class="text-sm" style="font-weight: 600; margin-bottom: 2px;">HackTrack Dashboard</p>
+            <p class="text-label text-tertiary">Neural Nexus</p>
+            <p class="text-sm" style="margin-top: 8px; color: var(--brand-400); font-weight: 600;">9.12</p>
+            <p class="text-label text-tertiary">judge score</p>
+            <p class="text-sm" style="margin-top: 4px;">♥ 38 votes</p>
+          </div>
+          <div class="podium-bar" style="height: 60px; background: rgba(148,163,184,0.2); border: 1px solid rgba(148,163,184,0.2);"></div>
+        </div>
+        <!-- 1st place -->
+        <div class="podium-place">
+          <div class="podium-card first">
+            <div class="podium-medal">🥇</div>
+            <p class="text-sm" style="font-weight: 700; margin-bottom: 2px; color: var(--warning);">EventBot — AI Matchmaker</p>
+            <p class="text-label text-tertiary">Alpha Builders</p>
+            <p class="text-sm" style="margin-top: 8px; color: var(--warning); font-weight: 700; font-size: 18px;">9.48</p>
+            <p class="text-label text-tertiary">judge score</p>
+            <p class="text-sm" style="margin-top: 4px;">♥ 42 votes</p>
+          </div>
+          <div class="podium-bar" style="height: 90px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.25);"></div>
+        </div>
+        <!-- 3rd place -->
+        <div class="podium-place">
+          <div class="podium-card third">
+            <div class="podium-medal">🥉</div>
+            <p class="text-sm" style="font-weight: 600; margin-bottom: 2px;">IdeaForge</p>
+            <p class="text-label text-tertiary">ByteStorm</p>
+            <p class="text-sm" style="margin-top: 8px; color: var(--brand-400); font-weight: 600;">8.84</p>
+            <p class="text-label text-tertiary">judge score</p>
+            <p class="text-sm" style="margin-top: 4px;">♥ 31 votes</p>
+          </div>
+          <div class="podium-bar" style="height: 40px; background: rgba(180,83,9,0.15); border: 1px solid rgba(180,83,9,0.2);"></div>
+        </div>
+      </div>
+
+      <!-- FULL LEADERBOARD -->
+      <h2 class="text-h3" style="margin-bottom: 16px;">Full Leaderboard</h2>
+
+      <!-- Rank 1 -->
+      <div class="rank-row" style="border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04);">
+        <span class="rank-num top3" style="font-size: 18px;">1</span>
+        <div class="rank-cover" style="background: linear-gradient(135deg, #1e3a5f, #4f6ef7);">🤖</div>
+        <div style="flex: 1;">
+          <p class="text-sm" style="font-weight: 600; margin-bottom: 2px;">EventBot — AI Matchmaker</p>
+          <div class="flex items-center gap-12">
+            <p class="text-label text-tertiary">Alpha Builders</p>
+            <span class="badge badge-submissions" style="font-size: 10px;">AI &amp; ML</span>
+          </div>
+        </div>
+        <div class="score-bars">
+          <div class="score-bar-row"><span class="score-bar-label">Judge</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 95%;"></div></div><span style="font-size: 12px; min-width: 32px; font-weight: 600; color: var(--warning);">9.48</span></div>
+          <div class="score-bar-row"><span class="score-bar-label">Votes</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 100%; background: #f87171;"></div></div><span style="font-size: 12px; min-width: 32px; color: var(--text-secondary);">42</span></div>
+        </div>
+        <button class="vote-btn-lg voted">♥ Voted</button>
+        <button class="btn btn-ghost btn-sm">View →</button>
+      </div>
+
+      <!-- Rank 2 -->
+      <div class="rank-row">
+        <span class="rank-num top3">2</span>
+        <div class="rank-cover" style="background: linear-gradient(135deg, #2e1065, #7c3aed);">🌐</div>
+        <div style="flex: 1;">
+          <p class="text-sm" style="font-weight: 600; margin-bottom: 2px;">HackTrack Dashboard</p>
+          <div class="flex items-center gap-12">
+            <p class="text-label text-tertiary">Neural Nexus</p>
+            <span class="badge badge-draft" style="font-size: 10px;">Web &amp; Mobile</span>
+          </div>
+        </div>
+        <div class="score-bars">
+          <div class="score-bar-row"><span class="score-bar-label">Judge</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 91%;"></div></div><span style="font-size: 12px; min-width: 32px; font-weight: 600;">9.12</span></div>
+          <div class="score-bar-row"><span class="score-bar-label">Votes</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 90%; background: #f87171;"></div></div><span style="font-size: 12px; min-width: 32px; color: var(--text-secondary);">38</span></div>
+        </div>
+        <button class="vote-btn-lg">♥ Vote</button>
+        <button class="btn btn-ghost btn-sm">View →</button>
+      </div>
+
+      <!-- Rank 3 -->
+      <div class="rank-row">
+        <span class="rank-num top3">3</span>
+        <div class="rank-cover" style="background: linear-gradient(135deg, #064e3b, #059669);">💡</div>
+        <div style="flex: 1;">
+          <p class="text-sm" style="font-weight: 600; margin-bottom: 2px;">IdeaForge — Idea Generator</p>
+          <div class="flex items-center gap-12">
+            <p class="text-label text-tertiary">ByteStorm</p>
+            <span class="badge" style="background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); font-size: 10px;">Open</span>
+          </div>
+        </div>
+        <div class="score-bars">
+          <div class="score-bar-row"><span class="score-bar-label">Judge</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 88%;"></div></div><span style="font-size: 12px; min-width: 32px; font-weight: 600;">8.84</span></div>
+          <div class="score-bar-row"><span class="score-bar-label">Votes</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 74%; background: #f87171;"></div></div><span style="font-size: 12px; min-width: 32px; color: var(--text-secondary);">31</span></div>
+        </div>
+        <button class="vote-btn-lg">♥ Vote</button>
+        <button class="btn btn-ghost btn-sm">View →</button>
+      </div>
+
+      <!-- Ranks 4-6 (dimmed) -->
+      <div class="rank-row" style="opacity: 0.7;">
+        <span class="rank-num">4</span>
+        <div class="rank-cover" style="background: linear-gradient(135deg, #1a1d27, #374151); font-size: 18px;">📊</div>
+        <div style="flex: 1;"><p class="text-sm" style="font-weight: 600;">DataLens Analytics</p><p class="text-label text-tertiary">DataTeam · AI &amp; ML</p></div>
+        <div class="score-bars">
+          <div class="score-bar-row"><span class="score-bar-label">Judge</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 82%;"></div></div><span style="font-size: 12px; min-width: 32px;">8.21</span></div>
+          <div class="score-bar-row"><span class="score-bar-label">Votes</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 67%; background: #f87171;"></div></div><span style="font-size: 12px; min-width: 32px; color: var(--text-secondary);">28</span></div>
+        </div>
+        <button class="vote-btn-lg">♥ Vote</button>
+        <button class="btn btn-ghost btn-sm">View →</button>
+      </div>
+      <div class="rank-row" style="opacity: 0.5;">
+        <span class="rank-num">5</span>
+        <div class="rank-cover" style="background: linear-gradient(135deg, #451a03, #b45309); font-size: 18px;">🔔</div>
+        <div style="flex: 1;"><p class="text-sm" style="font-weight: 600;">PushNote</p><p class="text-label text-tertiary">PushTeam · Web &amp; Mobile</p></div>
+        <div class="score-bars">
+          <div class="score-bar-row"><span class="score-bar-label">Judge</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 76%;"></div></div><span style="font-size: 12px; min-width: 32px;">7.62</span></div>
+          <div class="score-bar-row"><span class="score-bar-label">Votes</span><div class="score-bar-track"><div class="score-bar-fill" style="width: 57%; background: #f87171;"></div></div><span style="font-size: 12px; min-width: 32px; color: var(--text-secondary);">24</span></div>
+        </div>
+        <button class="vote-btn-lg">♥ Vote</button>
+        <button class="btn btn-ghost btn-sm">View →</button>
+      </div>
+
+      <div style="text-align: center; margin-top: 20px; color: var(--text-tertiary); font-size: 13px;">
+        Showing top 5 of 48 submissions · <a href="08-submission-gallery.html" style="color: var(--brand-400);">View all in gallery →</a>
+      </div>
+
+      <!-- Certificate banner (shown when results are published) -->
+      <div class="cert-banner">
+        <div style="font-size: 40px; margin-bottom: 12px;">🏆</div>
+        <h3 class="text-h3" style="margin-bottom: 6px;">Congratulations, Alpha Builders!</h3>
+        <p class="text-body text-secondary" style="max-width: 440px; margin: 0 auto 20px;">Your team placed 1st in Spring Hackathon 2025. Your participation certificates have been generated.</p>
+        <button class="btn btn-primary">Download certificate</button>
+        <div class="annotation" style="max-width: 480px; margin: 16px auto 0; text-align: left;">
+          <strong>API:</strong> GET /events/{slug}/results — paginated, sorted by weighted_score DESC<br/>
+          POST /events/{slug}/votes — cast / retract (I12: only during voting window, I5: one vote per submission per user)<br/>
+          GET /certificates/{userId}/{eventId} — download PDF (status must be results_published)
+        </div>
+      </div>
+
+      <div style="margin-top: 32px; padding: 16px 0; border-top: 1px solid var(--border-subtle);">
+        <a href="index.html" class="btn btn-ghost btn-sm">← Hub</a>
+        <a href="11-judge-scoring.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">← Judge Scoring</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

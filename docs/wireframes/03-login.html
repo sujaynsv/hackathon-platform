@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    body { display: grid; place-items: center; min-height: 100vh; padding: 24px; }
+    .auth-card { width: 100%; max-width: 400px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-xl); padding: 40px; box-shadow: var(--shadow-3); }
+    .auth-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; }
+    .auth-logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--brand-500); box-shadow: var(--glow); }
+    .auth-logo-text { font-size: 16px; font-weight: 700; }
+    .divider-or { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+    .divider-or span { font-size: 12px; color: var(--text-tertiary); }
+    .social-btn { width: 100%; justify-content: center; margin-bottom: 8px; }
+    .form-stack { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
+    .password-row { display: flex; justify-content: space-between; align-items: center; }
+    .forgot-link { font-size: 12px; color: var(--brand-400); }
+    .forgot-link:hover { text-decoration: underline; }
+    .auth-footer { text-align: center; font-size: 13px; color: var(--text-tertiary); margin-top: 24px; }
+    .auth-footer a { color: var(--brand-400); }
+    .auth-footer a:hover { text-decoration: underline; }
+    /* error state example */
+    .field-error-example .form-input { border-color: var(--error); box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+  </style>
+</head>
+<body>
+  <div style="width: 100%; max-width: 900px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;">
+
+      <!-- WIREFRAME: LOGIN FORM -->
+      <div class="auth-card">
+        <div class="auth-logo">
+          <div class="auth-logo-dot"></div>
+          <span class="auth-logo-text">Dogfood Platform</span>
+        </div>
+
+        <h1 class="text-h3" style="margin-bottom: 4px;">Welcome back</h1>
+        <p class="text-sm text-secondary" style="margin-bottom: 28px;">Sign in to your account to continue.</p>
+
+        <form>
+          <div class="form-stack">
+            <div class="form-group">
+              <label class="form-label">Email address</label>
+              <input class="form-input" type="email" placeholder="you@example.com" />
+            </div>
+
+            <div class="form-group">
+              <div class="password-row">
+                <label class="form-label">Password</label>
+                <a href="#" class="forgot-link">Forgot password?</a>
+              </div>
+              <input class="form-input" type="password" placeholder="••••••••" />
+            </div>
+
+            <!-- Error state (shown on bad credentials) -->
+            <div style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius-md); padding: 10px 14px; font-size: 13px; color: #f87171; display: none;">
+              Invalid email or password. Please try again.
+            </div>
+
+            <button class="btn btn-primary w-full" style="justify-content: center; margin-top: 4px;">
+              Sign in
+            </button>
+          </div>
+        </form>
+
+        <div class="auth-footer">
+          Don't have an account? <a href="04-register.html">Create one</a>
+        </div>
+      </div>
+
+      <!-- ANNOTATIONS PANEL -->
+      <div>
+        <p class="wireframe-label">Page: /login · Story: FE-A-001 · Owner: person-a</p>
+
+        <div class="card card-body" style="margin-bottom: 16px;">
+          <p class="text-h4" style="margin-bottom: 12px;">API calls on this page</p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="background: var(--bg-elevated); border-radius: var(--radius-md); padding: 10px 14px;">
+              <p class="text-code" style="color: var(--brand-400); font-size: 12px;">POST /api/v1/auth/login</p>
+              <p class="text-sm text-secondary" style="margin-top: 4px;">Body: {email, password} → Returns {accessToken, refreshToken, user}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-body" style="margin-bottom: 16px;">
+          <p class="text-h4" style="margin-bottom: 12px;">State transitions</p>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary);">
+            <div>• <strong class="text-primary">Submit</strong> → spinner on button, disabled</div>
+            <div>• <strong class="text-primary">401 error</strong> → red error box above submit button</div>
+            <div>• <strong class="text-primary">Success</strong> → store tokens → redirect to <code class="text-code">/events</code></div>
+            <div>• <strong class="text-primary">Already logged in</strong> → redirect to /events immediately</div>
+          </div>
+        </div>
+
+        <div class="card card-body" style="margin-bottom: 16px;">
+          <p class="text-h4" style="margin-bottom: 12px;">Error states</p>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary);">
+            <div>• <code class="text-code" style="color: var(--error);">UNAUTHORIZED</code> → "Invalid email or password"</div>
+            <div>• <code class="text-code" style="color: var(--error);">RATE_LIMITED</code> → "Too many attempts. Try again in 30s."</div>
+            <div>• Network error → "Connection failed. Check your internet."</div>
+            <div>• Validation: email format check before submit</div>
+          </div>
+        </div>
+
+        <div class="card card-body">
+          <p class="text-h4" style="margin-bottom: 12px;">Accessibility notes</p>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary);">
+            <div>• Tab order: Email → Password → Forgot link → Submit</div>
+            <div>• Error message: <code class="text-code">role="alert"</code> for screen readers</div>
+            <div>• Submit button: <code class="text-code">aria-busy="true"</code> while loading</div>
+            <div>• No autofocus on mobile (avoids keyboard jump)</div>
+          </div>
+        </div>
+
+        <div class="annotation">
+          <strong>Note:</strong> No "Sign in with Google" — custom JWT only per MASTER-CONTEXT.md invariants.
+        </div>
+      </div>
+    </div>
+
+    <!-- ERROR STATE DEMO -->
+    <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border-subtle);">
+      <p class="wireframe-label">Error state demo</p>
+      <div class="auth-card" style="max-width: 400px;">
+        <div class="form-group field-error-example">
+          <label class="form-label">Email address</label>
+          <input class="form-input error" type="email" value="wrong@example.com" />
+        </div>
+        <div class="form-group" style="margin-top: 16px;">
+          <label class="form-label">Password</label>
+          <input class="form-input error" type="password" value="wrongpass" />
+        </div>
+        <div style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius-md); padding: 10px 14px; font-size: 13px; color: #f87171; margin-top: 16px;">
+          Invalid email or password. Please try again.
+        </div>
+        <button class="btn btn-primary w-full" style="justify-content: center; margin-top: 16px;">Sign in</button>
+      </div>
+    </div>
+
+    <!-- LOADING STATE DEMO -->
+    <div style="margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--border-subtle);">
+      <p class="wireframe-label">Loading state (button while signing in)</p>
+      <button class="btn btn-primary" disabled style="display: flex; align-items: center; gap: 8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+        </svg>
+        Signing in…
+      </button>
+      <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+    </div>
+
+    <div style="margin-top: 32px; padding: 16px; border-top: 1px solid var(--border-subtle);">
+      <a href="index.html" class="btn btn-ghost btn-sm">← Back to hub</a>
+    </div>
+  </div>
+</body>
+</html>

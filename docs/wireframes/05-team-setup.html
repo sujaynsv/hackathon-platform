@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Setup — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .stepper { display: flex; align-items: center; gap: 0; margin-bottom: 40px; }
+    .step { display: flex; align-items: center; gap: 10px; }
+    .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; transition: all 0.2s; }
+    .step-circle.done { background: var(--success); color: #fff; }
+    .step-circle.active { background: var(--brand-500); color: #fff; box-shadow: var(--glow); }
+    .step-circle.upcoming { background: var(--bg-elevated); color: var(--text-tertiary); border: 2px solid var(--border-default); }
+    .step-text { font-size: 13px; font-weight: 500; }
+    .step-text.active { color: var(--text-primary); }
+    .step-text.done { color: var(--success); }
+    .step-text.upcoming { color: var(--text-tertiary); }
+    .step-connector { flex: 1; height: 2px; background: var(--border-subtle); margin: 0 8px; min-width: 24px; }
+    .step-connector.done { background: var(--success); }
+    .choice-card { background: var(--bg-surface); border: 2px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 28px; cursor: pointer; transition: all 0.2s; }
+    .choice-card:hover { border-color: var(--brand-500); box-shadow: 0 0 0 3px rgba(79,110,247,0.1); }
+    .choice-card.selected { border-color: var(--brand-500); background: rgba(79,110,247,0.05); box-shadow: 0 0 0 3px rgba(79,110,247,0.12); }
+    .choice-icon { width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px; }
+    .choice-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .choice-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .divider-text { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
+    .divider-text::before, .divider-text::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+    .divider-text span { font-size: 12px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+    .invite-code-input { background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 18px; text-align: center; letter-spacing: 0.12em; width: 100%; color: var(--text-primary); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo"><div class="navbar-logo-dot"></div>Dogfood</div>
+      <div class="navbar-links">
+        <a href="01-events-listing.html" class="navbar-link">Events</a>
+      </div>
+      <div class="navbar-actions">
+        <div class="avatar avatar-sm" style="background: var(--brand-500); color:#fff;">AJ</div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <div class="container" style="max-width: 680px;">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-8" style="margin-bottom: 24px; font-size: 13px;">
+        <a href="01-events-listing.html" style="color: var(--text-tertiary);">Events</a>
+        <span style="color: var(--text-tertiary);">/</span>
+        <a href="02-event-detail.html" style="color: var(--text-tertiary);">Spring Hackathon 2025</a>
+        <span style="color: var(--text-tertiary);">/</span>
+        <span style="color: var(--text-primary);">Join</span>
+      </div>
+
+      <h1 class="text-h2" style="margin-bottom: 4px;">Join Spring Hackathon 2025</h1>
+      <p class="text-body text-secondary" style="margin-bottom: 32px;">Complete these steps to participate.</p>
+
+      <!-- STEPPER — Step 1 complete, Step 2 active -->
+      <div class="stepper">
+        <div class="step">
+          <div class="step-circle done">✓</div>
+          <span class="step-text done">Register</span>
+        </div>
+        <div class="step-connector done"></div>
+        <div class="step">
+          <div class="step-circle active">2</div>
+          <span class="step-text active">Team Setup</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-circle upcoming">3</div>
+          <span class="step-text upcoming">Team Dashboard</span>
+        </div>
+      </div>
+
+      <!-- STEP 2: Create or Join -->
+      <div class="card card-body" style="margin-bottom: 24px;">
+        <h2 class="text-h3" style="margin-bottom: 6px;">Set up your team</h2>
+        <p class="text-sm text-secondary" style="margin-bottom: 24px;">Create a new team or join an existing one with an invite code.</p>
+
+        <div class="grid-2">
+          <div class="choice-card selected">
+            <div class="choice-icon" style="background: rgba(79,110,247,0.15);">+</div>
+            <div class="choice-title">Create a team</div>
+            <div class="choice-desc">Start fresh. Choose a name, pick your track, and share your invite code with teammates.</div>
+          </div>
+          <div class="choice-card">
+            <div class="choice-icon" style="background: rgba(34,197,94,0.15);">→</div>
+            <div class="choice-title">Join a team</div>
+            <div class="choice-desc">Have an invite code from a teammate? Paste it below to join their team.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OPTION A: Create Team Form (shown when "Create" is selected) -->
+      <div class="card card-body" style="margin-bottom: 16px;">
+        <h3 class="text-h4" style="margin-bottom: 20px;">Create your team</h3>
+        <div class="form-stack" style="gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Team name</label>
+            <input class="form-input" type="text" value="Alpha Builders" />
+            <span class="form-hint">2–48 characters. Visible to all participants.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Track</label>
+            <select class="form-input">
+              <option>Web &amp; Mobile</option>
+              <option>AI &amp; Machine Learning</option>
+              <option>Open Innovation</option>
+            </select>
+            <span class="form-hint">Track can be changed until submissions close. (Invariant: no track lock until final submit)</span>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 4px;">
+            <button class="btn btn-primary" style="flex: 1; justify-content: center;">Create team</button>
+            <button class="btn btn-secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OPTION B: Join Team Form (shown when "Join" is selected — hidden by default) -->
+      <div style="opacity: 0.5; pointer-events: none;">
+        <div class="divider-text"><span>or join with an invite code</span></div>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" style="text-align: center; display: block;">Invite code</label>
+          <input class="invite-code-input" placeholder="XXXX-XXXX" />
+          <span class="form-hint" style="text-align: center; display: block; margin-top: 6px;">Ask your team leader for their 8-character code.</span>
+        </div>
+        <button class="btn btn-primary w-full" style="justify-content: center;" disabled>Join team</button>
+      </div>
+
+      <!-- Annotations -->
+      <div class="annotation">
+        <strong>API (Create):</strong> POST /api/v1/events/{slug}/teams — body: {name, trackId} → 201 {team: {id, name, inviteCode, ...}}<br/>
+        <strong>API (Join):</strong> POST /api/v1/teams/join — body: {inviteCode} → 200 {team}<br/>
+        <strong>Invariants:</strong> I3 (must be registered), I6 (status=registration_open), I8 (cannot be in 2 teams), I2 (unique team name per event)
+      </div>
+
+      <!-- ERROR STATES DEMO -->
+      <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border-subtle);">
+        <p class="wireframe-label">Error state — duplicate team name</p>
+        <div class="card card-body" style="max-width: 480px; margin-top: 12px;">
+          <div class="form-group">
+            <label class="form-label">Team name</label>
+            <input class="form-input error" type="text" value="Alpha Builders" />
+            <span class="form-error">A team named "Alpha Builders" already exists in this event.</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+        <a href="index.html" class="btn btn-ghost btn-sm">← Hub</a>
+        <a href="02-event-detail.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">← Event Detail</a>
+        <a href="06-team-dashboard.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">Team Dashboard →</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

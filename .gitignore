@@ -1,0 +1,40 @@
+# Environment
+.env
+.env.local
+
+# Go build artifacts
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Dependency directory
+vendor/
+
+# Go coverage
+coverage.out
+coverage.html
+
+# Node / Next.js
+web/node_modules/
+web/.next/
+web/out/
+web/.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker volumes (local)
+postgres_data/
+minio_data/

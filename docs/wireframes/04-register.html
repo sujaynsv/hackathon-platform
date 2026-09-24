@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    body { display: grid; place-items: center; min-height: 100vh; padding: 24px; }
+    .auth-card { width: 100%; max-width: 440px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-xl); padding: 40px; box-shadow: var(--shadow-3); }
+    .auth-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+    .auth-logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--brand-500); box-shadow: var(--glow); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-stack { display: flex; flex-direction: column; gap: 14px; }
+    .password-strength { height: 4px; border-radius: 2px; background: var(--bg-subtle); margin-top: 6px; overflow: hidden; }
+    .password-strength-bar { height: 100%; border-radius: 2px; width: 60%; background: var(--warning); transition: width 0.3s, background 0.3s; }
+    .strength-label { font-size: 11px; color: var(--warning); margin-top: 4px; }
+    .terms { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; line-height: 1.5; }
+    .terms a { color: var(--brand-400); }
+    .auth-footer { text-align: center; font-size: 13px; color: var(--text-tertiary); margin-top: 20px; }
+    .auth-footer a { color: var(--brand-400); }
+    .auth-footer a:hover { text-decoration: underline; }
+    .step-indicator { display: flex; gap: 6px; align-items: center; margin-bottom: 24px; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-500); }
+    .step-dot.inactive { background: var(--bg-subtle); border: 1px solid var(--border-default); }
+    .step-label { font-size: 12px; color: var(--text-tertiary); margin-left: 4px; }
+  </style>
+</head>
+<body>
+  <div style="width: 100%; max-width: 960px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;">
+
+    <!-- WIREFRAME: REGISTER FORM -->
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-dot"></div>
+        <span style="font-size: 16px; font-weight: 700;">Dogfood Platform</span>
+      </div>
+
+      <h1 class="text-h3" style="margin-bottom: 4px;">Create your account</h1>
+      <p class="text-sm text-secondary" style="margin-bottom: 24px;">Join events, build teams, and ship great projects.</p>
+
+      <form>
+        <div class="form-stack">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First name</label>
+              <input class="form-input" type="text" placeholder="Alex" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last name</label>
+              <input class="form-input" type="text" placeholder="Johnson" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Display name <span style="color: var(--text-tertiary);">(shown to teammates)</span></label>
+            <input class="form-input" type="text" placeholder="alexj" />
+            <span class="form-hint">This is how your name appears on teams and submissions.</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email address</label>
+            <input class="form-input" type="email" placeholder="you@example.com" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" type="password" placeholder="Min. 8 characters" />
+            <div class="password-strength"><div class="password-strength-bar"></div></div>
+            <span class="strength-label">Strength: Good</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirm password</label>
+            <input class="form-input" type="password" placeholder="Re-enter password" />
+          </div>
+
+          <p class="terms">
+            By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+          </p>
+
+          <button class="btn btn-primary w-full" style="justify-content: center; margin-top: 4px;">
+            Create account
+          </button>
+        </div>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="03-login.html">Sign in</a>
+      </div>
+    </div>
+
+    <!-- ANNOTATIONS PANEL -->
+    <div>
+      <p class="wireframe-label">Page: /register · Story: FE-A-001 · Owner: person-a</p>
+
+      <div class="card card-body" style="margin-bottom: 16px;">
+        <p class="text-h4" style="margin-bottom: 12px;">API calls</p>
+        <div style="background: var(--bg-elevated); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 8px;">
+          <p class="text-code" style="color: var(--brand-400); font-size: 12px;">POST /api/v1/auth/register</p>
+          <p class="text-sm text-secondary" style="margin-top: 4px;">Body: {email, displayName, password} → 201 {accessToken, refreshToken, user}</p>
+        </div>
+        <div style="background: var(--bg-elevated); border-radius: var(--radius-md); padding: 10px 14px;">
+          <p class="text-code" style="color: var(--brand-400); font-size: 12px;">Note: first/last name are UI-only</p>
+          <p class="text-sm text-secondary" style="margin-top: 4px;">Concatenated into displayName before sending. Backend only stores displayName.</p>
+        </div>
+      </div>
+
+      <div class="card card-body" style="margin-bottom: 16px;">
+        <p class="text-h4" style="margin-bottom: 12px;">Validation rules</p>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary);">
+          <div>• Email: valid format, checked on blur</div>
+          <div>• Display name: 2–32 chars, no spaces allowed</div>
+          <div>• Password: min 8 chars, strength meter updates live</div>
+          <div>• Confirm: must match password, checked on blur</div>
+          <div>• All fields validated before submit enabled</div>
+        </div>
+      </div>
+
+      <div class="card card-body" style="margin-bottom: 16px;">
+        <p class="text-h4" style="margin-bottom: 12px;">Error states</p>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary);">
+          <div>• <code class="text-code" style="color: var(--error);">DUPLICATE_RESOURCE</code> (409) → "Email already registered. Sign in instead."</div>
+          <div>• Invariant I1: unique email enforced by DB UNIQUE constraint</div>
+          <div>• Password mismatch → inline red text below confirm field</div>
+        </div>
+      </div>
+
+      <div class="card card-body">
+        <p class="text-h4" style="margin-bottom: 12px;">Post-registration flow</p>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary);">
+          <div>1. Store accessToken + refreshToken in localStorage</div>
+          <div>2. Redirect to <code class="text-code">/events</code> (not a dashboard — direct to value)</div>
+          <div>3. Navbar now shows avatar + "My Team" link</div>
+        </div>
+      </div>
+
+      <!-- Password strength variants -->
+      <div class="card card-body" style="margin-top: 16px;">
+        <p class="text-h4" style="margin-bottom: 12px;">Password strength meter states</p>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <div class="flex justify-between" style="margin-bottom: 4px;"><span class="text-sm">Weak</span><span class="text-sm text-error">Short / no variety</span></div>
+            <div class="password-strength"><div class="password-strength-bar" style="width: 25%; background: var(--error);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between" style="margin-bottom: 4px;"><span class="text-sm">Fair</span><span class="text-sm text-warning">Add numbers or symbols</span></div>
+            <div class="password-strength"><div class="password-strength-bar" style="width: 55%; background: var(--warning);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between" style="margin-bottom: 4px;"><span class="text-sm">Strong</span><span class="text-sm text-success">Good to go</span></div>
+            <div class="password-strength"><div class="password-strength-bar" style="width: 100%; background: var(--success);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 960px; margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+    <a href="index.html" class="btn btn-ghost btn-sm">← Back to hub</a>
+    <a href="03-login.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">← Login</a>
+    <a href="01-events-listing.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">Events Listing →</a>
+  </div>
+</body>
+</html>

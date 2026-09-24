@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Organizer Dashboard — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .dash-tabs { display: flex; border-bottom: 1px solid var(--border-subtle); margin-bottom: 28px; gap: 4px; }
+    .dash-tab { font-size: 14px; font-weight: 500; color: var(--text-tertiary); padding: 12px 18px; border-bottom: 2px solid transparent; cursor: pointer; }
+    .dash-tab.active { color: var(--text-primary); border-bottom-color: var(--brand-500); }
+    .state-machine { display: flex; align-items: center; gap: 0; overflow-x: auto; padding: 4px 0; }
+    .state-pill { font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: var(--radius-full); border: 1px solid var(--border-default); color: var(--text-tertiary); background: var(--bg-surface); white-space: nowrap; cursor: pointer; }
+    .state-pill.current { background: var(--brand-500); border-color: var(--brand-500); color: #fff; }
+    .state-pill.next { border-color: rgba(79,110,247,0.4); color: var(--brand-400); background: rgba(79,110,247,0.08); }
+    .state-arrow { color: var(--text-tertiary); font-size: 12px; padding: 0 8px; flex-shrink: 0; }
+    .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+    .stat-mini { background: var(--bg-elevated); border-radius: var(--radius-lg); padding: 16px 18px; }
+    .stat-mini-val { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+    .stat-mini-label { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+    .judge-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); }
+    .judge-row:last-child { border-bottom: none; }
+    .progress-sm { height: 4px; background: var(--bg-subtle); border-radius: 2px; flex: 1; overflow: hidden; }
+    .progress-sm-fill { height: 100%; border-radius: 2px; background: var(--brand-500); }
+    .rubric-criterion { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-subtle); }
+    .rubric-criterion:last-child { border-bottom: none; }
+    .weight-badge { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; background: rgba(79,110,247,0.12); color: var(--brand-400); padding: 2px 8px; border-radius: var(--radius-sm); }
+    .action-row { display: flex; gap: 8px; margin-top: 16px; }
+    .danger-zone { border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-lg); padding: 20px; background: rgba(239,68,68,0.04); margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo"><div class="navbar-logo-dot"></div>Dogfood</div>
+      <div class="navbar-links">
+        <a href="01-events-listing.html" class="navbar-link">Events</a>
+        <a href="#" class="navbar-link active">Manage</a>
+      </div>
+      <div class="navbar-actions">
+        <span class="badge badge-draft" style="font-size: 11px;">Organizer</span>
+        <div class="avatar avatar-sm" style="background: var(--brand-500); color:#fff;">OR</div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <div class="container">
+      <!-- Page header -->
+      <div class="flex justify-between items-center" style="padding-top: 24px; margin-bottom: 20px;">
+        <div>
+          <p class="text-sm text-tertiary" style="margin-bottom: 4px;">Organizer view</p>
+          <h1 class="text-h2">Spring Hackathon 2025</h1>
+        </div>
+        <div class="flex gap-8">
+          <a href="02-event-detail.html" class="btn btn-ghost btn-sm">View public page</a>
+          <button class="btn btn-secondary btn-sm">Edit details</button>
+        </div>
+      </div>
+
+      <!-- STATE MACHINE CONTROLS -->
+      <div class="card card-body" style="margin-bottom: 24px;">
+        <div class="flex justify-between items-center" style="margin-bottom: 14px;">
+          <p class="text-h4">Event state</p>
+          <span class="badge badge-registration"><span class="badge-dot"></span>registration_open</span>
+        </div>
+        <div class="state-machine">
+          <div class="state-pill" style="opacity: 0.5;">draft</div>
+          <span class="state-arrow">→</span>
+          <div class="state-pill current">registration_open</div>
+          <span class="state-arrow">→</span>
+          <div class="state-pill next">submissions_open</div>
+          <span class="state-arrow">→</span>
+          <div class="state-pill">judging</div>
+          <span class="state-arrow">→</span>
+          <div class="state-pill">voting</div>
+          <span class="state-arrow">→</span>
+          <div class="state-pill">results_published</div>
+          <span class="state-arrow">→</span>
+          <div class="state-pill">archived</div>
+        </div>
+        <div style="margin-top: 16px; display: flex; gap: 10px; align-items: center;">
+          <button class="btn btn-primary btn-sm">Advance to submissions_open</button>
+          <p class="text-sm text-secondary">Opens the submission window. Teams can start submitting projects.</p>
+        </div>
+        <div class="annotation">
+          <strong>API:</strong> PATCH /events/{slug} — body: {status: "submissions_open"}<br/>
+          <strong>Invariant I15:</strong> Invalid transitions (e.g. skip to "results") return 422 INVALID_STATE_TRANSITION
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-row">
+        <div class="stat-mini"><div class="stat-mini-val">48</div><div class="stat-mini-label">Teams registered</div></div>
+        <div class="stat-mini"><div class="stat-mini-val">0</div><div class="stat-mini-label">Submissions</div></div>
+        <div class="stat-mini"><div class="stat-mini-val">12</div><div class="stat-mini-label">Judges assigned</div></div>
+        <div class="stat-mini"><div class="stat-mini-val" style="color: var(--warning);">6%</div><div class="stat-mini-label">Scoring progress</div></div>
+      </div>
+
+      <!-- Dashboard Tabs -->
+      <div class="dash-tabs">
+        <div class="dash-tab active">Judges</div>
+        <div class="dash-tab">Rubric</div>
+        <div class="dash-tab">Teams</div>
+        <div class="dash-tab">Submissions</div>
+        <div class="dash-tab">Settings</div>
+      </div>
+
+      <!-- TAB CONTENT: Judges -->
+      <div class="grid-layout">
+        <div>
+          <div class="flex justify-between items-center" style="margin-bottom: 16px;">
+            <h3 class="text-h3">Judge Assignments</h3>
+            <button class="btn btn-primary btn-sm">+ Assign judge</button>
+          </div>
+
+          <div class="card card-body">
+            <div class="judge-row">
+              <div class="avatar avatar-md">SR</div>
+              <div style="flex: 1;">
+                <p class="text-sm" style="font-weight: 500;">Sarah Reynolds</p>
+                <p class="text-label text-tertiary">sarah@acme.com · AI &amp; ML track</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; min-width: 160px;">
+                <div style="flex: 1;">
+                  <div class="flex justify-between" style="margin-bottom: 3px;">
+                    <span class="text-label text-tertiary">Progress</span>
+                    <span class="text-label" style="color: var(--brand-400);">3/16</span>
+                  </div>
+                  <div class="progress-sm"><div class="progress-sm-fill" style="width: 18%;"></div></div>
+                </div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="color: var(--error);">Remove</button>
+            </div>
+
+            <div class="judge-row">
+              <div class="avatar avatar-md">MK</div>
+              <div style="flex: 1;">
+                <p class="text-sm" style="font-weight: 500;">Marcus Kim</p>
+                <p class="text-label text-tertiary">marcus@techflow.io · Web &amp; Mobile track</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; min-width: 160px;">
+                <div style="flex: 1;">
+                  <div class="flex justify-between" style="margin-bottom: 3px;">
+                    <span class="text-label text-tertiary">Progress</span>
+                    <span class="text-label" style="color: var(--success);">12/12</span>
+                  </div>
+                  <div class="progress-sm"><div class="progress-sm-fill" style="width: 100%; background: var(--success);"></div></div>
+                </div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="color: var(--error);">Remove</button>
+            </div>
+
+            <div class="judge-row">
+              <div class="avatar avatar-md">AL</div>
+              <div style="flex: 1;">
+                <p class="text-sm" style="font-weight: 500;">Aisha Lim</p>
+                <p class="text-label text-tertiary">aisha@venture.vc · Open Innovation track</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; min-width: 160px;">
+                <div style="flex: 1;">
+                  <div class="flex justify-between" style="margin-bottom: 3px;">
+                    <span class="text-label text-tertiary">Progress</span>
+                    <span class="text-label" style="color: var(--warning);">0/20</span>
+                  </div>
+                  <div class="progress-sm"><div class="progress-sm-fill" style="width: 0%;"></div></div>
+                </div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="color: var(--error);">Remove</button>
+            </div>
+          </div>
+
+          <div class="annotation">
+            <strong>API:</strong> POST /events/{slug}/judges — body: {userId, trackId}<br/>
+            DELETE /events/{slug}/judges/{userId}<br/>
+            GET /events/{slug}/judges — includes scoring progress per judge<br/>
+            <strong>Invariant I16:</strong> Judge cannot score their own submission (enforced use-case layer)
+          </div>
+
+          <!-- Rubric Preview (second tab shown inline) -->
+          <div style="margin-top: 32px; border-top: 1px solid var(--border-subtle); padding-top: 24px;">
+            <p class="wireframe-label">Rubric tab content</p>
+            <div class="flex justify-between items-center" style="margin: 12px 0 16px;">
+              <h3 class="text-h3">Scoring Rubric</h3>
+              <button class="btn btn-secondary btn-sm">Edit rubric</button>
+            </div>
+            <div class="card card-body">
+              <div class="rubric-criterion">
+                <div style="flex: 1;"><p class="text-sm" style="font-weight: 500;">Innovation</p><p class="text-label text-tertiary">How novel and creative is the idea?</p></div>
+                <span class="weight-badge">30%</span>
+                <span class="text-sm text-tertiary">Max: 10</span>
+              </div>
+              <div class="rubric-criterion">
+                <div style="flex: 1;"><p class="text-sm" style="font-weight: 500;">Technical Execution</p><p class="text-label text-tertiary">Code quality, architecture, completeness</p></div>
+                <span class="weight-badge">35%</span>
+                <span class="text-sm text-tertiary">Max: 10</span>
+              </div>
+              <div class="rubric-criterion">
+                <div style="flex: 1;"><p class="text-sm" style="font-weight: 500;">Impact</p><p class="text-label text-tertiary">Real-world applicability and potential</p></div>
+                <span class="weight-badge">25%</span>
+                <span class="text-sm text-tertiary">Max: 10</span>
+              </div>
+              <div class="rubric-criterion">
+                <div style="flex: 1;"><p class="text-sm" style="font-weight: 500;">Presentation</p><p class="text-label text-tertiary">Demo quality, README clarity</p></div>
+                <span class="weight-badge">10%</span>
+                <span class="text-sm text-tertiary">Max: 10</span>
+              </div>
+            </div>
+            <div class="flex justify-between items-center" style="margin-top: 10px; padding: 8px 0;">
+              <span class="text-sm text-secondary">Total weight</span>
+              <span class="text-sm" style="font-weight: 600; color: var(--success);">100% ✓</span>
+            </div>
+            <div class="annotation">
+              <strong>Invariant I14:</strong> Weights must sum to exactly 100%. DB CHECK constraint enforces this. API returns 422 if not.
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar: Quick actions -->
+        <div>
+          <div class="card card-body" style="margin-bottom: 16px;">
+            <p class="text-h4" style="margin-bottom: 14px;">Quick actions</p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <button class="btn btn-secondary w-full" style="justify-content: flex-start;">Export teams CSV</button>
+              <button class="btn btn-secondary w-full" style="justify-content: flex-start;">Export submissions CSV</button>
+              <button class="btn btn-secondary w-full" style="justify-content: flex-start;">Send announcement email</button>
+              <button class="btn btn-secondary w-full" style="justify-content: flex-start;">Generate certificates</button>
+            </div>
+          </div>
+
+          <div class="card card-body" style="margin-bottom: 16px;">
+            <p class="text-h4" style="margin-bottom: 12px;">Event settings</p>
+            <div style="font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
+              <div class="flex justify-between"><span class="text-secondary">Max team size</span><span>6</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Voting enabled</span><span style="color: var(--success);">Yes</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Public gallery</span><span style="color: var(--success);">Yes</span></div>
+              <div class="flex justify-between"><span class="text-secondary">Track count</span><span>3</span></div>
+            </div>
+          </div>
+
+          <div class="danger-zone">
+            <p class="text-h4" style="color: var(--error); margin-bottom: 8px;">Danger zone</p>
+            <p class="text-sm text-secondary" style="margin-bottom: 12px;">These actions are irreversible.</p>
+            <button class="btn btn-danger w-full btn-sm" style="justify-content: center; margin-bottom: 8px;">Disqualify submission…</button>
+            <button class="btn btn-danger w-full btn-sm" style="justify-content: center;">Archive event</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 32px; padding: 16px 0; border-top: 1px solid var(--border-subtle);">
+        <a href="index.html" class="btn btn-ghost btn-sm">← Hub</a>
+        <a href="08-submission-gallery.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">← Gallery</a>
+        <a href="10-judge-queue.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">Judge Queue →</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

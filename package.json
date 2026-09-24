@@ -1,0 +1,19 @@
+{
+  "name": "dogfood-platform",
+  "version": "1.0.0",
+  "description": "Hackathon Dogfood Platform Root Scripts",
+  "scripts": {
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "dev:api": "go run ./cmd/api",
+    "dev:web": "npm run dev --prefix web",
+    "dev": "npm run docker:up",
+    "build:api": "go build -o bin/api ./cmd/api",
+    "build:web": "npm run build --prefix web",
+    "test:api": "go test ./...",
+    "test:race": "go test -race ./...",
+    "lint:api": "go vet ./...",
+    "lint:arch": "go run github.com/fe3dback/go-arch-lint@latest check",
+    "gate": "npm run lint:api && npm run lint:arch && npm run test:api && npm run build:web"
+  }
+}

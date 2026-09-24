@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submission Gallery — Dogfood Platform Wireframe</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .gallery-hero { padding: 32px 0 24px; border-bottom: 1px solid var(--border-subtle); }
+    .filter-bar { display: flex; gap: 10px; align-items: center; padding: 18px 0; flex-wrap: wrap; }
+    .filter-pill { font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border-default); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; background: var(--bg-surface); }
+    .filter-pill:hover { color: var(--text-primary); border-color: var(--border-strong); }
+    .filter-pill.active { background: var(--brand-500); border-color: var(--brand-500); color: #fff; }
+    .sub-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); overflow: hidden; transition: all 0.2s; }
+    .sub-card:hover { border-color: var(--border-default); box-shadow: var(--shadow-2); transform: translateY(-2px); }
+    .sub-cover { height: 120px; display: flex; align-items: center; justify-content: center; font-size: 28px; position: relative; }
+    .sub-body { padding: 16px; }
+    .sub-team { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-tertiary); margin-top: 6px; }
+    .vote-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border-default); background: var(--bg-surface); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+    .vote-btn:hover { border-color: rgba(239,68,68,0.4); color: #f87171; background: rgba(239,68,68,0.06); }
+    .vote-btn.voted { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: #f87171; }
+    .vote-count { font-size: 12px; color: var(--text-tertiary); }
+    .sort-bar { display: flex; align-items: center; gap: 8px; }
+    .sort-label { font-size: 13px; color: var(--text-tertiary); }
+    .sort-select { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 6px 12px; font-size: 13px; color: var(--text-primary); }
+    .result-count { font-size: 13px; color: var(--text-tertiary); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo"><div class="navbar-logo-dot"></div>Dogfood</div>
+      <div class="navbar-links">
+        <a href="01-events-listing.html" class="navbar-link">Events</a>
+        <a href="06-team-dashboard.html" class="navbar-link">My Team</a>
+      </div>
+      <div class="navbar-actions">
+        <div class="avatar avatar-sm" style="background: var(--brand-500); color:#fff;">AJ</div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <div class="container">
+      <!-- Gallery header -->
+      <div class="gallery-hero">
+        <div class="flex items-center gap-8" style="margin-bottom: 6px; font-size: 13px; color: var(--text-tertiary);">
+          <a href="01-events-listing.html" style="color: var(--text-tertiary);">Events</a>
+          <span>/</span>
+          <a href="02-event-detail.html" style="color: var(--text-tertiary);">Spring Hackathon 2025</a>
+          <span>/</span>
+          <span style="color: var(--text-primary);">Submissions</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-h2" style="margin-bottom: 4px;">Project Gallery</h1>
+            <p class="text-sm text-secondary">Spring Hackathon 2025 · 48 submissions</p>
+          </div>
+          <span class="badge badge-voting"><span class="badge-dot"></span>Voting Open</span>
+        </div>
+      </div>
+
+      <!-- Filters + Sort -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--border-subtle);">
+        <div class="flex gap-8 flex-wrap">
+          <span class="filter-pill active">All tracks</span>
+          <span class="filter-pill">Web &amp; Mobile</span>
+          <span class="filter-pill">AI &amp; ML</span>
+          <span class="filter-pill">Open Innovation</span>
+        </div>
+        <div class="sort-bar">
+          <span class="sort-label">Sort by</span>
+          <select class="sort-select">
+            <option>Most votes</option>
+            <option>Newest</option>
+            <option>Alphabetical</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Result count + search -->
+      <div class="flex justify-between items-center" style="padding: 12px 0 20px;">
+        <span class="result-count">Showing 48 submissions</span>
+        <input class="form-input" type="search" placeholder="Search projects…" style="width: 240px;" />
+      </div>
+
+      <!-- GALLERY GRID -->
+      <div class="grid-3">
+
+        <!-- Card 1: Voted -->
+        <div class="sub-card">
+          <div class="sub-cover" style="background: linear-gradient(135deg, #1e3a5f, #4f6ef7);">🤖</div>
+          <div class="sub-body">
+            <div class="flex justify-between items-start" style="margin-bottom: 6px;">
+              <span class="badge badge-submissions" style="font-size: 11px;">AI &amp; ML</span>
+              <button class="vote-btn voted">♥ 42</button>
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">EventBot — AI Matchmaker</h3>
+            <p class="text-sm text-secondary" style="margin-bottom: 10px;">ML-powered participant-to-event matching using collaborative filtering and skills graph.</p>
+            <div class="sub-team">
+              <div class="avatar avatar-sm" style="background: rgba(79,110,247,0.3); color: var(--brand-400);">AB</div>
+              <span>Alpha Builders · 4 members</span>
+            </div>
+            <div class="flex gap-8" style="margin-top: 14px;">
+              <button class="btn btn-primary btn-sm">View project</button>
+              <a href="#" style="font-size: 12px; color: var(--text-tertiary); display: flex; align-items: center;">GitHub →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Not voted -->
+        <div class="sub-card">
+          <div class="sub-cover" style="background: linear-gradient(135deg, #2e1065, #7c3aed);">🌐</div>
+          <div class="sub-body">
+            <div class="flex justify-between items-start" style="margin-bottom: 6px;">
+              <span class="badge badge-draft" style="font-size: 11px;">Web &amp; Mobile</span>
+              <button class="vote-btn">♥ 38</button>
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">HackTrack Dashboard</h3>
+            <p class="text-sm text-secondary" style="margin-bottom: 10px;">Real-time hackathon progress tracker with team analytics and milestone visualization.</p>
+            <div class="sub-team">
+              <div class="avatar avatar-sm" style="background: rgba(168,85,247,0.3); color: #c084fc;">NX</div>
+              <span>Neural Nexus · 6 members</span>
+            </div>
+            <div class="flex gap-8" style="margin-top: 14px;">
+              <button class="btn btn-primary btn-sm">View project</button>
+              <a href="#" style="font-size: 12px; color: var(--text-tertiary); display: flex; align-items: center;">Demo →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="sub-card">
+          <div class="sub-cover" style="background: linear-gradient(135deg, #064e3b, #059669);">💡</div>
+          <div class="sub-body">
+            <div class="flex justify-between items-start" style="margin-bottom: 6px;">
+              <span class="badge" style="background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); font-size: 11px;">Open</span>
+              <button class="vote-btn">♥ 31</button>
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">IdeaForge — Idea Generator</h3>
+            <p class="text-sm text-secondary" style="margin-bottom: 10px;">LLM-powered hackathon idea generator with context from past winning projects.</p>
+            <div class="sub-team">
+              <div class="avatar avatar-sm" style="background: rgba(34,197,94,0.3); color: var(--success);">BS</div>
+              <span>ByteStorm · 3 members</span>
+            </div>
+            <div class="flex gap-8" style="margin-top: 14px;">
+              <button class="btn btn-primary btn-sm">View project</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cards 4–6: skeleton placeholders for visual balance -->
+        <div class="sub-card" style="opacity: 0.6;">
+          <div class="sub-cover" style="background: linear-gradient(135deg, #1a1d27, #2c3050);">📊</div>
+          <div class="sub-body">
+            <div class="flex justify-between items-start" style="margin-bottom: 6px;">
+              <span class="badge badge-submissions" style="font-size: 11px;">AI &amp; ML</span>
+              <button class="vote-btn">♥ 28</button>
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">DataLens Analytics</h3>
+            <p class="text-sm text-secondary" style="margin-bottom: 10px;">Open-source analytics dashboard for non-technical teams.</p>
+            <div class="sub-team"><div class="avatar avatar-sm">DL</div><span>DataLens · 5 members</span></div>
+            <div style="margin-top: 14px;"><button class="btn btn-primary btn-sm">View project</button></div>
+          </div>
+        </div>
+
+        <div class="sub-card" style="opacity: 0.6;">
+          <div class="sub-cover" style="background: linear-gradient(135deg, #451a03, #b45309);">🔔</div>
+          <div class="sub-body">
+            <div class="flex justify-between items-start" style="margin-bottom: 6px;">
+              <span class="badge badge-draft" style="font-size: 11px;">Web &amp; Mobile</span>
+              <button class="vote-btn">♥ 24</button>
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">PushNote</h3>
+            <p class="text-sm text-secondary" style="margin-bottom: 10px;">Smart notification prioritisation using context signals.</p>
+            <div class="sub-team"><div class="avatar avatar-sm">PN</div><span>PushTeam · 4 members</span></div>
+            <div style="margin-top: 14px;"><button class="btn btn-primary btn-sm">View project</button></div>
+          </div>
+        </div>
+
+        <div class="sub-card" style="opacity: 0.6;">
+          <div class="sub-cover" style="background: linear-gradient(135deg, #1e1b4b, #4338ca);">🔐</div>
+          <div class="sub-body">
+            <div class="flex justify-between items-start" style="margin-bottom: 6px;">
+              <span class="badge" style="background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); font-size: 11px;">Open</span>
+              <button class="vote-btn">♥ 19</button>
+            </div>
+            <h3 class="text-h4" style="margin-bottom: 4px;">VaultKey</h3>
+            <p class="text-sm text-secondary" style="margin-bottom: 10px;">Zero-knowledge password manager with team sharing.</p>
+            <div class="sub-team"><div class="avatar avatar-sm">VK</div><span>CryptoBuilders · 2 members</span></div>
+            <div style="margin-top: 14px;"><button class="btn btn-primary btn-sm">View project</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-center gap-4" style="margin-top: 40px; padding-bottom: 8px;">
+        <button class="btn btn-secondary btn-sm" disabled>← Prev</button>
+        <button class="btn btn-primary btn-sm">1</button>
+        <button class="btn btn-ghost btn-sm">2</button>
+        <button class="btn btn-ghost btn-sm">3</button>
+        <span class="btn btn-ghost btn-sm" style="cursor: default;">…</span>
+        <button class="btn btn-ghost btn-sm">6</button>
+        <button class="btn btn-secondary btn-sm">Next →</button>
+      </div>
+
+      <!-- Annotations -->
+      <div class="annotation" style="margin-top: 24px;">
+        <strong>APIs:</strong> GET /events/{slug}/submissions?track=&amp;sort=votes&amp;page=1 — paginated list<br/>
+        POST /events/{slug}/votes — body: {submissionId} — cast vote (I5: one per user/submission, I12: only during voting window)<br/>
+        DELETE /events/{slug}/votes/{id} — retract vote<br/>
+        <strong>Vote button:</strong> Heart fills on click, count increments optimistically. Reverts on API error.
+      </div>
+
+      <div style="margin-top: 24px; padding: 16px 0; border-top: 1px solid var(--border-subtle);">
+        <a href="index.html" class="btn btn-ghost btn-sm">← Hub</a>
+        <a href="07-submission-editor.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">← Editor</a>
+        <a href="09-organizer-dashboard.html" class="btn btn-ghost btn-sm" style="margin-left: 8px;">Organizer →</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
