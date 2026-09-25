@@ -15,18 +15,12 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"StrongPass123!\",\n    \"displayName\": \"Test User\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"StrongPass123!\",\n    \"displayName\": \"Test User\",\n    \"captchaToken\": \"xxx\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/v1/auth/register",
@@ -40,31 +34,39 @@
 								"register"
 							]
 						}
-					},
-					"response": []
+					}
 				},
 				{
-					"name": "Register - Breached Password",
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if(jsonData && jsonData.data) {",
+									"    pm.environment.set(\"access_token\", jsonData.data.accessToken);",
+									"    pm.environment.set(\"refresh_token\", jsonData.data.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"testuser2@example.com\",\n    \"password\": \"password123\",\n    \"displayName\": \"Test User 2\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"StrongPass123!\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"raw": "{{baseUrl}}/api/v1/auth/login",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -72,11 +74,85 @@
 								"api",
 								"v1",
 								"auth",
-								"register"
+								"login"
 							]
 						}
-					},
-					"response": []
+					}
+				},
+				{
+					"name": "Refresh",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if(jsonData && jsonData.data) {",
+									"    pm.environment.set(\"access_token\", jsonData.data.accessToken);",
+									"    pm.environment.set(\"refresh_token\", jsonData.data.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh"
+							]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					}
 				}
 			]
 		}
