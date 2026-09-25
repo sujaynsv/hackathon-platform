@@ -63,7 +63,6 @@ func (m *mockRefreshRepo) FindByHash(ctx context.Context, hash string) (*domain.
 	return nil, nil
 }
 func (m *mockRefreshRepo) RevokeAllForUser(ctx context.Context, userID uuid.UUID) error { return nil }
-func (m *mockRefreshRepo) Revoke(ctx context.Context, id uuid.UUID) error { return nil }
 
 type mockPasswordValidator struct {
 	compromised bool

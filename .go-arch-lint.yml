@@ -8,9 +8,6 @@ exclude:
   - web
   - migrations
 
-excludeFiles:
-  - "^.*_test\\.go$"
-
 components:
   domain:
     in: internal/*/domain

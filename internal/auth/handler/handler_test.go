@@ -37,7 +37,7 @@ func (m *mockRegisterUseCase) Register(ctx context.Context, cmd port.RegisterCom
 
 func TestAuthHandler_Register_Success(t *testing.T) {
 	uc := &mockRegisterUseCase{}
-	h := handler.NewAuthHandler(uc, nil, nil, nil, nil, nil, "secret")
+	h := handler.NewAuthHandler(uc, nil)
 	
 	r := chi.NewRouter()
 	r.Mount("/", h.Routes())
@@ -62,7 +62,7 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 
 func TestAuthHandler_Register_InvalidEmail(t *testing.T) {
 	uc := &mockRegisterUseCase{shouldErr: domain.ErrInvalidEmail}
-	h := handler.NewAuthHandler(uc, nil, nil, nil, nil, nil, "secret")
+	h := handler.NewAuthHandler(uc, nil)
 	
 	r := chi.NewRouter()
 	r.Mount("/", h.Routes())

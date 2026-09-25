@@ -57,12 +57,9 @@ func main() {
 
 	registerSvc := usecase.NewRegisterService(userRepo, hasher, tokenIssuer, refreshRepo, passwordValidator, emailTokensRepo, emailSender, captchaValidator)
 	verifySvc := usecase.NewVerifyEmailService(emailTokensRepo, userRepo)
-	loginSvc := usecase.NewLoginService(userRepo, hasher, tokenIssuer, refreshRepo)
-	refreshSvc := usecase.NewRefreshService(userRepo, refreshRepo, tokenIssuer)
-	redisCache := cache.NewRedisCache(rdb)
-	logoutSvc := usecase.NewLogoutService(redisCache)
 	
 	webAuthnRepo := repository.NewWebAuthnRepository(db)
+	redisCache := cache.NewRedisCache(rdb)
 	webAuthnSvc, err := usecase.NewWebAuthnService(
 		userRepo, webAuthnRepo, redisCache, tokenIssuer, refreshRepo, 
 		"Dogfood Hackathon", cfg.WebAuthnRPID, cfg.WebAuthnRPOrigin,
@@ -72,7 +69,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	authHandler := handler.NewAuthHandler(registerSvc, verifySvc, loginSvc, refreshSvc, logoutSvc, redisCache, cfg.JWTSecret)
+	authHandler := handler.NewAuthHandler(registerSvc, verifySvc)
 	webAuthnHandler := handler.NewWebAuthnHandler(webAuthnSvc)
 
 	// 6. Wire Chi router
