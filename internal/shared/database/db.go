@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -48,8 +49,7 @@ func MustMigrate(db *sqlx.DB, migrationsPath string) {
 		_, err = db.Exec(string(content))
 		if err != nil {
 			slog.Error("Failed to execute migration", "file", file, "error", err)
-			// Ignore errors like "relation already exists" for this naive approach
-			// Just log them and continue. A real tool tracks applied migrations.
+			panic(fmt.Errorf("migration failed for file %s: %w", file, err))
 		} else {
 			slog.Info("Applied migration", "file", file)
 		}

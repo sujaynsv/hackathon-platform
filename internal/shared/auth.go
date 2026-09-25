@@ -90,6 +90,7 @@ func (v *HIBPValidator) IsCompromised(ctx context.Context, password string) (boo
 	if err != nil {
 		return false, fmt.Errorf("create HIBP request: %w", err)
 	}
+	req.Header.Set("User-Agent", "Dogfood-Platform")
 
 	resp, err := v.client.Do(req)
 	if err != nil {

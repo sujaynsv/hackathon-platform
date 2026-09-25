@@ -2,12 +2,14 @@ package usecase
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"time"
 
 	"github.com/dogfood-platform/dogfood/internal/auth/domain"
 	"github.com/dogfood-platform/dogfood/internal/auth/port"
 	"github.com/dogfood-platform/dogfood/internal/shared/response"
+	"github.com/google/uuid"
 )
 
 type RegisterService struct {
@@ -36,7 +38,7 @@ func NewRegisterService(
 
 func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand) (*port.AuthResponse, error) {
 	// 1. Validate password length (domain rule)
-	if len(cmd.Password) < 8 {
+	if len(cmd.Password) < 8 || len(cmd.Password) > 72 {
 		return nil, fmt.Errorf("%w", domain.ErrWeakPassword)
 	}
 
@@ -57,7 +59,7 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 		return nil, fmt.Errorf("check email: %w", err)
 	}
 	if exists {
-		return nil, fmt.Errorf("%w: email already registered", response.ErrInvariantViolated) // maps to 409
+		return nil, fmt.Errorf("%w: email already registered", response.ErrDuplicate) // maps to 409
 	}
 
 	// 3. Build domain user (validates email format)
@@ -86,6 +88,22 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 	refreshToken, err := s.tokens.IssueRefreshToken(user.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("issue refresh token: %w", err)
+	}
+
+	// Persist refresh token hash
+	h := sha256.New()
+	h.Write([]byte(refreshToken))
+	rtHash := fmt.Sprintf("%x", h.Sum(nil))
+
+	rt := &domain.RefreshToken{
+		ID:        uuid.New(),
+		UserID:    user.ID,
+		Hash:      rtHash,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour), // Match config TTL (7 days)
+		CreatedAt: time.Now(),
+	}
+	if err := s.refresh.Save(ctx, rt); err != nil {
+		return nil, fmt.Errorf("save refresh token: %w", err)
 	}
 
 	return &port.AuthResponse{

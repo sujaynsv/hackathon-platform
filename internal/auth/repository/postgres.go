@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -118,7 +119,10 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*domain
 	var row userRow
 	err := r.db.GetContext(ctx, &row, "SELECT id, email, password_hash, display_name, avatar_url, is_active, is_admin, created_at, updated_at FROM users WHERE email = $1", email)
 	if err != nil {
-		return nil, fmt.Errorf("%w: user not found", response.ErrNotFound)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: user not found", response.ErrNotFound)
+		}
+		return nil, fmt.Errorf("find by email: %w", err)
 	}
 	return toDomainUser(row), nil
 }
@@ -127,7 +131,10 @@ func (r *UserRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.Us
 	var row userRow
 	err := r.db.GetContext(ctx, &row, "SELECT id, email, password_hash, display_name, avatar_url, is_active, is_admin, created_at, updated_at FROM users WHERE id = $1", id)
 	if err != nil {
-		return nil, fmt.Errorf("%w: user not found", response.ErrNotFound)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: user not found", response.ErrNotFound)
+		}
+		return nil, fmt.Errorf("find by id: %w", err)
 	}
 	return toDomainUser(row), nil
 }
@@ -153,7 +160,10 @@ func (r *RefreshTokenRepository) FindByHash(ctx context.Context, hash string) (*
 	var row refreshTokenRow
 	err := r.db.GetContext(ctx, &row, "SELECT id, user_id, token_hash, expires_at, revoked_at, issued_at, ip_hash FROM refresh_tokens WHERE token_hash = $1", hash)
 	if err != nil {
-		return nil, fmt.Errorf("%w: refresh token not found", response.ErrNotFound)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: refresh token not found", response.ErrNotFound)
+		}
+		return nil, fmt.Errorf("find refresh token: %w", err)
 	}
 	return toDomainRefreshToken(row), nil
 }

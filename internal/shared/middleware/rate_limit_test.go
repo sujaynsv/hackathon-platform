@@ -45,7 +45,7 @@ func TestRateLimiter(t *testing.T) {
 	// Make 5 successful requests
 	for i := 0; i < 5; i++ {
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/register", nil)
-		req.Header.Set("X-Forwarded-For", "192.168.1.1") // same IP
+		req.RemoteAddr = "192.168.1.1:1234" // same IP
 		rec := httptest.NewRecorder()
 		
 		handler.ServeHTTP(rec, req)
@@ -54,7 +54,7 @@ func TestRateLimiter(t *testing.T) {
 
 	// 6th request should be rate limited (429)
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/register", nil)
-	req.Header.Set("X-Forwarded-For", "192.168.1.1") // same IP
+	req.RemoteAddr = "192.168.1.1:1234" // same IP
 	rec := httptest.NewRecorder()
 	
 	handler.ServeHTTP(rec, req)
@@ -63,7 +63,7 @@ func TestRateLimiter(t *testing.T) {
 
 	// Different IP should still be allowed
 	req2 := httptest.NewRequest(http.MethodGet, "/api/v1/auth/register", nil)
-	req2.Header.Set("X-Forwarded-For", "10.0.0.1")
+	req2.RemoteAddr = "10.0.0.1:1234"
 	rec2 := httptest.NewRecorder()
 	
 	handler.ServeHTTP(rec2, req2)

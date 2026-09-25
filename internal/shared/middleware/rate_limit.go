@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"fmt"
+	"log/slog"
+	"net"
 	"net/http"
 	"time"
 
@@ -22,11 +24,12 @@ func NewRateLimiter(client *redis.Client) *RateLimiter {
 func (rl *RateLimiter) RateLimit(limit int, window time.Duration) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Extract IP
-			ip := r.Header.Get("X-Forwarded-For")
-			if ip == "" {
+			// Extract IP properly
+			ip, _, err := net.SplitHostPort(r.RemoteAddr)
+			if err != nil {
 				ip = r.RemoteAddr
 			}
+			// (Optional: if behind trusted proxy, read X-Forwarded-For only if configured to trust it)
 			
 			key := fmt.Sprintf("ratelimit:%s:%s", r.URL.Path, ip)
 			
@@ -53,10 +56,10 @@ func (rl *RateLimiter) RateLimit(limit int, window time.Duration) func(http.Hand
 			// Update expiration
 			pipe.Expire(ctx, key, window)
 			
-			_, err := pipe.Exec(ctx)
+			_, err = pipe.Exec(ctx)
 			if err != nil {
-				// If redis fails, fail-open to not block users during cache outages
-				next.ServeHTTP(w, r)
+				slog.Error("Redis rate limit pipeline failed", "error", err)
+				response.HandleDomainError(w, r, response.ErrRateLimited)
 				return
 			}
 			

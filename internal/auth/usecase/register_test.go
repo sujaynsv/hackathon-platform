@@ -82,7 +82,7 @@ func TestRegisterService_ValidInput_ReturnsAuthResponse(t *testing.T) {
 	assert.Equal(t, "hashed_Password123!", repo.saved.PasswordHash)
 }
 
-func TestRegisterService_DuplicateEmail_ReturnsInvariantViolated(t *testing.T) {
+func TestRegisterService_DuplicateEmail_ReturnsErrDuplicate(t *testing.T) {
 	repo := &mockUserRepo{exists: true}
 	svc := usecase.NewRegisterService(repo, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, &mockPasswordValidator{})
 
@@ -92,7 +92,7 @@ func TestRegisterService_DuplicateEmail_ReturnsInvariantViolated(t *testing.T) {
 		DisplayName: "Alice",
 	})
 
-	assert.ErrorIs(t, err, response.ErrInvariantViolated)
+	assert.ErrorIs(t, err, response.ErrDuplicate)
 }
 
 func TestRegisterService_WeakPassword_ReturnsErrWeakPassword(t *testing.T) {
