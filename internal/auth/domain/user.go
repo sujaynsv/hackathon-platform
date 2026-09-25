@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"strings"
 	"time"
@@ -37,6 +39,17 @@ type RefreshToken struct {
 	ExpiresAt time.Time
 	RevokedAt *time.Time
 	CreatedAt time.Time
+}
+
+// IsExpired returns true if the token is past its expiry or revoked.
+func (rt *RefreshToken) IsExpired() bool {
+	return time.Now().UTC().After(rt.ExpiresAt) || rt.RevokedAt != nil
+}
+
+// HashToken converts a raw refresh token string to its SHA-256 hex hash for storage.
+func HashToken(raw string) string {
+	importHash := sha256.Sum256([]byte(raw))
+	return hex.EncodeToString(importHash[:])
 }
 
 // NewUser validates and constructs a new User (without saving).
