@@ -49,3 +49,12 @@ export interface TokenPair {
   accessToken: string;
   refreshToken: string;
 }
+
+export interface VerifyEmailRequest {
+  token: string;
+}
+
+export interface VerifyEmailResponse {
+  message: string;
+}
+

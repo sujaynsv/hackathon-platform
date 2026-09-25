@@ -95,4 +95,10 @@ export const apiClient = {
     await api.post('/auth/logout', { refreshToken }).catch(() => {});
     _accessToken = null;
   },
+
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const res = await api.post<{ message: string }>('/auth/verify-email', { token });
+    return res.data;
+  },
 };
+

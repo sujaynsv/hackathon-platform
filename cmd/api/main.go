@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -48,14 +49,25 @@ func main() {
 	refreshRepo := repository.NewRefreshTokenRepository(db)
 	passwordValidator := shared.NewHIBPValidator()
 	emailTokensRepo := repository.NewEmailVerificationRepository(db)
-	emailSender := email.NewStubSender(slog.Default())
+	var baseEmailSender port.EmailSender
+	if cfg.SMTPHost != "" {
+		baseEmailSender = email.NewSMTPSender(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPass, cfg.SMTPFrom)
+	} else {
+		baseEmailSender = email.NewStubSender(slog.Default())
+	}
+
+	// Wrap the base sender in the queue sender for async delivery
+	emailQueueSender := email.NewQueueSender(rdb)
+
+	// Start the background worker
+	go email.RunWorker(context.Background(), rdb, baseEmailSender)
 	
 	var captchaValidator port.CaptchaValidator
 	if cfg.TurnstileKey != "" {
 		captchaValidator = captcha.NewTurnstileValidator(cfg.TurnstileKey)
 	}
 
-	registerSvc := usecase.NewRegisterService(userRepo, hasher, tokenIssuer, refreshRepo, passwordValidator, emailTokensRepo, emailSender, captchaValidator)
+	registerSvc := usecase.NewRegisterService(userRepo, hasher, tokenIssuer, refreshRepo, passwordValidator, emailTokensRepo, emailQueueSender, captchaValidator)
 	verifySvc := usecase.NewVerifyEmailService(emailTokensRepo, userRepo)
 	loginSvc := usecase.NewLoginService(userRepo, hasher, tokenIssuer, refreshRepo)
 	refreshSvc := usecase.NewRefreshService(userRepo, refreshRepo, tokenIssuer)

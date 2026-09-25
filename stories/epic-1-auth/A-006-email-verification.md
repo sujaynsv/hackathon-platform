@@ -27,5 +27,7 @@ An email verification flow involving magic links or OTPs.
 ## Definition of Done
 - [x] Update User domain model with `IsVerified` flag.
 - [x] Create `POST /api/v1/auth/verify-email` endpoint.
-- [x] Add email sending capabilities (e.g., SMTP or AWS SES stub).
+- [x] Add email sending capabilities (SMTP integration).
 - [x] Add OTP generation and verification logic.
+- [x] Implement async Email Queue using Redis List (`LPUSH`/`BRPOP`) and Go goroutines.
+- [x] Add Mailpit to `docker-compose.yml` for local SMTP email catching.

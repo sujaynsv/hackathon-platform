@@ -63,9 +63,19 @@ export default function RegisterPage() {
     return (
       <div className={styles.page}>
         <div className={styles.form}>
+          <header className={styles.header}>
+            <span className={styles.wordmark}>Dogfood</span>
+            <h1 className={styles.title}>Account created</h1>
+          </header>
           <p className={styles.verifyMsg}>
-            Account created. Check your email for a verification link before signing in.
+            Please verify your email address to activate your account before signing in.
           </p>
+          <div style={{ marginTop: '1.25rem', marginBottom: '1.25rem' }}>
+            <Link href="/verify-email" className="btn" style={{ width: '100%', textAlign: 'center' }}>
+              Enter verification code
+            </Link>
+          </div>
+
           <p className={styles.footer}>
             <Link href="/login">Back to sign in</Link>
           </p>
