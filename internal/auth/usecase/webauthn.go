@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/dogfood-platform/dogfood/internal/auth/domain"
@@ -173,11 +172,7 @@ func (s *WebAuthnService) RegisterFinish(ctx context.Context, cmd port.WebAuthnR
 		return nil, err
 	}
 
-	// Create a dummy http.Request to parse the body using webauthn library (since we received body bytes)
-	req, _ := http.NewRequestWithContext(ctx, "POST", "/", bytes.NewReader(cmd.Body))
-	req.Header.Set("Content-Type", "application/json")
-
-	parsedResponse, err := protocol.ParseCredentialCreationResponseBody(req.Body)
+	parsedResponse, err := protocol.ParseCredentialCreationResponseBody(bytes.NewReader(cmd.Body))
 	if err != nil {
 		return nil, fmt.Errorf("%w: invalid webauthn response", response.ErrInvalidTransition) // or custom validation error
 	}
@@ -284,10 +279,7 @@ func (s *WebAuthnService) LoginFinish(ctx context.Context, cmd port.WebAuthnLogi
 		return nil, err
 	}
 
-	req, _ := http.NewRequestWithContext(ctx, "POST", "/", bytes.NewReader(cmd.Body))
-	req.Header.Set("Content-Type", "application/json")
-
-	parsedResponse, err := protocol.ParseCredentialRequestResponseBody(req.Body)
+	parsedResponse, err := protocol.ParseCredentialRequestResponseBody(bytes.NewReader(cmd.Body))
 	if err != nil {
 		return nil, fmt.Errorf("%w: invalid webauthn login response", response.ErrInvalidTransition)
 	}
