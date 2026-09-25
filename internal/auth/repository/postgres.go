@@ -20,8 +20,10 @@ type userRow struct {
 	PasswordHash string    `db:"password_hash"`
 	DisplayName  string    `db:"display_name"`
 	AvatarURL    *string   `db:"avatar_url"`
+	IsVerified   bool      `db:"is_verified"`
 	IsActive     bool      `db:"is_active"`
 	IsAdmin      bool      `db:"is_admin"`
+	VerifiedAt   *time.Time`db:"verified_at"`
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 }
@@ -33,8 +35,10 @@ func toUserRow(u *domain.User) userRow {
 		PasswordHash: u.PasswordHash,
 		DisplayName:  u.DisplayName,
 		AvatarURL:    u.AvatarURL,
+		IsVerified:   u.IsVerified,
 		IsActive:     u.IsActive,
 		IsAdmin:      u.IsAdmin,
+		VerifiedAt:   u.VerifiedAt,
 		CreatedAt:    u.CreatedAt,
 		UpdatedAt:    u.UpdatedAt,
 	}
@@ -47,8 +51,10 @@ func toDomainUser(r userRow) *domain.User {
 		PasswordHash: r.PasswordHash,
 		DisplayName:  r.DisplayName,
 		AvatarURL:    r.AvatarURL,
+		IsVerified:   r.IsVerified,
 		IsActive:     r.IsActive,
 		IsAdmin:      r.IsAdmin,
+		VerifiedAt:   r.VerifiedAt,
 		CreatedAt:    r.CreatedAt,
 		UpdatedAt:    r.UpdatedAt,
 	}
@@ -97,14 +103,28 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 
 func (r *UserRepository) Save(ctx context.Context, user *domain.User) error {
 	const q = `
-        INSERT INTO users (id, email, password_hash, display_name, avatar_url, is_active, is_admin, created_at, updated_at)
-        VALUES (:id, :email, :password_hash, :display_name, :avatar_url, :is_active, :is_admin, :created_at, :updated_at)`
+        INSERT INTO users (id, email, password_hash, display_name, avatar_url, is_verified, is_active, is_admin, verified_at, created_at, updated_at)
+        VALUES (:id, :email, :password_hash, :display_name, :avatar_url, :is_verified, :is_active, :is_admin, :verified_at, :created_at, :updated_at)`
 	if _, err := r.db.NamedExecContext(ctx, q, toUserRow(user)); err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return fmt.Errorf("%w: email already registered", response.ErrDuplicate)
 		}
 		return fmt.Errorf("user repo save: %w", err)
+	}
+	return nil
+}
+
+func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
+	const q = `
+		UPDATE users 
+		SET email = :email, password_hash = :password_hash, display_name = :display_name, 
+		    avatar_url = :avatar_url, is_verified = :is_verified, is_active = :is_active, 
+		    is_admin = :is_admin, verified_at = :verified_at, updated_at = :updated_at
+		WHERE id = :id`
+	_, err := r.db.NamedExecContext(ctx, q, toUserRow(user))
+	if err != nil {
+		return fmt.Errorf("user repo update: %w", err)
 	}
 	return nil
 }
@@ -117,7 +137,7 @@ func (r *UserRepository) ExistsByEmail(ctx context.Context, email string) (bool,
 
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var row userRow
-	err := r.db.GetContext(ctx, &row, "SELECT id, email, password_hash, display_name, avatar_url, is_active, is_admin, created_at, updated_at FROM users WHERE email = $1", email)
+	err := r.db.GetContext(ctx, &row, "SELECT id, email, password_hash, display_name, avatar_url, is_verified, is_active, is_admin, verified_at, created_at, updated_at FROM users WHERE email = $1", email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("%w: user not found", response.ErrNotFound)
@@ -129,7 +149,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*domain
 
 func (r *UserRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	var row userRow
-	err := r.db.GetContext(ctx, &row, "SELECT id, email, password_hash, display_name, avatar_url, is_active, is_admin, created_at, updated_at FROM users WHERE id = $1", id)
+	err := r.db.GetContext(ctx, &row, "SELECT id, email, password_hash, display_name, avatar_url, is_verified, is_active, is_admin, verified_at, created_at, updated_at FROM users WHERE id = $1", id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("%w: user not found", response.ErrNotFound)
@@ -172,4 +192,68 @@ func (r *RefreshTokenRepository) RevokeAllForUser(ctx context.Context, userID uu
 	const q = `UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL`
 	_, err := r.db.ExecContext(ctx, q, userID)
 	return err
+}
+
+type emailTokenRow struct {
+	ID        uuid.UUID `db:"id"`
+	UserID    uuid.UUID `db:"user_id"`
+	TokenHash string    `db:"token_hash"`
+	ExpiresAt time.Time `db:"expires_at"`
+	IssuedAt  time.Time `db:"issued_at"`
+	IsUsed    bool      `db:"is_used"`
+}
+
+type EmailVerificationRepository struct {
+	db *sqlx.DB
+}
+
+func NewEmailVerificationRepository(db *sqlx.DB) *EmailVerificationRepository {
+	return &EmailVerificationRepository{db: db}
+}
+
+func (r *EmailVerificationRepository) Save(ctx context.Context, token *domain.EmailVerificationToken) error {
+	const q = `
+		INSERT INTO email_verification_tokens (id, user_id, token_hash, expires_at, issued_at, is_used)
+		VALUES (:id, :user_id, :token_hash, :expires_at, :issued_at, :is_used)`
+	row := emailTokenRow{
+		ID:        token.ID,
+		UserID:    token.UserID,
+		TokenHash: token.TokenHash,
+		ExpiresAt: token.ExpiresAt,
+		IssuedAt:  token.IssuedAt,
+		IsUsed:    token.IsUsed,
+	}
+	_, err := r.db.NamedExecContext(ctx, q, row)
+	if err != nil {
+		return fmt.Errorf("email verification token save: %w", err)
+	}
+	return nil
+}
+
+func (r *EmailVerificationRepository) FindByHash(ctx context.Context, hash string) (*domain.EmailVerificationToken, error) {
+	var row emailTokenRow
+	err := r.db.GetContext(ctx, &row, "SELECT id, user_id, token_hash, expires_at, issued_at, is_used FROM email_verification_tokens WHERE token_hash = $1", hash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: email token not found", response.ErrNotFound)
+		}
+		return nil, fmt.Errorf("find email token by hash: %w", err)
+	}
+	return &domain.EmailVerificationToken{
+		ID:        row.ID,
+		UserID:    row.UserID,
+		TokenHash: row.TokenHash,
+		ExpiresAt: row.ExpiresAt,
+		IssuedAt:  row.IssuedAt,
+		IsUsed:    row.IsUsed,
+	}, nil
+}
+
+func (r *EmailVerificationRepository) MarkUsed(ctx context.Context, tokenID uuid.UUID) error {
+	const q = `UPDATE email_verification_tokens SET is_used = true WHERE id = $1`
+	_, err := r.db.ExecContext(ctx, q, tokenID)
+	if err != nil {
+		return fmt.Errorf("mark email token used: %w", err)
+	}
+	return nil
 }

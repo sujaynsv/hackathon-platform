@@ -13,6 +13,7 @@ type UserRepository interface {
 	FindByEmail(ctx context.Context, email string) (*domain.User, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*domain.User, error)
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
+	Update(ctx context.Context, user *domain.User) error
 }
 
 // PasswordHasher is the outbound port for password hashing.
@@ -38,4 +39,14 @@ type RefreshTokenRepository interface {
 	Save(ctx context.Context, token *domain.RefreshToken) error
 	FindByHash(ctx context.Context, hash string) (*domain.RefreshToken, error)
 	RevokeAllForUser(ctx context.Context, userID uuid.UUID) error
+}
+
+type EmailSender interface {
+	SendVerificationEmail(ctx context.Context, email, token string) error
+}
+
+type EmailVerificationRepository interface {
+	Save(ctx context.Context, token *domain.EmailVerificationToken) error
+	FindByHash(ctx context.Context, hash string) (*domain.EmailVerificationToken, error)
+	MarkUsed(ctx context.Context, tokenID uuid.UUID) error
 }

@@ -14,15 +14,17 @@ import (
 
 type AuthHandler struct {
 	register port.RegisterUseCase
+	verify   port.VerifyEmailUseCase
 }
 
-func NewAuthHandler(register port.RegisterUseCase) *AuthHandler {
-	return &AuthHandler{register: register}
+func NewAuthHandler(register port.RegisterUseCase, verify port.VerifyEmailUseCase) *AuthHandler {
+	return &AuthHandler{register: register, verify: verify}
 }
 
 func (h *AuthHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Post("/register", h.Register)
+	r.Post("/verify-email", h.VerifyEmail)
 	return r
 }
 
@@ -70,4 +72,22 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.Created(w, r, result)
+}
+
+func (h *AuthHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	var req port.VerifyEmailCommand
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid request body")
+		return
+	}
+	if req.Token == "" {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "token is required")
+		return
+	}
+
+	if err := h.verify.Verify(r.Context(), req); err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
+	response.OK(w, r, map[string]string{"message": "email successfully verified"})
 }

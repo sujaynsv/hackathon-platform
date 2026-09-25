@@ -18,6 +18,8 @@ type RegisterService struct {
 	tokens    port.TokenIssuer
 	refresh   port.RefreshTokenRepository
 	validator port.PasswordValidator
+	emailTks  port.EmailVerificationRepository
+	sender    port.EmailSender
 }
 
 func NewRegisterService(
@@ -26,6 +28,8 @@ func NewRegisterService(
 	tokens port.TokenIssuer,
 	refresh port.RefreshTokenRepository,
 	validator port.PasswordValidator,
+	emailTks port.EmailVerificationRepository,
+	sender port.EmailSender,
 ) *RegisterService {
 	return &RegisterService{
 		users:     users,
@@ -33,6 +37,8 @@ func NewRegisterService(
 		tokens:    tokens,
 		refresh:   refresh,
 		validator: validator,
+		emailTks:  emailTks,
+		sender:    sender,
 	}
 }
 
@@ -78,6 +84,20 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 	// 5. Persist user
 	if err := s.users.Save(ctx, user); err != nil {
 		return nil, fmt.Errorf("save user: %w", err)
+	}
+
+	// 5.5 Generate and send verification email
+	if s.emailTks != nil && s.sender != nil {
+		rawToken, tokenDomain := domain.NewEmailVerificationToken(user.ID)
+		if err := s.emailTks.Save(ctx, tokenDomain); err != nil {
+			return nil, fmt.Errorf("save email token: %w", err)
+		}
+		// In a real system, we'd send this async. We'll do it synchronously for now.
+		if err := s.sender.SendVerificationEmail(ctx, user.Email, rawToken); err != nil {
+			// Don't fail the whole registration if email fails, but log it (or handle it)
+			// Returning err here might be too harsh, but let's be strict for A-006 testability
+			return nil, fmt.Errorf("send verification email: %w", err)
+		}
 	}
 
 	// 6. Issue tokens

@@ -18,6 +18,7 @@ import (
 	"github.com/dogfood-platform/dogfood/internal/shared"
 	"github.com/dogfood-platform/dogfood/internal/shared/cache"
 	"github.com/dogfood-platform/dogfood/internal/shared/database"
+	"github.com/dogfood-platform/dogfood/internal/shared/email"
 	"github.com/dogfood-platform/dogfood/internal/shared/middleware"
 )
 
@@ -44,8 +45,13 @@ func main() {
 	tokenIssuer := shared.NewJWTIssuer(cfg.JWTSecret, cfg.JWTAccessTTLH*60, cfg.JWTRefreshTTLD)
 	refreshRepo := repository.NewRefreshTokenRepository(db)
 	passwordValidator := shared.NewHIBPValidator()
-	registerSvc := usecase.NewRegisterService(userRepo, hasher, tokenIssuer, refreshRepo, passwordValidator)
-	authHandler := handler.NewAuthHandler(registerSvc)
+	emailTokensRepo := repository.NewEmailVerificationRepository(db)
+	emailSender := email.NewStubSender(slog.Default())
+	
+	registerSvc := usecase.NewRegisterService(userRepo, hasher, tokenIssuer, refreshRepo, passwordValidator, emailTokensRepo, emailSender)
+	verifySvc := usecase.NewVerifyEmailService(emailTokensRepo, userRepo)
+	
+	authHandler := handler.NewAuthHandler(registerSvc, verifySvc)
 
 	// 6. Wire Chi router
 	r := chi.NewRouter()
