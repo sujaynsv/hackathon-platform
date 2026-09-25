@@ -22,8 +22,10 @@ type User struct {
 	PasswordHash string
 	DisplayName  string
 	AvatarURL    *string
+	IsVerified   bool
 	IsActive     bool
 	IsAdmin      bool
+	VerifiedAt   *time.Time
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -53,6 +55,7 @@ func NewUser(email, displayName string) (*User, error) {
 		ID:          uuid.New(),
 		Email:       email,
 		DisplayName: displayName,
+		IsVerified:  false,
 		IsActive:    true,
 		IsAdmin:     false,
 		CreatedAt:   now,
@@ -64,4 +67,15 @@ func isValidEmail(email string) bool {
 	// Simple check: contains exactly one @ with non-empty parts before and after
 	parts := strings.Split(email, "@")
 	return len(parts) == 2 && len(parts[0]) > 0 && strings.Contains(parts[1], ".")
+}
+
+// Verify marks the user as verified.
+func (u *User) Verify() {
+	if u.IsVerified {
+		return
+	}
+	now := time.Now().UTC()
+	u.IsVerified = true
+	u.VerifiedAt = &now
+	u.UpdatedAt = now
 }

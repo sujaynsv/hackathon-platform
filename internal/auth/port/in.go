@@ -8,6 +8,14 @@ type RegisterUseCase interface {
 	Register(ctx context.Context, cmd RegisterCommand) (*AuthResponse, error)
 }
 
+type VerifyEmailCommand struct {
+	Token string `json:"token"`
+}
+
+type VerifyEmailUseCase interface {
+	Verify(ctx context.Context, cmd VerifyEmailCommand) error
+}
+
 type RegisterCommand struct {
 	Email       string
 	Password    string
@@ -15,9 +23,10 @@ type RegisterCommand struct {
 }
 
 type AuthResponse struct {
-	User         UserDTO `json:"user"`
-	AccessToken  string  `json:"accessToken"`
-	RefreshToken string  `json:"refreshToken"`
+	User                 UserDTO `json:"user"`
+	AccessToken          string  `json:"accessToken,omitempty"`
+	RefreshToken         string  `json:"refreshToken,omitempty"`
+	RequiresVerification bool    `json:"requiresVerification,omitempty"`
 }
 
 type UserDTO struct {

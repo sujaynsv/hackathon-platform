@@ -38,3 +38,4 @@ Thumbs.db
 # Docker volumes (local)
 postgres_data/
 minio_data/
+api

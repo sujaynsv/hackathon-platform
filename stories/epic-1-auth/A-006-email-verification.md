@@ -3,7 +3,7 @@ id: A-006
 title: Email Verification Loop
 epic: auth
 owner: Unassigned
-status: "[ ] backlog"
+status: "[x] done"
 branch: 
 blocks: 
 blocked-by: A-001
@@ -25,7 +25,7 @@ An email verification flow involving magic links or OTPs.
 4. (Optional) Enforce `is_verified` via a new middleware for specific protected routes.
 
 ## Definition of Done
-- [ ] Update User domain model with `IsVerified` flag.
-- [ ] Create `POST /api/v1/auth/verify-email` endpoint.
-- [ ] Add email sending capabilities (e.g., SMTP or AWS SES stub).
-- [ ] Add OTP generation and verification logic.
+- [x] Update User domain model with `IsVerified` flag.
+- [x] Create `POST /api/v1/auth/verify-email` endpoint.
+- [x] Add email sending capabilities (e.g., SMTP or AWS SES stub).
+- [x] Add OTP generation and verification logic.

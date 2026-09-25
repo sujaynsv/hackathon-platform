@@ -22,8 +22,18 @@ func (m *mockUserRepo) Save(ctx context.Context, user *domain.User) error {
 	m.saved = user
 	return nil
 }
+func (m *mockUserRepo) Update(ctx context.Context, user *domain.User) error {
+	m.saved = user
+	return nil
+}
 func (m *mockUserRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
-	return nil, nil
+	if m.exists {
+		if m.saved != nil {
+			return m.saved, nil
+		}
+		return &domain.User{}, nil
+	}
+	return nil, response.ErrNotFound
 }
 func (m *mockUserRepo) FindByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	return nil, nil
@@ -65,7 +75,7 @@ func (m *mockPasswordValidator) IsCompromised(ctx context.Context, password stri
 
 func TestRegisterService_ValidInput_ReturnsAuthResponse(t *testing.T) {
 	repo := &mockUserRepo{}
-	svc := usecase.NewRegisterService(repo, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, &mockPasswordValidator{})
+	svc := usecase.NewRegisterService(repo, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, &mockPasswordValidator{}, nil, nil)
 
 	resp, err := svc.Register(context.Background(), port.RegisterCommand{
 		Email:       "alice@example.com",
@@ -83,8 +93,8 @@ func TestRegisterService_ValidInput_ReturnsAuthResponse(t *testing.T) {
 }
 
 func TestRegisterService_DuplicateEmail_ReturnsErrDuplicate(t *testing.T) {
-	repo := &mockUserRepo{exists: true}
-	svc := usecase.NewRegisterService(repo, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, &mockPasswordValidator{})
+	repo := &mockUserRepo{exists: true, saved: &domain.User{IsVerified: true}}
+	svc := usecase.NewRegisterService(repo, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, &mockPasswordValidator{}, nil, nil)
 
 	_, err := svc.Register(context.Background(), port.RegisterCommand{
 		Email:       "alice@example.com",
@@ -96,7 +106,7 @@ func TestRegisterService_DuplicateEmail_ReturnsErrDuplicate(t *testing.T) {
 }
 
 func TestRegisterService_WeakPassword_ReturnsErrWeakPassword(t *testing.T) {
-	svc := usecase.NewRegisterService(&mockUserRepo{}, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, &mockPasswordValidator{})
+	svc := usecase.NewRegisterService(&mockUserRepo{}, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, &mockPasswordValidator{}, nil, nil)
 
 	_, err := svc.Register(context.Background(), port.RegisterCommand{
 		Email:       "alice@example.com",
@@ -109,7 +119,7 @@ func TestRegisterService_WeakPassword_ReturnsErrWeakPassword(t *testing.T) {
 
 func TestRegisterService_CompromisedPassword_ReturnsErrWeakPassword(t *testing.T) {
 	validator := &mockPasswordValidator{compromised: true}
-	svc := usecase.NewRegisterService(&mockUserRepo{}, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, validator)
+	svc := usecase.NewRegisterService(&mockUserRepo{}, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, validator, nil, nil)
 
 	_, err := svc.Register(context.Background(), port.RegisterCommand{
 		Email:       "alice@example.com",
