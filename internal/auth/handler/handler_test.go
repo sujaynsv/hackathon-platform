@@ -38,7 +38,7 @@ func (m *mockRegisterUseCase) Register(ctx context.Context, cmd port.RegisterCom
 func TestAuthHandler_Register_Success(t *testing.T) {
 	uc := &mockRegisterUseCase{}
 	h := handler.NewAuthHandler(uc, nil, nil, nil, nil, nil, "secret")
-	
+
 	r := chi.NewRouter()
 	r.Mount("/", h.Routes())
 
@@ -50,7 +50,7 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
-	
+
 	var res map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &res)
 	require.NoError(t, err)
@@ -63,7 +63,7 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 func TestAuthHandler_Register_InvalidEmail(t *testing.T) {
 	uc := &mockRegisterUseCase{shouldErr: domain.ErrInvalidEmail}
 	h := handler.NewAuthHandler(uc, nil, nil, nil, nil, nil, "secret")
-	
+
 	r := chi.NewRouter()
 	r.Mount("/", h.Routes())
 
@@ -78,7 +78,7 @@ func TestAuthHandler_Register_InvalidEmail(t *testing.T) {
 
 	var res map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &res)
-	
+
 	errData := res["error"].(map[string]interface{})
 	assert.Equal(t, "VALIDATION_ERROR", errData["code"])
 }

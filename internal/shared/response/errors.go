@@ -18,7 +18,7 @@ var (
 	ErrInvalidTransition = errors.New("invalid state transition")
 	ErrRateLimited       = errors.New("rate limited")
 	ErrDuplicate         = errors.New("duplicate resource")
-	
+
 	// Auth errors
 	ErrInvalidCredentials  = errors.New("invalid credentials")
 	ErrInvalidRefreshToken = errors.New("invalid refresh token")

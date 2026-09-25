@@ -9,18 +9,18 @@ import (
 // Config holds all application configuration loaded from environment variables.
 // MustLoad panics on startup if any required variable is missing — fail fast by design.
 type Config struct {
-	Port           string
-	AllowedOrigins string
-	DatabaseURL    string
-	RedisURL       string
-	MinioEndpoint  string
-	MinioAccessKey string
-	MinioSecretKey string
-	MinioUseSSL    bool
-	MinioBucket    string
-	JWTSecret      string
-	JWTAccessTTLH  int
-	JWTRefreshTTLD int
+	Port             string
+	AllowedOrigins   string
+	DatabaseURL      string
+	RedisURL         string
+	MinioEndpoint    string
+	MinioAccessKey   string
+	MinioSecretKey   string
+	MinioUseSSL      bool
+	MinioBucket      string
+	JWTSecret        string
+	JWTAccessTTLH    int
+	JWTRefreshTTLD   int
 	AppEnv           string
 	IPHashSalt       string
 	TurnstileKey     string
@@ -37,18 +37,18 @@ type Config struct {
 // This is intentional — a misconfigured app should fail fast at boot, not at runtime.
 func MustLoad() Config {
 	cfg := Config{
-		Port:           mustGetenv("PORT"),
-		AllowedOrigins: mustGetenv("ALLOWED_ORIGINS"),
-		DatabaseURL:    mustGetenv("DATABASE_URL"),
-		RedisURL:       mustGetenv("REDIS_URL"),
-		MinioEndpoint:  mustGetenv("MINIO_ENDPOINT"),
-		MinioAccessKey: mustGetenv("MINIO_ACCESS_KEY"),
-		MinioSecretKey: mustGetenv("MINIO_SECRET_KEY"),
-		MinioUseSSL:    getenvBool("MINIO_USE_SSL", false),
-		MinioBucket:    getenvDefault("MINIO_BUCKET_UPLOADS", "uploads"),
-		JWTSecret:      mustGetenv("JWT_SECRET"),
-		JWTAccessTTLH:  getenvInt("JWT_ACCESS_TTL_HOURS", 24),
-		JWTRefreshTTLD: getenvInt("JWT_REFRESH_TTL_DAYS", 7),
+		Port:             mustGetenv("PORT"),
+		AllowedOrigins:   mustGetenv("ALLOWED_ORIGINS"),
+		DatabaseURL:      mustGetenv("DATABASE_URL"),
+		RedisURL:         mustGetenv("REDIS_URL"),
+		MinioEndpoint:    mustGetenv("MINIO_ENDPOINT"),
+		MinioAccessKey:   mustGetenv("MINIO_ACCESS_KEY"),
+		MinioSecretKey:   mustGetenv("MINIO_SECRET_KEY"),
+		MinioUseSSL:      getenvBool("MINIO_USE_SSL", false),
+		MinioBucket:      getenvDefault("MINIO_BUCKET_UPLOADS", "uploads"),
+		JWTSecret:        mustGetenv("JWT_SECRET"),
+		JWTAccessTTLH:    getenvInt("JWT_ACCESS_TTL_HOURS", 24),
+		JWTRefreshTTLD:   getenvInt("JWT_REFRESH_TTL_DAYS", 7),
 		AppEnv:           getenvDefault("APP_ENV", "development"),
 		IPHashSalt:       mustGetenv("IP_HASH_SALT"),
 		TurnstileKey:     os.Getenv("TURNSTILE_SECRET_KEY"), // Optional for local dev

@@ -21,7 +21,7 @@ func JWT(secret string) func(http.Handler) http.Handler {
 				response.HandleDomainError(w, r, response.ErrUnauthorized)
 				return
 			}
-			
+
 			// Extract token
 			parts := strings.Split(authHeader, " ")
 			if len(parts) != 2 || parts[0] != "Bearer" {
@@ -31,7 +31,7 @@ func JWT(secret string) func(http.Handler) http.Handler {
 
 			// STUB: Real validation will go here
 			// tokenString := parts[1]
-			
+
 			// For now, pass through
 			ctx := context.WithValue(r.Context(), "user_id", "stub-user-id")
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -72,7 +72,7 @@ func JWTMiddleware(secret string, cache port.Cache) func(http.Handler) http.Hand
 				response.HandleDomainError(w, r, fmt.Errorf("%w: missing authorization header", response.ErrUnauthorized))
 				return
 			}
-			
+
 			parts := strings.Split(authHeader, " ")
 			if len(parts) != 2 || parts[0] != "Bearer" {
 				response.HandleDomainError(w, r, fmt.Errorf("%w: invalid authorization header format", response.ErrUnauthorized))
@@ -80,7 +80,7 @@ func JWTMiddleware(secret string, cache port.Cache) func(http.Handler) http.Hand
 			}
 
 			tokenString := parts[1]
-			
+
 			token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("unexpected signing method")

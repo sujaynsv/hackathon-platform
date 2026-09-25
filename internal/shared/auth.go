@@ -31,9 +31,9 @@ func (h *BcryptHasher) Verify(hash, plain string) bool {
 }
 
 type JWTIssuer struct {
-	secret             string
-	accessTTLMinutes   int
-	refreshTTLDays     int
+	secret           string
+	accessTTLMinutes int
+	refreshTTLDays   int
 }
 
 func NewJWTIssuer(secret string, accessTTLMinutes, refreshTTLDays int) *JWTIssuer {

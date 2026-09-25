@@ -31,7 +31,7 @@ func TestRateLimiter(t *testing.T) {
 	defer rdb.Close() //nolint:errcheck
 
 	limiter := middleware.NewRateLimiter(rdb)
-	
+
 	// Create a dummy handler that returns 200 OK
 	dummyHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -47,7 +47,7 @@ func TestRateLimiter(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/register", nil)
 		req.RemoteAddr = "192.168.1.1:1234" // same IP
 		rec := httptest.NewRecorder()
-		
+
 		handler.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusOK, rec.Code, "request %d should be allowed", i+1)
 	}
@@ -56,7 +56,7 @@ func TestRateLimiter(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/register", nil)
 	req.RemoteAddr = "192.168.1.1:1234" // same IP
 	rec := httptest.NewRecorder()
-	
+
 	handler.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusTooManyRequests, rec.Code, "6th request should be rate limited")
 	assert.Contains(t, rec.Body.String(), "RATE_LIMITED")
@@ -65,7 +65,7 @@ func TestRateLimiter(t *testing.T) {
 	req2 := httptest.NewRequest(http.MethodGet, "/api/v1/auth/register", nil)
 	req2.RemoteAddr = "10.0.0.1:1234"
 	rec2 := httptest.NewRecorder()
-	
+
 	handler.ServeHTTP(rec2, req2)
 	assert.Equal(t, http.StatusOK, rec2.Code, "different IP should be allowed")
 }

@@ -12,7 +12,7 @@ import (
 
 // Domain errors — use fmt.Errorf("%w: detail", domain.ErrXxx) to wrap with context.
 var (
-	ErrEmailTaken   = errors.New("email already registered")
+	ErrEmailTaken         = errors.New("email already registered")
 	ErrInvalidEmail       = errors.New("invalid email format")
 	ErrWeakPassword       = errors.New("password too short: minimum 8 characters")
 	ErrInvalidDisplayName = errors.New("display name is required")

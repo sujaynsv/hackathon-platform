@@ -16,17 +16,17 @@ import (
 )
 
 type userRow struct {
-	ID           uuid.UUID `db:"id"`
-	Email        string    `db:"email"`
-	PasswordHash string    `db:"password_hash"`
-	DisplayName  string    `db:"display_name"`
-	AvatarURL    *string   `db:"avatar_url"`
-	IsVerified   bool      `db:"is_verified"`
-	IsActive     bool      `db:"is_active"`
-	IsAdmin      bool      `db:"is_admin"`
-	VerifiedAt   *time.Time`db:"verified_at"`
-	CreatedAt    time.Time `db:"created_at"`
-	UpdatedAt    time.Time `db:"updated_at"`
+	ID           uuid.UUID  `db:"id"`
+	Email        string     `db:"email"`
+	PasswordHash string     `db:"password_hash"`
+	DisplayName  string     `db:"display_name"`
+	AvatarURL    *string    `db:"avatar_url"`
+	IsVerified   bool       `db:"is_verified"`
+	IsActive     bool       `db:"is_active"`
+	IsAdmin      bool       `db:"is_admin"`
+	VerifiedAt   *time.Time `db:"verified_at"`
+	CreatedAt    time.Time  `db:"created_at"`
+	UpdatedAt    time.Time  `db:"updated_at"`
 }
 
 func toUserRow(u *domain.User) userRow {
@@ -283,18 +283,18 @@ func (r *EmailVerificationRepository) MarkUsed(ctx context.Context, tokenID uuid
 }
 
 type webAuthnCredentialRow struct {
-	ID                  uuid.UUID `db:"id"`
-	UserID              uuid.UUID `db:"user_id"`
-	CredentialID        []byte    `db:"credential_id"`
-	PublicKey           []byte    `db:"public_key"`
-	AttestationType     string    `db:"attestation_type"`
-	Transport           []byte    `db:"transport"`
-	Flags               []byte    `db:"flags"`
-	AuthenticatorAAGUID []byte    `db:"authenticator_aaguid"`
-	SignCount           uint32    `db:"sign_count"`
-	CloneWarning        bool      `db:"clone_warning"`
-	CreatedAt           time.Time `db:"created_at"`
-	LastUsedAt          *time.Time`db:"last_used_at"`
+	ID                  uuid.UUID  `db:"id"`
+	UserID              uuid.UUID  `db:"user_id"`
+	CredentialID        []byte     `db:"credential_id"`
+	PublicKey           []byte     `db:"public_key"`
+	AttestationType     string     `db:"attestation_type"`
+	Transport           []byte     `db:"transport"`
+	Flags               []byte     `db:"flags"`
+	AuthenticatorAAGUID []byte     `db:"authenticator_aaguid"`
+	SignCount           uint32     `db:"sign_count"`
+	CloneWarning        bool       `db:"clone_warning"`
+	CreatedAt           time.Time  `db:"created_at"`
+	LastUsedAt          *time.Time `db:"last_used_at"`
 }
 
 type WebAuthnRepository struct {
@@ -362,7 +362,7 @@ func (r *WebAuthnRepository) FindByUserID(ctx context.Context, userID uuid.UUID)
 		_ = flags.ScanJSON(row.Flags)
 		var transport []string
 		_ = json.Unmarshal(row.Transport, &transport)
-		
+
 		creds = append(creds, &domain.WebAuthnCredential{
 			ID:                  row.ID,
 			UserID:              row.UserID,
@@ -409,4 +409,3 @@ func (r *WebAuthnRepository) Update(ctx context.Context, cred *domain.WebAuthnCr
 	}
 	return nil
 }
-

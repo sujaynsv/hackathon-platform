@@ -85,7 +85,7 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 		if err := s.users.Update(ctx, existingUser); err != nil {
 			return nil, fmt.Errorf("update user: %w", err)
 		}
-		
+
 		if s.emailTks != nil && s.sender != nil {
 			rawToken, tokenDomain := domain.NewEmailVerificationToken(existingUser.ID)
 			if err := s.emailTks.Save(ctx, tokenDomain); err != nil {
@@ -93,7 +93,7 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 			}
 			_ = s.sender.SendVerificationEmail(ctx, existingUser.Email, rawToken)
 		}
-		
+
 		return &port.AuthResponse{
 			User: port.UserDTO{
 				ID:          existingUser.ID.String(),

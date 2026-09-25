@@ -19,18 +19,19 @@ import (
 	"github.com/dogfood-platform/dogfood/internal/config"
 	"github.com/dogfood-platform/dogfood/internal/shared"
 	"github.com/dogfood-platform/dogfood/internal/shared/cache"
+	"github.com/dogfood-platform/dogfood/internal/shared/captcha"
 	"github.com/dogfood-platform/dogfood/internal/shared/database"
 	"github.com/dogfood-platform/dogfood/internal/shared/email"
 	"github.com/dogfood-platform/dogfood/internal/shared/middleware"
-	"github.com/dogfood-platform/dogfood/internal/shared/captcha"
 
+	eventsHandlerPkg "github.com/dogfood-platform/dogfood/internal/events/handler"
 	eventRepo "github.com/dogfood-platform/dogfood/internal/events/repository"
-	teamRepo "github.com/dogfood-platform/dogfood/internal/teams/repository"
+	eventsUsecase "github.com/dogfood-platform/dogfood/internal/events/usecase"
+	subHandlerPkg "github.com/dogfood-platform/dogfood/internal/submissions/handler"
 	subRepo "github.com/dogfood-platform/dogfood/internal/submissions/repository"
 	subUsecase "github.com/dogfood-platform/dogfood/internal/submissions/usecase"
-	subHandlerPkg "github.com/dogfood-platform/dogfood/internal/submissions/handler"
+	teamRepo "github.com/dogfood-platform/dogfood/internal/teams/repository"
 )
-
 
 func main() {
 	// 1. Load config from env
@@ -41,14 +42,14 @@ func main() {
 	// 2. Connect to Database and Migrate
 	db := database.MustConnect(cfg.DatabaseURL)
 	database.MustMigrate(db, "migrations/")
-	
+
 	// 3. Connect to Cache
 	rdb := cache.MustConnect(cfg.RedisURL)
 	rateLimiter := middleware.NewRateLimiter(rdb)
 
 	// STUBS: 4-5
 	// mc := storage.MustConnect(cfg.MinioEndpoint, cfg.MinioAccessKey, cfg.MinioSecretKey)
-	
+
 	// Initialize Auth dependencies
 	userRepo := repository.NewUserRepository(db)
 	hasher := shared.NewBcryptHasher()
@@ -68,7 +69,7 @@ func main() {
 
 	// Start the background worker
 	go email.RunWorker(context.Background(), rdb, baseEmailSender)
-	
+
 	var captchaValidator port.CaptchaValidator
 	if cfg.TurnstileKey != "" {
 		captchaValidator = captcha.NewTurnstileValidator(cfg.TurnstileKey)
@@ -80,10 +81,10 @@ func main() {
 	refreshSvc := usecase.NewRefreshService(userRepo, refreshRepo, tokenIssuer)
 	redisCache := cache.NewRedisCache(rdb)
 	logoutSvc := usecase.NewLogoutService(redisCache, refreshRepo)
-	
+
 	webAuthnRepo := repository.NewWebAuthnRepository(db)
 	webAuthnSvc, err := usecase.NewWebAuthnService(
-		userRepo, webAuthnRepo, redisCache, tokenIssuer, refreshRepo, 
+		userRepo, webAuthnRepo, redisCache, tokenIssuer, refreshRepo,
 		"Dogfood Hackathon", cfg.WebAuthnRPID, cfg.WebAuthnRPOrigin,
 	)
 	if err != nil {
@@ -94,17 +95,24 @@ func main() {
 	authHandler := handler.NewAuthHandler(registerSvc, verifySvc, loginSvc, refreshSvc, logoutSvc, redisCache, cfg.JWTSecret)
 	webAuthnHandler := handler.NewWebAuthnHandler(webAuthnSvc)
 
+	eventsRepo := eventRepo.NewPgEventRepository(db)
+	eventsRoleRepo := eventRepo.NewPgEventRoleRepository(db)
+	eventsCreateSvc := eventsUsecase.NewCreateEventService(eventsRepo, eventsRoleRepo)
+	eventsListSvc := eventsUsecase.NewListEventsService(eventsRepo)
+	eventsGetSvc := eventsUsecase.NewGetEventService(eventsRepo)
+	eventsHandler := eventsHandlerPkg.NewEventHandler(eventsCreateSvc, eventsListSvc, eventsGetSvc)
+
 	// Submissions module
-	eventsRepo := eventRepo.NewPgEventReader(db) // Assuming internal/events/repository
-	teamsRepo := teamRepo.NewPgTeamReader(db) // Assuming internal/teams/repository
+	subEventsReader := eventRepo.NewPgEventReader(db)
+	teamsRepo := teamRepo.NewPgTeamReader(db)
 	tracksRepo := eventRepo.NewPgTrackReader(db)
 	subsRepo := subRepo.NewPgSubmissionRepository(db)
-	createSubSvc := subUsecase.NewCreateSubmissionService(eventsRepo, teamsRepo, tracksRepo, subsRepo)
+	createSubSvc := subUsecase.NewCreateSubmissionService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
 	subHandler := subHandlerPkg.NewSubmissionHandler(createSubSvc)
 
 	// 6. Wire Chi router
 	r := chi.NewRouter()
-	
+
 	// Basic middlewares for stub
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{cfg.AllowedOrigins},
@@ -128,6 +136,7 @@ func main() {
 			r.Use(rateLimiter.RateLimit(5, 15*time.Minute))
 			r.Mount("/auth", authHandler.Routes())
 			webAuthnHandler.RegisterPublicRoutes(r)
+			eventsHandler.RegisterPublicRoutes(r)
 		})
 
 		// Protected routes
@@ -135,7 +144,7 @@ func main() {
 			r.Use(middleware.JWTMiddleware(cfg.JWTSecret, redisCache))
 			webAuthnHandler.RegisterProtectedRoutes(r)
 			subHandler.RegisterRoutes(r)
-			// events.Mount(r, eventsHandler)
+			eventsHandler.RegisterProtectedRoutes(r)
 			// teams.Mount(r, teamsHandler)
 			// judging.Mount(r, judgingHandler)
 			// voting.Mount(r, votingHandler)
