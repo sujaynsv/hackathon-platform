@@ -22,6 +22,11 @@ type PasswordHasher interface {
 	Verify(hash, plain string) bool
 }
 
+// PasswordValidator checks if a password meets external security criteria (e.g., not breached).
+type PasswordValidator interface {
+	IsCompromised(ctx context.Context, password string) (bool, error)
+}
+
 // TokenIssuer is the outbound port for JWT generation.
 type TokenIssuer interface {
 	IssueAccessToken(userID, email string, isAdmin bool) (string, error)

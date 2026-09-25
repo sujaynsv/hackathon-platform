@@ -130,6 +130,44 @@ CREATE INDEX        idx_refresh_tokens_expiry ON refresh_tokens (expires_at)
 
 ---
 
+### 3.2.1 `email_verification_tokens` (Upcoming for A-006)
+
+```sql
+CREATE TABLE email_verification_tokens (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash  TEXT        NOT NULL,
+    expires_at  TIMESTAMPTZ NOT NULL,
+    issued_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    is_used     BOOLEAN     NOT NULL DEFAULT false
+);
+
+CREATE UNIQUE INDEX idx_email_verification_tokens_hash ON email_verification_tokens (token_hash);
+CREATE INDEX        idx_email_verification_tokens_user ON email_verification_tokens (user_id);
+```
+
+---
+
+### 3.2.2 `webauthn_credentials` (Upcoming for A-007)
+
+```sql
+CREATE TABLE webauthn_credentials (
+    id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id          UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    credential_id    BYTEA       NOT NULL UNIQUE,
+    public_key       BYTEA       NOT NULL,
+    attestation_type TEXT        NOT NULL,
+    aaguid           BYTEA       NOT NULL,
+    sign_count       BIGINT      NOT NULL DEFAULT 0,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    last_used_at     TIMESTAMPTZ
+);
+
+CREATE INDEX idx_webauthn_credentials_user ON webauthn_credentials (user_id);
+```
+
+---
+
 ### 3.3 `events`
 
 ```sql

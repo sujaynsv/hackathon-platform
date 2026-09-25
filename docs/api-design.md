@@ -106,14 +106,16 @@ Create a new user account.
 {
   "email": "alice@example.com",
   "password": "Min8CharsAtLeast1Number",
-  "displayName": "Alice Chen"
+  "displayName": "Alice Chen",
+  "captchaToken": "xyz..." 
 }
 ```
 
 **Validation:**
 - `email`: valid email format, max 255 chars
-- `password`: min 8 chars, max 72 chars (bcrypt limit)
+- `password`: min 8 chars, max 72 chars, must not be compromised (checked against HIBP)
 - `displayName`: min 2 chars, max 80 chars
+- `captchaToken`: valid CAPTCHA token (required for A-008)
 
 **Response 201:**
 ```json
@@ -131,7 +133,8 @@ Create a new user account.
 | Code | Condition |
 |------|-----------|
 | `DUPLICATE_RESOURCE` 409 | Email already registered (I1 enforcement) |
-| `VALIDATION_ERROR` 400 | Invalid email / weak password |
+| `VALIDATION_ERROR` 400 | Invalid email / weak or compromised password / invalid captcha |
+| `RATE_LIMITED` 429 | >5 requests per IP in 15 minutes |
 
 ---
 
@@ -169,8 +172,8 @@ Also sets `Set-Cookie: refresh_token=<token>; HttpOnly; SameSite=Strict; Max-Age
 **Errors:**
 | Code | Condition |
 |------|-----------|
-| `UNAUTHORIZED` 401 | Wrong email or password (same message, no enumeration) |
-| `RATE_LIMITED` 429 | >10 failed attempts per IP in 15 minutes |
+| `UNAUTHORIZED` 401 | Wrong email or password (same message, no enumeration), or email not verified |
+| `RATE_LIMITED` 429 | >5 requests per IP in 15 minutes |
 
 ---
 
@@ -211,6 +214,26 @@ Invalidate the current session.
 **Behavior:**
 - Adds JWT `jti` to Redis blacklist with TTL = remaining token lifetime
 - Revokes the refresh token in PostgreSQL
+
+---
+
+### POST /auth/verify-email
+Verify an email address using a token (Upcoming for A-006).
+
+**Request:**
+```json
+{
+  "token": "abc123def456"
+}
+```
+
+---
+
+### Passkey Authentication (Upcoming for A-007)
+- `POST /auth/passkeys/register/start`
+- `POST /auth/passkeys/register/finish`
+- `POST /auth/passkeys/login/start`
+- `POST /auth/passkeys/login/finish`
 
 ---
 

@@ -165,7 +165,7 @@ dogfood/
 │   │   │   └── user.go             User, RefreshToken structs + domain methods
 │   │   ├── port/
 │   │   │   ├── in.go               RegisterUseCase, LoginUseCase, RefreshUseCase interfaces
-│   │   │   └── out.go              UserRepository, PasswordHasher, TokenIssuer interfaces
+│   │   │   └── out.go              UserRepository, PasswordHasher, TokenIssuer, PasswordValidator, EmailSender, CaptchaValidator interfaces
 │   │   ├── usecase/
 │   │   │   ├── register.go         RegisterService implements port.RegisterUseCase
 │   │   │   ├── login.go            LoginService
@@ -332,7 +332,7 @@ HTTP Request
 │    - Per-user + per-IP sliding window (Redis ZSET)  │
 │    - Vote endpoint: 1 req/s per user                │
 │    - Score endpoint: 10 req/s per judge             │
-│    - Auth endpoints: 5 req/min per IP               │
+│    - Auth endpoints: 5 req/15min per IP             │
 │    - 429 Too Many Requests if exceeded              │
 └──────────────────────────┬──────────────────────────┘
                             │
@@ -706,6 +706,7 @@ Layer 4: Application (Use Case / Domain)
   - Business-rule invariants (I1–I19)
   - Deadline enforcement
   - State machine guards
+  - HIBP compromised password validation (for Auth)
 
 Layer 5: Database
   - UNIQUE constraints (I1, I2, I5)

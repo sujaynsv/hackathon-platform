@@ -11,10 +11,11 @@ import (
 )
 
 type RegisterService struct {
-	users   port.UserRepository
-	hasher  port.PasswordHasher
-	tokens  port.TokenIssuer
-	refresh port.RefreshTokenRepository
+	users     port.UserRepository
+	hasher    port.PasswordHasher
+	tokens    port.TokenIssuer
+	refresh   port.RefreshTokenRepository
+	validator port.PasswordValidator
 }
 
 func NewRegisterService(
@@ -22,14 +23,32 @@ func NewRegisterService(
 	hasher port.PasswordHasher,
 	tokens port.TokenIssuer,
 	refresh port.RefreshTokenRepository,
+	validator port.PasswordValidator,
 ) *RegisterService {
-	return &RegisterService{users: users, hasher: hasher, tokens: tokens, refresh: refresh}
+	return &RegisterService{
+		users:     users,
+		hasher:    hasher,
+		tokens:    tokens,
+		refresh:   refresh,
+		validator: validator,
+	}
 }
 
 func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand) (*port.AuthResponse, error) {
 	// 1. Validate password length (domain rule)
 	if len(cmd.Password) < 8 {
 		return nil, fmt.Errorf("%w", domain.ErrWeakPassword)
+	}
+
+	// 1.5 Check if password is breached
+	if s.validator != nil {
+		compromised, err := s.validator.IsCompromised(ctx, cmd.Password)
+		if err != nil {
+			return nil, fmt.Errorf("check breached password: %w", err)
+		}
+		if compromised {
+			return nil, fmt.Errorf("password has appeared in a data breach: %w", domain.ErrWeakPassword)
+		}
 	}
 
 	// 2. Check email uniqueness
