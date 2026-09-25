@@ -250,10 +250,17 @@ func (r *EmailVerificationRepository) FindByHash(ctx context.Context, hash strin
 }
 
 func (r *EmailVerificationRepository) MarkUsed(ctx context.Context, tokenID uuid.UUID) error {
-	const q = `UPDATE email_verification_tokens SET is_used = true WHERE id = $1`
-	_, err := r.db.ExecContext(ctx, q, tokenID)
+	const q = `UPDATE email_verification_tokens SET is_used = true WHERE id = $1 AND is_used = false`
+	res, err := r.db.ExecContext(ctx, q, tokenID)
 	if err != nil {
 		return fmt.Errorf("mark email token used: %w", err)
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("check rows affected: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("token already used or not found")
 	}
 	return nil
 }

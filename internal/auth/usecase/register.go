@@ -59,13 +59,42 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 		}
 	}
 
-	// 2. Check email uniqueness
-	exists, err := s.users.ExistsByEmail(ctx, cmd.Email)
-	if err != nil {
-		return nil, fmt.Errorf("check email: %w", err)
-	}
-	if exists {
-		return nil, fmt.Errorf("%w: email already registered", response.ErrDuplicate) // maps to 409
+	// 2. Check email uniqueness and resend logic
+	existingUser, err := s.users.FindByEmail(ctx, cmd.Email)
+	if err == nil {
+		if existingUser.IsVerified {
+			return nil, fmt.Errorf("%w: email already registered", response.ErrDuplicate)
+		}
+		// If unverified, we update password and resend token instead of failing
+		hash, err := s.hasher.Hash(cmd.Password)
+		if err != nil {
+			return nil, fmt.Errorf("hash password: %w", err)
+		}
+		existingUser.PasswordHash = hash
+		existingUser.DisplayName = cmd.DisplayName
+		if err := s.users.Update(ctx, existingUser); err != nil {
+			return nil, fmt.Errorf("update user: %w", err)
+		}
+		
+		if s.emailTks != nil && s.sender != nil {
+			rawToken, tokenDomain := domain.NewEmailVerificationToken(existingUser.ID)
+			if err := s.emailTks.Save(ctx, tokenDomain); err != nil {
+				return nil, fmt.Errorf("save email token: %w", err)
+			}
+			_ = s.sender.SendVerificationEmail(ctx, existingUser.Email, rawToken)
+		}
+		
+		return &port.AuthResponse{
+			User: port.UserDTO{
+				ID:          existingUser.ID.String(),
+				Email:       existingUser.Email,
+				DisplayName: existingUser.DisplayName,
+				AvatarURL:   existingUser.AvatarURL,
+				IsAdmin:     existingUser.IsAdmin,
+				CreatedAt:   existingUser.CreatedAt.Format(time.RFC3339),
+			},
+			RequiresVerification: true,
+		}, nil
 	}
 
 	// 3. Build domain user (validates email format)
@@ -100,7 +129,22 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 		}
 	}
 
-	// 6. Issue tokens
+	requiresVerification := s.emailTks != nil && s.sender != nil
+	if requiresVerification {
+		return &port.AuthResponse{
+			User: port.UserDTO{
+				ID:          user.ID.String(),
+				Email:       user.Email,
+				DisplayName: user.DisplayName,
+				AvatarURL:   user.AvatarURL,
+				IsAdmin:     user.IsAdmin,
+				CreatedAt:   user.CreatedAt.Format(time.RFC3339),
+			},
+			RequiresVerification: true,
+		}, nil
+	}
+
+	// 6. Issue tokens (only if verification is not required)
 	accessToken, err := s.tokens.IssueAccessToken(user.ID.String(), user.Email, user.IsAdmin)
 	if err != nil {
 		return nil, fmt.Errorf("issue access token: %w", err)
@@ -110,7 +154,6 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 		return nil, fmt.Errorf("issue refresh token: %w", err)
 	}
 
-	// Persist refresh token hash
 	h := sha256.New()
 	h.Write([]byte(refreshToken))
 	rtHash := fmt.Sprintf("%x", h.Sum(nil))
@@ -119,7 +162,7 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 		ID:        uuid.New(),
 		UserID:    user.ID,
 		Hash:      rtHash,
-		ExpiresAt: time.Now().Add(7 * 24 * time.Hour), // Match config TTL (7 days)
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
 		CreatedAt: time.Now(),
 	}
 	if err := s.refresh.Save(ctx, rt); err != nil {

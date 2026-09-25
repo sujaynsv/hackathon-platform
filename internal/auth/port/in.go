@@ -23,9 +23,10 @@ type RegisterCommand struct {
 }
 
 type AuthResponse struct {
-	User         UserDTO `json:"user"`
-	AccessToken  string  `json:"accessToken"`
-	RefreshToken string  `json:"refreshToken"`
+	User                 UserDTO `json:"user"`
+	AccessToken          string  `json:"accessToken,omitempty"`
+	RefreshToken         string  `json:"refreshToken,omitempty"`
+	RequiresVerification bool    `json:"requiresVerification,omitempty"`
 }
 
 type UserDTO struct {

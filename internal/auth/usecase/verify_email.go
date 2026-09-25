@@ -47,14 +47,13 @@ func (s *VerifyEmailService) Verify(ctx context.Context, cmd port.VerifyEmailCom
 	// 5. Update domain
 	user.Verify()
 
-	// 6. Save changes
-	// Note: in a real system we'd wrap this in a transaction.
-	// For this modular monolith, since we don't have transaction wrappers exposed cleanly here yet,
-	// we do it sequentially.
-	if err := s.users.Update(ctx, user); err != nil {
-		return err
-	}
+	// 6. Atomically claim the token first
 	if err := s.tokens.MarkUsed(ctx, token.ID); err != nil {
+		return fmt.Errorf("%w: token already used or expired", response.ErrInvalidTransition)
+	}
+
+	// 7. Save changes
+	if err := s.users.Update(ctx, user); err != nil {
 		return err
 	}
 

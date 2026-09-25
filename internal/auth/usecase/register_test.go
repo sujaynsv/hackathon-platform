@@ -27,7 +27,13 @@ func (m *mockUserRepo) Update(ctx context.Context, user *domain.User) error {
 	return nil
 }
 func (m *mockUserRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
-	return nil, nil
+	if m.exists {
+		if m.saved != nil {
+			return m.saved, nil
+		}
+		return &domain.User{}, nil
+	}
+	return nil, response.ErrNotFound
 }
 func (m *mockUserRepo) FindByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	return nil, nil
@@ -87,7 +93,7 @@ func TestRegisterService_ValidInput_ReturnsAuthResponse(t *testing.T) {
 }
 
 func TestRegisterService_DuplicateEmail_ReturnsErrDuplicate(t *testing.T) {
-	repo := &mockUserRepo{exists: true}
+	repo := &mockUserRepo{exists: true, saved: &domain.User{IsVerified: true}}
 	svc := usecase.NewRegisterService(repo, &mockHasher{}, &mockTokenIssuer{}, &mockRefreshRepo{}, &mockPasswordValidator{}, nil, nil)
 
 	_, err := svc.Register(context.Background(), port.RegisterCommand{
