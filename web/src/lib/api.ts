@@ -1,6 +1,9 @@
-import { ApiResponse } from '../types/api';
+import type { ApiResponse, AuthResponse, LoginRequest, RegisterRequest, TokenPair } from '../types/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+
+// In-memory token — never persisted to localStorage (XSS mitigation)
+let _accessToken: string | null = null;
 
 export class ApiClientError extends Error {
   constructor(
@@ -18,15 +21,18 @@ async function request<T>(
   path: string,
   init?: RequestInit,
 ): Promise<ApiResponse<T>> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(init?.headers as Record<string, string>),
+  };
+
+  if (_accessToken) {
+    headers['Authorization'] = `Bearer ${_accessToken}`;
+  }
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init?.headers,
-    },
+    headers,
   });
 
   const body = await res.json();
@@ -50,4 +56,43 @@ export const api = {
   patch: <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+};
+
+export const apiClient = {
+  setToken(token: string | null) {
+    _accessToken = token;
+  },
+
+  clearToken() {
+    _accessToken = null;
+  },
+
+  async register(req: RegisterRequest): Promise<AuthResponse> {
+    const res = await api.post<AuthResponse>('/auth/register', req);
+    if (res.data.accessToken) {
+      _accessToken = res.data.accessToken;
+    }
+    return res.data;
+  },
+
+  async login(req: LoginRequest): Promise<AuthResponse> {
+    const res = await api.post<AuthResponse>('/auth/login', req);
+    if (res.data.accessToken) {
+      _accessToken = res.data.accessToken;
+    }
+    return res.data;
+  },
+
+  async refresh(refreshToken: string): Promise<TokenPair> {
+    const res = await api.post<TokenPair>('/auth/refresh', { refreshToken });
+    if (res.data.accessToken) {
+      _accessToken = res.data.accessToken;
+    }
+    return res.data;
+  },
+
+  async logout(refreshToken?: string): Promise<void> {
+    await api.post('/auth/logout', { refreshToken }).catch(() => {});
+    _accessToken = null;
+  },
 };
