@@ -23,7 +23,14 @@ import (
 	"github.com/dogfood-platform/dogfood/internal/shared/email"
 	"github.com/dogfood-platform/dogfood/internal/shared/middleware"
 	"github.com/dogfood-platform/dogfood/internal/shared/captcha"
+
+	eventRepo "github.com/dogfood-platform/dogfood/internal/events/repository"
+	teamRepo "github.com/dogfood-platform/dogfood/internal/teams/repository"
+	subRepo "github.com/dogfood-platform/dogfood/internal/submissions/repository"
+	subUsecase "github.com/dogfood-platform/dogfood/internal/submissions/usecase"
+	subHandlerPkg "github.com/dogfood-platform/dogfood/internal/submissions/handler"
 )
+
 
 func main() {
 	// 1. Load config from env
@@ -87,6 +94,14 @@ func main() {
 	authHandler := handler.NewAuthHandler(registerSvc, verifySvc, loginSvc, refreshSvc, logoutSvc, redisCache, cfg.JWTSecret)
 	webAuthnHandler := handler.NewWebAuthnHandler(webAuthnSvc)
 
+	// Submissions module
+	eventsRepo := eventRepo.NewPgEventReader(db) // Assuming internal/events/repository
+	teamsRepo := teamRepo.NewPgTeamReader(db) // Assuming internal/teams/repository
+	tracksRepo := eventRepo.NewPgTrackReader(db)
+	subsRepo := subRepo.NewPgSubmissionRepository(db)
+	createSubSvc := subUsecase.NewCreateSubmissionService(eventsRepo, teamsRepo, tracksRepo, subsRepo)
+	subHandler := subHandlerPkg.NewSubmissionHandler(createSubSvc)
+
 	// 6. Wire Chi router
 	r := chi.NewRouter()
 	
@@ -119,9 +134,9 @@ func main() {
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.JWTMiddleware(cfg.JWTSecret, redisCache))
 			webAuthnHandler.RegisterProtectedRoutes(r)
+			subHandler.RegisterRoutes(r)
 			// events.Mount(r, eventsHandler)
 			// teams.Mount(r, teamsHandler)
-			// submissions.Mount(r, submissionsHandler)
 			// judging.Mount(r, judgingHandler)
 			// voting.Mount(r, votingHandler)
 			// admin.Mount(r, adminHandler)
