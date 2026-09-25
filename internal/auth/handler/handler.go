@@ -62,7 +62,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		DisplayName: req.DisplayName,
 	})
 	if err != nil {
-		if errors.Is(err, domain.ErrInvalidEmail) || errors.Is(err, domain.ErrWeakPassword) || err.Error() == "display name is required" {
+		if errors.Is(err, domain.ErrInvalidEmail) || errors.Is(err, domain.ErrWeakPassword) || errors.Is(err, domain.ErrInvalidDisplayName) {
 			response.BadRequest(w, r, "VALIDATION_ERROR", err.Error())
 			return
 		}

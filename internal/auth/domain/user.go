@@ -11,8 +11,9 @@ import (
 // Domain errors — use fmt.Errorf("%w: detail", domain.ErrXxx) to wrap with context.
 var (
 	ErrEmailTaken   = errors.New("email already registered")
-	ErrInvalidEmail = errors.New("invalid email format")
-	ErrWeakPassword = errors.New("password too short: minimum 8 characters")
+	ErrInvalidEmail       = errors.New("invalid email format")
+	ErrWeakPassword       = errors.New("password too short: minimum 8 characters")
+	ErrInvalidDisplayName = errors.New("display name is required")
 )
 
 type User struct {
@@ -45,7 +46,7 @@ func NewUser(email, displayName string) (*User, error) {
 	}
 	displayName = strings.TrimSpace(displayName)
 	if displayName == "" {
-		return nil, errors.New("display name is required")
+		return nil, ErrInvalidDisplayName
 	}
 	now := time.Now().UTC()
 	return &User{
