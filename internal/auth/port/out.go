@@ -2,6 +2,7 @@ package port
 
 import (
 	"context"
+	"time"
 
 	"github.com/dogfood-platform/dogfood/internal/auth/domain"
 	"github.com/google/uuid"
@@ -49,4 +50,20 @@ type EmailVerificationRepository interface {
 	Save(ctx context.Context, token *domain.EmailVerificationToken) error
 	FindByHash(ctx context.Context, hash string) (*domain.EmailVerificationToken, error)
 	MarkUsed(ctx context.Context, tokenID uuid.UUID) error
+}
+
+type WebAuthnRepository interface {
+	Save(ctx context.Context, cred *domain.WebAuthnCredential) error
+	FindByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.WebAuthnCredential, error)
+	Update(ctx context.Context, cred *domain.WebAuthnCredential) error
+}
+
+type Cache interface {
+	Get(ctx context.Context, key string) ([]byte, error)
+	Set(ctx context.Context, key string, value []byte, expiration time.Duration) error
+	Delete(ctx context.Context, key string) error
+}
+
+type CaptchaValidator interface {
+	Verify(ctx context.Context, token string, remoteIP string) (bool, error)
 }

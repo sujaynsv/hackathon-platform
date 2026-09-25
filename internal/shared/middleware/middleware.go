@@ -34,3 +34,11 @@ func JWT(secret string) func(http.Handler) http.Handler {
 		})
 	}
 }
+
+// GetUserID extracts the user ID from the request context.
+func GetUserID(ctx context.Context) string {
+	if val, ok := ctx.Value("user_id").(string); ok {
+		return val
+	}
+	return ""
+}

@@ -70,3 +70,11 @@ func BadRequest(w http.ResponseWriter, r *http.Request, code, message string) {
 		Meta:  newMeta(r),
 	})
 }
+
+// Unauthorized writes a 401 response with the given machine-readable code and message.
+func Unauthorized(w http.ResponseWriter, r *http.Request, code, message string) {
+	writeJSON(w, http.StatusUnauthorized, ErrorResponse{
+		Error: ErrorBody{Code: code, Message: message},
+		Meta:  newMeta(r),
+	})
+}

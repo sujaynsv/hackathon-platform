@@ -21,13 +21,17 @@ type Config struct {
 	JWTSecret      string
 	JWTAccessTTLH  int
 	JWTRefreshTTLD int
-	IPHashSalt     string
+	AppEnv           string
+	IPHashSalt       string
+	TurnstileKey     string
+	WebAuthnRPID     string
+	WebAuthnRPOrigin string
 }
 
 // MustLoad reads all required env vars. Panics if any required vars are missing.
 // This is intentional — a misconfigured app should fail fast at boot, not at runtime.
 func MustLoad() Config {
-	return Config{
+	cfg := Config{
 		Port:           mustGetenv("PORT"),
 		AllowedOrigins: mustGetenv("ALLOWED_ORIGINS"),
 		DatabaseURL:    mustGetenv("DATABASE_URL"),
@@ -40,8 +44,18 @@ func MustLoad() Config {
 		JWTSecret:      mustGetenv("JWT_SECRET"),
 		JWTAccessTTLH:  getenvInt("JWT_ACCESS_TTL_HOURS", 24),
 		JWTRefreshTTLD: getenvInt("JWT_REFRESH_TTL_DAYS", 7),
-		IPHashSalt:     mustGetenv("IP_HASH_SALT"),
+		AppEnv:           getenvDefault("APP_ENV", "development"),
+		IPHashSalt:       mustGetenv("IP_HASH_SALT"),
+		TurnstileKey:     os.Getenv("TURNSTILE_SECRET_KEY"), // Optional for local dev
+		WebAuthnRPID:     getenvDefault("WEBAUTHN_RP_ID", "localhost"),
+		WebAuthnRPOrigin: getenvDefault("WEBAUTHN_RP_ORIGIN", "http://localhost:3000"),
 	}
+
+	if cfg.AppEnv != "development" && cfg.TurnstileKey == "" {
+		panic("TURNSTILE_SECRET_KEY is required in non-development environments")
+	}
+
+	return cfg
 }
 
 func mustGetenv(key string) string {

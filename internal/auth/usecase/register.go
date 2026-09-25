@@ -20,6 +20,7 @@ type RegisterService struct {
 	validator port.PasswordValidator
 	emailTks  port.EmailVerificationRepository
 	sender    port.EmailSender
+	captcha   port.CaptchaValidator
 }
 
 func NewRegisterService(
@@ -30,6 +31,7 @@ func NewRegisterService(
 	validator port.PasswordValidator,
 	emailTks port.EmailVerificationRepository,
 	sender port.EmailSender,
+	captcha port.CaptchaValidator,
 ) *RegisterService {
 	return &RegisterService{
 		users:     users,
@@ -39,6 +41,7 @@ func NewRegisterService(
 		validator: validator,
 		emailTks:  emailTks,
 		sender:    sender,
+		captcha:   captcha,
 	}
 }
 
@@ -46,6 +49,13 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 	// 1. Validate password length (domain rule)
 	if len(cmd.Password) < 8 || len(cmd.Password) > 72 {
 		return nil, fmt.Errorf("%w", domain.ErrWeakPassword)
+	}
+
+	if s.captcha != nil {
+		valid, err := s.captcha.Verify(ctx, cmd.CaptchaToken, "") // IP could be extracted
+		if err != nil || !valid {
+			return nil, fmt.Errorf("%w: invalid captcha", response.ErrForbidden)
+		}
 	}
 
 	// 1.5 Check if password is breached
