@@ -22,6 +22,7 @@ type Config struct {
 	JWTAccessTTLH  int
 	JWTRefreshTTLD int
 	IPHashSalt     string
+	TurnstileKey   string
 }
 
 // MustLoad reads all required env vars. Panics if any required vars are missing.
@@ -41,6 +42,7 @@ func MustLoad() Config {
 		JWTAccessTTLH:  getenvInt("JWT_ACCESS_TTL_HOURS", 24),
 		JWTRefreshTTLD: getenvInt("JWT_REFRESH_TTL_DAYS", 7),
 		IPHashSalt:     mustGetenv("IP_HASH_SALT"),
+		TurnstileKey:   os.Getenv("TURNSTILE_SECRET_KEY"), // Optional for local dev
 	}
 }
 

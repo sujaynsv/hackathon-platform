@@ -3,7 +3,7 @@ id: A-007
 title: Passkeys (WebAuthn)
 epic: auth
 owner: Unassigned
-status: "[ ] backlog"
+status: "[x] done"
 branch: 
 blocks: 
 blocked-by: A-001

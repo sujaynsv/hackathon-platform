@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/dogfood-platform/dogfood/internal/auth/handler"
+	"github.com/dogfood-platform/dogfood/internal/auth/port"
 	"github.com/dogfood-platform/dogfood/internal/auth/repository"
 	"github.com/dogfood-platform/dogfood/internal/auth/usecase"
 	"github.com/dogfood-platform/dogfood/internal/config"
@@ -20,6 +21,7 @@ import (
 	"github.com/dogfood-platform/dogfood/internal/shared/database"
 	"github.com/dogfood-platform/dogfood/internal/shared/email"
 	"github.com/dogfood-platform/dogfood/internal/shared/middleware"
+	"github.com/dogfood-platform/dogfood/internal/shared/captcha"
 )
 
 func main() {
@@ -48,10 +50,27 @@ func main() {
 	emailTokensRepo := repository.NewEmailVerificationRepository(db)
 	emailSender := email.NewStubSender(slog.Default())
 	
-	registerSvc := usecase.NewRegisterService(userRepo, hasher, tokenIssuer, refreshRepo, passwordValidator, emailTokensRepo, emailSender)
+	var captchaValidator port.CaptchaValidator
+	if cfg.TurnstileKey != "" {
+		captchaValidator = captcha.NewTurnstileValidator(cfg.TurnstileKey)
+	}
+
+	registerSvc := usecase.NewRegisterService(userRepo, hasher, tokenIssuer, refreshRepo, passwordValidator, emailTokensRepo, emailSender, captchaValidator)
 	verifySvc := usecase.NewVerifyEmailService(emailTokensRepo, userRepo)
 	
+	webAuthnRepo := repository.NewWebAuthnRepository(db)
+	redisCache := cache.NewRedisCache(rdb)
+	webAuthnSvc, err := usecase.NewWebAuthnService(
+		userRepo, webAuthnRepo, redisCache, tokenIssuer, refreshRepo, 
+		"Dogfood Hackathon", "localhost", "http://localhost:3000",
+	)
+	if err != nil {
+		slog.Error("failed to init webauthn", "error", err)
+		os.Exit(1)
+	}
+
 	authHandler := handler.NewAuthHandler(registerSvc, verifySvc)
+	webAuthnHandler := handler.NewWebAuthnHandler(webAuthnSvc)
 
 	// 6. Wire Chi router
 	r := chi.NewRouter()
@@ -78,6 +97,7 @@ func main() {
 			// Rate limit: 5 requests per 15 minutes per IP
 			r.Use(rateLimiter.RateLimit(5, 15*time.Minute))
 			r.Mount("/auth", authHandler.Routes())
+			webAuthnHandler.RegisterRoutes(r)
 		})
 
 		// Protected routes

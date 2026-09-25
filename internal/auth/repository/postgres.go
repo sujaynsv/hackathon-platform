@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -264,3 +265,132 @@ func (r *EmailVerificationRepository) MarkUsed(ctx context.Context, tokenID uuid
 	}
 	return nil
 }
+
+type webAuthnCredentialRow struct {
+	ID                  uuid.UUID `db:"id"`
+	UserID              uuid.UUID `db:"user_id"`
+	CredentialID        []byte    `db:"credential_id"`
+	PublicKey           []byte    `db:"public_key"`
+	AttestationType     string    `db:"attestation_type"`
+	Transport           []byte    `db:"transport"`
+	Flags               []byte    `db:"flags"`
+	AuthenticatorAAGUID []byte    `db:"authenticator_aaguid"`
+	SignCount           uint32    `db:"sign_count"`
+	CloneWarning        bool      `db:"clone_warning"`
+	CreatedAt           time.Time `db:"created_at"`
+	LastUsedAt          *time.Time`db:"last_used_at"`
+}
+
+type WebAuthnRepository struct {
+	db *sqlx.DB
+}
+
+func NewWebAuthnRepository(db *sqlx.DB) *WebAuthnRepository {
+	return &WebAuthnRepository{db: db}
+}
+
+func (r *WebAuthnRepository) Save(ctx context.Context, cred *domain.WebAuthnCredential) error {
+	flagsJSON, err := cred.Flags.ToJSON()
+	if err != nil {
+		return fmt.Errorf("marshal flags: %w", err)
+	}
+	// transport json
+	transportJSON, err := json.Marshal(cred.Transport)
+	if err != nil {
+		return fmt.Errorf("marshal transport: %w", err)
+	}
+
+	row := webAuthnCredentialRow{
+		ID:                  cred.ID,
+		UserID:              cred.UserID,
+		CredentialID:        cred.CredentialID,
+		PublicKey:           cred.PublicKey,
+		AttestationType:     cred.AttestationType,
+		Transport:           transportJSON,
+		Flags:               flagsJSON,
+		AuthenticatorAAGUID: cred.AuthenticatorAAGUID,
+		SignCount:           cred.SignCount,
+		CloneWarning:        cred.CloneWarning,
+		CreatedAt:           cred.CreatedAt,
+		LastUsedAt:          cred.LastUsedAt,
+	}
+
+	const q = `
+		INSERT INTO webauthn_credentials (
+			id, user_id, credential_id, public_key, attestation_type, transport, flags, authenticator_aaguid, sign_count, clone_warning, created_at, last_used_at
+		) VALUES (
+			:id, :user_id, :credential_id, :public_key, :attestation_type, :transport, :flags, :authenticator_aaguid, :sign_count, :clone_warning, :created_at, :last_used_at
+		)`
+	if _, err := r.db.NamedExecContext(ctx, q, row); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return fmt.Errorf("%w: passkey already registered", response.ErrDuplicate)
+		}
+		return fmt.Errorf("webauthn save: %w", err)
+	}
+	return nil
+}
+
+func (r *WebAuthnRepository) FindByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.WebAuthnCredential, error) {
+	var rows []webAuthnCredentialRow
+	const q = `
+		SELECT id, user_id, credential_id, public_key, attestation_type, transport, flags, authenticator_aaguid, sign_count, clone_warning, created_at, last_used_at 
+		FROM webauthn_credentials WHERE user_id = $1`
+	if err := r.db.SelectContext(ctx, &rows, q, userID); err != nil {
+		return nil, fmt.Errorf("find webauthn by user: %w", err)
+	}
+
+	var creds []*domain.WebAuthnCredential
+	for _, row := range rows {
+		var flags domain.CredentialFlags
+		_ = flags.ScanJSON(row.Flags)
+		var transport []string
+		_ = json.Unmarshal(row.Transport, &transport)
+		
+		creds = append(creds, &domain.WebAuthnCredential{
+			ID:                  row.ID,
+			UserID:              row.UserID,
+			CredentialID:        row.CredentialID,
+			PublicKey:           row.PublicKey,
+			AttestationType:     row.AttestationType,
+			Transport:           transport,
+			Flags:               flags,
+			AuthenticatorAAGUID: row.AuthenticatorAAGUID,
+			SignCount:           row.SignCount,
+			CloneWarning:        row.CloneWarning,
+			CreatedAt:           row.CreatedAt,
+			LastUsedAt:          row.LastUsedAt,
+		})
+	}
+	return creds, nil
+}
+
+func (r *WebAuthnRepository) Update(ctx context.Context, cred *domain.WebAuthnCredential) error {
+	flagsJSON, _ := cred.Flags.ToJSON()
+	transportJSON, _ := json.Marshal(cred.Transport)
+
+	row := webAuthnCredentialRow{
+		ID:                  cred.ID,
+		UserID:              cred.UserID,
+		CredentialID:        cred.CredentialID,
+		PublicKey:           cred.PublicKey,
+		AttestationType:     cred.AttestationType,
+		Transport:           transportJSON,
+		Flags:               flagsJSON,
+		AuthenticatorAAGUID: cred.AuthenticatorAAGUID,
+		SignCount:           cred.SignCount,
+		CloneWarning:        cred.CloneWarning,
+		CreatedAt:           cred.CreatedAt,
+		LastUsedAt:          cred.LastUsedAt,
+	}
+
+	const q = `
+		UPDATE webauthn_credentials
+		SET sign_count = :sign_count, clone_warning = :clone_warning, last_used_at = :last_used_at, flags = :flags
+		WHERE id = :id`
+	if _, err := r.db.NamedExecContext(ctx, q, row); err != nil {
+		return fmt.Errorf("update webauthn: %w", err)
+	}
+	return nil
+}
+

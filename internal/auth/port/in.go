@@ -17,9 +17,10 @@ type VerifyEmailUseCase interface {
 }
 
 type RegisterCommand struct {
-	Email       string
-	Password    string
-	DisplayName string
+	Email        string
+	Password     string
+	DisplayName  string
+	CaptchaToken string
 }
 
 type AuthResponse struct {
@@ -36,4 +37,31 @@ type UserDTO struct {
 	AvatarURL   *string `json:"avatarUrl"`
 	IsAdmin     bool    `json:"isAdmin"`
 	CreatedAt   string  `json:"createdAt"`
+}
+
+type WebAuthnRegisterBeginCommand struct {
+	Email string `json:"email"`
+}
+
+type WebAuthnRegisterFinishCommand struct {
+	Email     string `json:"email"`
+	SessionID string `json:"sessionId"`
+	Body      []byte `json:"-"`
+}
+
+type WebAuthnLoginBeginCommand struct {
+	Email string `json:"email"`
+}
+
+type WebAuthnLoginFinishCommand struct {
+	Email     string `json:"email"`
+	SessionID string `json:"sessionId"`
+	Body      []byte `json:"-"`
+}
+
+type WebAuthnUseCase interface {
+	RegisterBegin(ctx context.Context, cmd WebAuthnRegisterBeginCommand) (creationData any, sessionID string, err error)
+	RegisterFinish(ctx context.Context, cmd WebAuthnRegisterFinishCommand) (*AuthResponse, error)
+	LoginBegin(ctx context.Context, cmd WebAuthnLoginBeginCommand) (assertionData any, sessionID string, err error)
+	LoginFinish(ctx context.Context, cmd WebAuthnLoginFinishCommand) (*AuthResponse, error)
 }
