@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dogfood-platform/dogfood/internal/auth/port"
 	"github.com/dogfood-platform/dogfood/internal/auth/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,13 +34,17 @@ func (m *mockCache) Delete(ctx context.Context, key string) error {
 
 func TestLogoutService_ValidJTI_BlacklistsInRedis(t *testing.T) {
 	cache := &mockCache{keys: make(map[string][]byte)}
-	svc := usecase.NewLogoutService(cache)
+	svc := usecase.NewLogoutService(cache, &mockRefreshRepo{})
 
 	jti := "test-jti-123"
 	// Expires in 1 hour
 	exp := time.Now().Add(1 * time.Hour)
 
-	err := svc.Logout(context.Background(), jti, exp)
+	err := svc.Logout(context.Background(), port.LogoutCommand{
+		JTI:             jti,
+		ExpiresAt:       exp,
+		RawRefreshToken: "",
+	})
 	require.NoError(t, err)
 
 	assert.Contains(t, cache.keys, "revoked:test-jti-123")
@@ -48,13 +53,17 @@ func TestLogoutService_ValidJTI_BlacklistsInRedis(t *testing.T) {
 
 func TestLogoutService_AlreadyExpiredToken_NoOp_Returns200(t *testing.T) {
 	cache := &mockCache{keys: make(map[string][]byte)}
-	svc := usecase.NewLogoutService(cache)
+	svc := usecase.NewLogoutService(cache, &mockRefreshRepo{})
 
 	jti := "test-jti-456"
 	// Expired 1 hour ago
 	exp := time.Now().Add(-1 * time.Hour)
 
-	err := svc.Logout(context.Background(), jti, exp)
+	err := svc.Logout(context.Background(), port.LogoutCommand{
+		JTI:             jti,
+		ExpiresAt:       exp,
+		RawRefreshToken: "",
+	})
 	require.NoError(t, err)
 
 	// Should not have touched cache

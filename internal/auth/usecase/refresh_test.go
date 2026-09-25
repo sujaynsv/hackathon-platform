@@ -27,6 +27,9 @@ func (m *mockRefreshRepoAdvanced) FindByHash(ctx context.Context, hash string) (
 }
 func (m *mockRefreshRepoAdvanced) Revoke(ctx context.Context, id uuid.UUID) error {
 	if m.rt != nil && m.rt.ID == id {
+		if m.rt.RevokedAt != nil {
+			return response.ErrTokenRevoked
+		}
 		now := time.Now()
 		m.rt.RevokedAt = &now
 	}
@@ -74,7 +77,7 @@ func TestRefreshService_ExpiredToken_Returns401(t *testing.T) {
 	svc := usecase.NewRefreshService(&mockUserRepo{}, refreshRepo, &mockTokenIssuer{})
 
 	_, err := svc.Refresh(context.Background(), port.RefreshCommand{RawRefreshToken: rawToken})
-	assert.ErrorIs(t, err, response.ErrUnauthorized)
+	assert.ErrorIs(t, err, response.ErrInvalidRefreshToken)
 }
 
 func TestRefreshService_RevokedToken_Returns401(t *testing.T) {
@@ -90,5 +93,5 @@ func TestRefreshService_RevokedToken_Returns401(t *testing.T) {
 	svc := usecase.NewRefreshService(&mockUserRepo{}, refreshRepo, &mockTokenIssuer{})
 
 	_, err := svc.Refresh(context.Background(), port.RefreshCommand{RawRefreshToken: rawToken})
-	assert.ErrorIs(t, err, response.ErrUnauthorized)
+	assert.ErrorIs(t, err, response.ErrTokenRevoked)
 }

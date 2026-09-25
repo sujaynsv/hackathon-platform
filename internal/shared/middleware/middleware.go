@@ -108,9 +108,14 @@ func JWTMiddleware(secret string, cache port.Cache) func(http.Handler) http.Hand
 			// Check if blacklisted in Redis
 			key := fmt.Sprintf("revoked:%s", jti)
 			val, err := cache.Get(r.Context(), key)
-			if err == nil && val != nil {
+			if err != nil {
+				// Fail closed on storage errors
+				response.HandleDomainError(w, r, fmt.Errorf("blacklist check failed: %w", err))
+				return
+			}
+			if val != nil {
 				// Token is revoked
-				response.HandleDomainError(w, r, fmt.Errorf("%w: token revoked", response.ErrUnauthorized))
+				response.HandleDomainError(w, r, response.ErrTokenRevoked)
 				return
 			}
 

@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -40,6 +41,9 @@ func NewRedisCache(client *redis.Client) *RedisCache {
 func (c *RedisCache) Get(ctx context.Context, key string) ([]byte, error) {
 	val, err := c.client.Get(ctx, key).Bytes()
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return val, nil

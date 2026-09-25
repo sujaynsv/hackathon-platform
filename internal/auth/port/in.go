@@ -27,8 +27,14 @@ type RefreshUseCase interface {
 	Refresh(ctx context.Context, cmd RefreshCommand) (*TokenPair, error)
 }
 
+type LogoutCommand struct {
+	JTI             string
+	ExpiresAt       time.Time
+	RawRefreshToken string
+}
+
 type LogoutUseCase interface {
-	Logout(ctx context.Context, jti string, expiresAt time.Time) error
+	Logout(ctx context.Context, cmd LogoutCommand) error
 }
 
 type RegisterCommand struct {

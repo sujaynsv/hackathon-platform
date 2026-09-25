@@ -170,8 +170,23 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		RefreshToken string `json:"refreshToken"`
+	}
+	// Decode may fail if body is empty, which is fine (optional refresh token for logout)
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
 	jti := middleware.GetJTI(r.Context())
 	exp := middleware.GetTokenExpiry(r.Context())
-	_ = h.logout.Logout(r.Context(), jti, exp)
+	
+	err := h.logout.Logout(r.Context(), port.LogoutCommand{
+		JTI:             jti,
+		ExpiresAt:       exp,
+		RawRefreshToken: req.RefreshToken,
+	})
+	if err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
 	response.OK(w, r, map[string]bool{"loggedOut": true})
 }

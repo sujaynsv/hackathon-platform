@@ -60,7 +60,7 @@ func main() {
 	loginSvc := usecase.NewLoginService(userRepo, hasher, tokenIssuer, refreshRepo)
 	refreshSvc := usecase.NewRefreshService(userRepo, refreshRepo, tokenIssuer)
 	redisCache := cache.NewRedisCache(rdb)
-	logoutSvc := usecase.NewLogoutService(redisCache)
+	logoutSvc := usecase.NewLogoutService(redisCache, refreshRepo)
 	
 	webAuthnRepo := repository.NewWebAuthnRepository(db)
 	webAuthnSvc, err := usecase.NewWebAuthnService(
@@ -105,7 +105,7 @@ func main() {
 
 		// Protected routes
 		r.Group(func(r chi.Router) {
-			r.Use(middleware.JWT(cfg.JWTSecret))
+			r.Use(middleware.JWTMiddleware(cfg.JWTSecret, redisCache))
 			webAuthnHandler.RegisterProtectedRoutes(r)
 			// events.Mount(r, eventsHandler)
 			// teams.Mount(r, teamsHandler)

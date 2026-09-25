@@ -3,7 +3,6 @@ package usecase_test
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/dogfood-platform/dogfood/internal/auth/domain"
 	"github.com/dogfood-platform/dogfood/internal/auth/port"
@@ -20,6 +19,7 @@ func TestLoginService_ValidCredentials_ReturnsAuthResponse(t *testing.T) {
 			Email:        "bob@example.com",
 			PasswordHash: "hashed_bobpass",
 			IsActive:     true,
+			IsVerified:   true,
 			DisplayName:  "Bob",
 		},
 	}
@@ -40,8 +40,9 @@ func TestLoginService_WrongPassword_ReturnsErrUnauthorized(t *testing.T) {
 		exists: true,
 		saved: &domain.User{
 			Email:        "bob@example.com",
-			PasswordHash: "hashed_realpass",
+			PasswordHash: "hashed_bobpass",
 			IsActive:     true,
+			IsVerified:   true,
 		},
 	}
 	// mockHasher returns "hashed_" + plain, which won't match "hashed_realpass"
@@ -49,9 +50,9 @@ func TestLoginService_WrongPassword_ReturnsErrUnauthorized(t *testing.T) {
 
 	_, err := svc.Login(context.Background(), port.LoginCommand{
 		Email:    "bob@example.com",
-		Password: "wrongpass", // hashed_wrongpass != hashed_realpass
+		Password: "wrongpass", // hashed_wrongpass != hashed_bobpass
 	})
-	assert.ErrorIs(t, err, response.ErrUnauthorized)
+	assert.ErrorIs(t, err, response.ErrInvalidCredentials)
 }
 
 func TestLoginService_UserNotFound_ReturnsErrUnauthorized(t *testing.T) {
@@ -62,7 +63,7 @@ func TestLoginService_UserNotFound_ReturnsErrUnauthorized(t *testing.T) {
 		Email:    "nobody@example.com",
 		Password: "pass",
 	})
-	assert.ErrorIs(t, err, response.ErrUnauthorized)
+	assert.ErrorIs(t, err, response.ErrInvalidCredentials)
 }
 
 func TestLoginService_InactiveUser_ReturnsErrForbidden(t *testing.T) {

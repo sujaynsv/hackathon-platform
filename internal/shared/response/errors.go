@@ -18,6 +18,11 @@ var (
 	ErrInvalidTransition = errors.New("invalid state transition")
 	ErrRateLimited       = errors.New("rate limited")
 	ErrDuplicate         = errors.New("duplicate resource")
+	
+	// Auth errors
+	ErrInvalidCredentials  = errors.New("invalid credentials")
+	ErrInvalidRefreshToken = errors.New("invalid refresh token")
+	ErrTokenRevoked        = errors.New("token revoked")
 )
 
 type apiError struct {
@@ -58,6 +63,12 @@ func mapError(err error) apiError {
 		return apiError{422, "INVARIANT_VIOLATION", err.Error()}
 	case errors.Is(err, ErrDuplicate):
 		return apiError{409, "DUPLICATE_RESOURCE", "resource already exists"}
+	case errors.Is(err, ErrInvalidCredentials):
+		return apiError{401, "INVALID_CREDENTIALS", "invalid email or password"}
+	case errors.Is(err, ErrInvalidRefreshToken):
+		return apiError{401, "INVALID_REFRESH_TOKEN", "invalid refresh token"}
+	case errors.Is(err, ErrTokenRevoked):
+		return apiError{401, "TOKEN_REVOKED", "token revoked"}
 	default:
 		return apiError{500, "INTERNAL_SERVER_ERROR", "an unexpected error occurred"}
 	}

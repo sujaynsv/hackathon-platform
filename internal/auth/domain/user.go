@@ -41,9 +41,9 @@ type RefreshToken struct {
 	CreatedAt time.Time
 }
 
-// IsExpired returns true if the token is past its expiry or revoked.
+// IsExpired returns true if the token is past its expiry.
 func (rt *RefreshToken) IsExpired() bool {
-	return time.Now().UTC().After(rt.ExpiresAt) || rt.RevokedAt != nil
+	return time.Now().UTC().After(rt.ExpiresAt)
 }
 
 // HashToken converts a raw refresh token string to its SHA-256 hex hash for storage.

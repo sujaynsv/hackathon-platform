@@ -31,8 +31,8 @@ type PasswordValidator interface {
 
 // TokenIssuer is the outbound port for JWT generation.
 type TokenIssuer interface {
-	IssueAccessToken(userID, email string, isAdmin bool) (string, error)
-	IssueRefreshToken(userID string) (string, error)
+	IssueAccessToken(userID, email string, isAdmin bool) (string, time.Time, error)
+	IssueRefreshToken(userID string) (string, time.Time, error)
 }
 
 // RefreshTokenRepository is the outbound port for refresh token persistence.

@@ -3,6 +3,7 @@ package usecase_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/dogfood-platform/dogfood/internal/auth/domain"
 	"github.com/dogfood-platform/dogfood/internal/auth/port"
@@ -36,7 +37,13 @@ func (m *mockUserRepo) FindByEmail(ctx context.Context, email string) (*domain.U
 	return nil, response.ErrNotFound
 }
 func (m *mockUserRepo) FindByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
-	return nil, nil
+	if m.exists {
+		if m.saved != nil {
+			return m.saved, nil
+		}
+		return &domain.User{}, nil
+	}
+	return nil, response.ErrNotFound
 }
 func (m *mockUserRepo) ExistsByEmail(ctx context.Context, email string) (bool, error) {
 	return m.exists, nil
@@ -45,22 +52,31 @@ func (m *mockUserRepo) ExistsByEmail(ctx context.Context, email string) (bool, e
 type mockHasher struct{}
 
 func (m *mockHasher) Hash(plain string) (string, error) { return "hashed_" + plain, nil }
-func (m *mockHasher) Verify(hash, plain string) bool    { return true }
+func (m *mockHasher) Verify(hash, plain string) bool    { return hash == "hashed_"+plain }
 
 type mockTokenIssuer struct{}
 
-func (m *mockTokenIssuer) IssueAccessToken(userID, email string, isAdmin bool) (string, error) {
-	return "access_token", nil
+func (m *mockTokenIssuer) IssueAccessToken(userID, email string, isAdmin bool) (string, time.Time, error) {
+	return "access_token", time.Now().Add(1 * time.Hour), nil
 }
-func (m *mockTokenIssuer) IssueRefreshToken(userID string) (string, error) {
-	return "refresh_token", nil
+func (m *mockTokenIssuer) IssueRefreshToken(userID string) (string, time.Time, error) {
+	return "refresh_token", time.Now().Add(24 * time.Hour), nil
 }
 
-type mockRefreshRepo struct{}
+type mockRefreshRepo struct{
+	token *domain.RefreshToken
+	err   error
+}
 
 func (m *mockRefreshRepo) Save(ctx context.Context, token *domain.RefreshToken) error { return nil }
 func (m *mockRefreshRepo) FindByHash(ctx context.Context, hash string) (*domain.RefreshToken, error) {
-	return nil, nil
+	if m.err != nil {
+		return nil, m.err
+	}
+	if m.token != nil {
+		return m.token, nil
+	}
+	return nil, response.ErrNotFound
 }
 func (m *mockRefreshRepo) RevokeAllForUser(ctx context.Context, userID uuid.UUID) error { return nil }
 func (m *mockRefreshRepo) Revoke(ctx context.Context, id uuid.UUID) error { return nil }

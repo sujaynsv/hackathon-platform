@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -35,12 +36,15 @@ func (s *RefreshService) Refresh(ctx context.Context, cmd port.RefreshCommand) (
 	// 1. Find the refresh token by its hash
 	rt, err := s.refresh.FindByHash(ctx, tokenHash)
 	if err != nil {
-		return nil, fmt.Errorf("%w: invalid refresh token", response.ErrUnauthorized)
+		return nil, response.ErrInvalidRefreshToken
 	}
 
 	// 2. Check if expired or revoked
+	if rt.RevokedAt != nil {
+		return nil, response.ErrTokenRevoked
+	}
 	if rt.IsExpired() {
-		return nil, fmt.Errorf("%w: refresh token has been revoked or expired", response.ErrUnauthorized)
+		return nil, response.ErrInvalidRefreshToken
 	}
 
 	// 3. Load user
@@ -51,15 +55,18 @@ func (s *RefreshService) Refresh(ctx context.Context, cmd port.RefreshCommand) (
 
 	// 4. Revoke the old refresh token (rotation)
 	if err := s.refresh.Revoke(ctx, rt.ID); err != nil {
+		if errors.Is(err, response.ErrTokenRevoked) {
+			return nil, response.ErrTokenRevoked
+		}
 		return nil, fmt.Errorf("revoke old refresh token: %w", err)
 	}
 
 	// 5. Issue new tokens
-	newAccess, err := s.tokens.IssueAccessToken(user.ID.String(), user.Email, user.IsAdmin)
+	newAccess, _, err := s.tokens.IssueAccessToken(user.ID.String(), user.Email, user.IsAdmin)
 	if err != nil {
 		return nil, fmt.Errorf("issue access token: %w", err)
 	}
-	newRaw, err := s.tokens.IssueRefreshToken(user.ID.String())
+	newRaw, exp, err := s.tokens.IssueRefreshToken(user.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("issue refresh token: %w", err)
 	}
@@ -69,7 +76,7 @@ func (s *RefreshService) Refresh(ctx context.Context, cmd port.RefreshCommand) (
 		ID:        uuid.New(),
 		UserID:    user.ID,
 		Hash:      domain.HashToken(newRaw),
-		ExpiresAt: time.Now().UTC().Add(7 * 24 * time.Hour),
+		ExpiresAt: exp,
 		CreatedAt: time.Now().UTC(),
 	}
 	if err := s.refresh.Save(ctx, newRT); err != nil {

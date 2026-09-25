@@ -239,11 +239,11 @@ func (s *WebAuthnService) RegisterFinish(ctx context.Context, cmd port.WebAuthnR
 		return nil, err
 	}
 
-	accessToken, err := s.tokens.IssueAccessToken(adapter.u.ID.String(), adapter.u.Email, adapter.u.IsAdmin)
+	accessToken, _, err := s.tokens.IssueAccessToken(adapter.u.ID.String(), adapter.u.Email, adapter.u.IsAdmin)
 	if err != nil {
 		return nil, fmt.Errorf("issue access token: %w", err)
 	}
-	refreshTokenStr, err := s.tokens.IssueRefreshToken(adapter.u.ID.String())
+	refreshTokenStr, exp, err := s.tokens.IssueRefreshToken(adapter.u.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("issue refresh token: %w", err)
 	}
@@ -256,7 +256,7 @@ func (s *WebAuthnService) RegisterFinish(ctx context.Context, cmd port.WebAuthnR
 		ID:        uuid.New(),
 		UserID:    adapter.u.ID,
 		Hash:      rtHash,
-		ExpiresAt: time.Now().UTC().Add(7 * 24 * time.Hour), // 7 days
+		ExpiresAt: exp,
 		CreatedAt: time.Now().UTC(),
 	}); err != nil {
 		return nil, fmt.Errorf("save refresh token: %w", err)
@@ -339,11 +339,11 @@ func (s *WebAuthnService) LoginFinish(ctx context.Context, cmd port.WebAuthnLogi
 		}
 	}
 
-	accessToken, err := s.tokens.IssueAccessToken(adapter.u.ID.String(), adapter.u.Email, adapter.u.IsAdmin)
+	accessToken, _, err := s.tokens.IssueAccessToken(adapter.u.ID.String(), adapter.u.Email, adapter.u.IsAdmin)
 	if err != nil {
 		return nil, fmt.Errorf("issue access token: %w", err)
 	}
-	refreshTokenStr, err := s.tokens.IssueRefreshToken(adapter.u.ID.String())
+	refreshTokenStr, exp, err := s.tokens.IssueRefreshToken(adapter.u.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("issue refresh token: %w", err)
 	}
@@ -356,7 +356,7 @@ func (s *WebAuthnService) LoginFinish(ctx context.Context, cmd port.WebAuthnLogi
 		ID:        uuid.New(),
 		UserID:    adapter.u.ID,
 		Hash:      rtHash,
-		ExpiresAt: time.Now().UTC().Add(7 * 24 * time.Hour), // 7 days
+		ExpiresAt: exp,
 		CreatedAt: time.Now().UTC(),
 	}); err != nil {
 		return nil, fmt.Errorf("save refresh token: %w", err)
