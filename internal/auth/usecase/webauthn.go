@@ -3,6 +3,7 @@ package usecase
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -110,6 +111,33 @@ func (s *WebAuthnService) getUserAdapter(ctx context.Context, email string) (*we
 		return nil, err // Returns ErrNotFound mapped correctly
 	}
 
+	if !u.IsVerified {
+		return nil, fmt.Errorf("%w: user email not verified", response.ErrForbidden)
+	}
+
+	creds, err := s.creds.FindByUserID(ctx, u.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &webAuthnUserAdapter{u: u, creds: creds}, nil
+}
+
+func (s *WebAuthnService) getUserAdapterByID(ctx context.Context, userIDStr string) (*webAuthnUserAdapter, error) {
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid user id", response.ErrUnauthorized)
+	}
+
+	u, err := s.users.FindByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !u.IsVerified {
+		return nil, fmt.Errorf("%w: user email not verified", response.ErrForbidden)
+	}
+
 	creds, err := s.creds.FindByUserID(ctx, u.ID)
 	if err != nil {
 		return nil, err
@@ -143,7 +171,7 @@ func (s *WebAuthnService) getSession(ctx context.Context, sessionID string) (*we
 }
 
 func (s *WebAuthnService) RegisterBegin(ctx context.Context, cmd port.WebAuthnRegisterBeginCommand) (any, string, error) {
-	adapter, err := s.getUserAdapter(ctx, cmd.Email)
+	adapter, err := s.getUserAdapterByID(ctx, cmd.UserID)
 	if err != nil {
 		return nil, "", err
 	}
@@ -162,7 +190,7 @@ func (s *WebAuthnService) RegisterBegin(ctx context.Context, cmd port.WebAuthnRe
 }
 
 func (s *WebAuthnService) RegisterFinish(ctx context.Context, cmd port.WebAuthnRegisterFinishCommand) (*port.AuthResponse, error) {
-	adapter, err := s.getUserAdapter(ctx, cmd.Email)
+	adapter, err := s.getUserAdapterByID(ctx, cmd.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -220,10 +248,14 @@ func (s *WebAuthnService) RegisterFinish(ctx context.Context, cmd port.WebAuthnR
 		return nil, fmt.Errorf("issue refresh token: %w", err)
 	}
 
+	h := sha256.New()
+	h.Write([]byte(refreshTokenStr))
+	rtHash := fmt.Sprintf("%x", h.Sum(nil))
+
 	if err := s.refreshTokens.Save(ctx, &domain.RefreshToken{
 		ID:        uuid.New(),
 		UserID:    adapter.u.ID,
-		Hash:      refreshTokenStr, // Simplified for brevity (should hash)
+		Hash:      rtHash,
 		ExpiresAt: time.Now().UTC().Add(7 * 24 * time.Hour), // 7 days
 		CreatedAt: time.Now().UTC(),
 	}); err != nil {
@@ -316,10 +348,14 @@ func (s *WebAuthnService) LoginFinish(ctx context.Context, cmd port.WebAuthnLogi
 		return nil, fmt.Errorf("issue refresh token: %w", err)
 	}
 
+	h := sha256.New()
+	h.Write([]byte(refreshTokenStr))
+	rtHash := fmt.Sprintf("%x", h.Sum(nil))
+
 	if err := s.refreshTokens.Save(ctx, &domain.RefreshToken{
 		ID:        uuid.New(),
 		UserID:    adapter.u.ID,
-		Hash:      refreshTokenStr, // Simplification
+		Hash:      rtHash,
 		ExpiresAt: time.Now().UTC().Add(7 * 24 * time.Hour), // 7 days
 		CreatedAt: time.Now().UTC(),
 	}); err != nil {

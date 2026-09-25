@@ -40,11 +40,11 @@ type UserDTO struct {
 }
 
 type WebAuthnRegisterBeginCommand struct {
-	Email string `json:"email"`
+	UserID string `json:"userId"`
 }
 
 type WebAuthnRegisterFinishCommand struct {
-	Email     string `json:"email"`
+	UserID    string `json:"userId"`
 	SessionID string `json:"sessionId"`
 	Body      []byte `json:"-"`
 }

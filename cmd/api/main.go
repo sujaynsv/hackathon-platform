@@ -62,7 +62,7 @@ func main() {
 	redisCache := cache.NewRedisCache(rdb)
 	webAuthnSvc, err := usecase.NewWebAuthnService(
 		userRepo, webAuthnRepo, redisCache, tokenIssuer, refreshRepo, 
-		"Dogfood Hackathon", "localhost", "http://localhost:3000",
+		"Dogfood Hackathon", cfg.WebAuthnRPID, cfg.WebAuthnRPOrigin,
 	)
 	if err != nil {
 		slog.Error("failed to init webauthn", "error", err)
@@ -97,12 +97,13 @@ func main() {
 			// Rate limit: 5 requests per 15 minutes per IP
 			r.Use(rateLimiter.RateLimit(5, 15*time.Minute))
 			r.Mount("/auth", authHandler.Routes())
-			webAuthnHandler.RegisterRoutes(r)
+			webAuthnHandler.RegisterPublicRoutes(r)
 		})
 
 		// Protected routes
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.JWT(cfg.JWTSecret))
+			webAuthnHandler.RegisterProtectedRoutes(r)
 			// events.Mount(r, eventsHandler)
 			// teams.Mount(r, teamsHandler)
 			// submissions.Mount(r, submissionsHandler)

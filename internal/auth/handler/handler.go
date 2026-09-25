@@ -33,6 +33,7 @@ type registerRequest struct {
 	Password     string `json:"password"`
 	DisplayName  string `json:"displayName"`
 	CaptchaToken string `json:"captchaToken"`
+	CFTurnstile  string `json:"cf-turnstile-response"`
 }
 
 func (req registerRequest) validate() error {
@@ -59,11 +60,16 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token := req.CaptchaToken
+	if token == "" {
+		token = req.CFTurnstile
+	}
+
 	result, err := h.register.Register(r.Context(), port.RegisterCommand{
 		Email:        req.Email,
 		Password:     req.Password,
 		DisplayName:  req.DisplayName,
-		CaptchaToken: req.CaptchaToken,
+		CaptchaToken: token,
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidEmail) || errors.Is(err, domain.ErrWeakPassword) || errors.Is(err, domain.ErrInvalidDisplayName) {

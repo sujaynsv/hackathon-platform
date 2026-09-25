@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/dogfood-platform/dogfood/internal/auth/port"
+	"github.com/dogfood-platform/dogfood/internal/shared/middleware"
 	"github.com/dogfood-platform/dogfood/internal/shared/response"
 	"github.com/go-chi/chi/v5"
 )
@@ -18,23 +19,24 @@ func NewWebAuthnHandler(webAuthn port.WebAuthnUseCase) *WebAuthnHandler {
 	return &WebAuthnHandler{webAuthn: webAuthn}
 }
 
-func (h *WebAuthnHandler) RegisterRoutes(r chi.Router) {
-	r.Post("/auth/webauthn/register/begin", h.RegisterBegin)
-	r.Post("/auth/webauthn/register/finish", h.RegisterFinish)
+func (h *WebAuthnHandler) RegisterPublicRoutes(r chi.Router) {
 	r.Post("/auth/webauthn/login/begin", h.LoginBegin)
 	r.Post("/auth/webauthn/login/finish", h.LoginFinish)
 }
 
+func (h *WebAuthnHandler) RegisterProtectedRoutes(r chi.Router) {
+	r.Post("/auth/webauthn/register/begin", h.RegisterBegin)
+	r.Post("/auth/webauthn/register/finish", h.RegisterFinish)
+}
+
 func (h *WebAuthnHandler) RegisterBegin(w http.ResponseWriter, r *http.Request) {
-	var body struct {
-		Email string `json:"email"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid request body")
+	userID := middleware.GetUserID(r.Context())
+	if userID == "" {
+		response.Unauthorized(w, r, "UNAUTHORIZED", "must be logged in to register a passkey")
 		return
 	}
 
-	cmd := port.WebAuthnRegisterBeginCommand{Email: body.Email}
+	cmd := port.WebAuthnRegisterBeginCommand{UserID: userID}
 	creationData, sessionID, err := h.webAuthn.RegisterBegin(r.Context(), cmd)
 	if err != nil {
 		response.HandleDomainError(w, r, err)
@@ -42,19 +44,27 @@ func (h *WebAuthnHandler) RegisterBegin(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Set("X-WebAuthn-Session", sessionID)
-	response.OK(w, r, creationData)
+	// Wrap creationData and sessionID together for the frontend
+	response.OK(w, r, map[string]any{
+		"options":   creationData,
+		"sessionId": sessionID,
+	})
 }
 
 func (h *WebAuthnHandler) RegisterFinish(w http.ResponseWriter, r *http.Request) {
-	sessionID := r.Header.Get("X-WebAuthn-Session")
-	if sessionID == "" {
-		response.BadRequest(w, r, "VALIDATION_ERROR", "missing X-WebAuthn-Session header")
+	userID := middleware.GetUserID(r.Context())
+	if userID == "" {
+		response.Unauthorized(w, r, "UNAUTHORIZED", "must be logged in to register a passkey")
 		return
 	}
-	email := r.URL.Query().Get("email")
-	if email == "" {
-		response.BadRequest(w, r, "VALIDATION_ERROR", "missing email query param")
-		return
+
+	sessionID := r.Header.Get("X-WebAuthn-Session")
+	if sessionID == "" {
+		sessionID = r.URL.Query().Get("sessionId")
+		if sessionID == "" {
+			response.BadRequest(w, r, "VALIDATION_ERROR", "missing sessionId header or query param")
+			return
+		}
 	}
 
 	bodyBytes, err := io.ReadAll(r.Body)
@@ -64,7 +74,7 @@ func (h *WebAuthnHandler) RegisterFinish(w http.ResponseWriter, r *http.Request)
 	}
 
 	cmd := port.WebAuthnRegisterFinishCommand{
-		Email:     email,
+		UserID:    userID,
 		SessionID: sessionID,
 		Body:      bodyBytes,
 	}
@@ -95,14 +105,20 @@ func (h *WebAuthnHandler) LoginBegin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("X-WebAuthn-Session", sessionID)
-	response.OK(w, r, assertionData)
+	response.OK(w, r, map[string]any{
+		"options":   assertionData,
+		"sessionId": sessionID,
+	})
 }
 
 func (h *WebAuthnHandler) LoginFinish(w http.ResponseWriter, r *http.Request) {
 	sessionID := r.Header.Get("X-WebAuthn-Session")
 	if sessionID == "" {
-		response.BadRequest(w, r, "VALIDATION_ERROR", "missing X-WebAuthn-Session header")
-		return
+		sessionID = r.URL.Query().Get("sessionId")
+		if sessionID == "" {
+			response.BadRequest(w, r, "VALIDATION_ERROR", "missing sessionId header or query param")
+			return
+		}
 	}
 	email := r.URL.Query().Get("email")
 	if email == "" {
