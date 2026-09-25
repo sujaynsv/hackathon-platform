@@ -1,42 +1,129 @@
+/* Design tokens — set once, used everywhere */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:         #0f0f0f;
+  --surface:    #1a1a1a;
+  --border:     #2a2a2a;
+  --text:       #e8e8e8;
+  --text-muted: #7a7a7a;
+  --accent:     #d4a055;   /* warm amber — chosen for readability, not decoration */
+  --accent-dim: #b88a3e;
+  --danger:     #c0392b;
+  --danger-text:#e57373;
+  --radius:     6px;
+  --font:       var(--font-geist-sans), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-html,
+html {
+  color-scheme: dark;
+  font-size: 16px;
+}
+
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+  min-height: 100vh;
 }
 
 a {
-  color: inherit;
+  color: var(--accent);
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+a:hover {
+  text-decoration: underline;
+}
+
+/* Form primitives */
+.input {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 150ms;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.input-error {
+  border-color: var(--danger);
+}
+
+/* Button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: var(--accent);
+  color: #0f0f0f;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 150ms;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--accent-dim);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+/* Error text */
+.error-text {
+  color: var(--danger-text);
+  font-size: 0.875rem;
+}
+
+/* Spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }

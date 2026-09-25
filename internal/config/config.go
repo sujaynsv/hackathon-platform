@@ -26,6 +26,11 @@ type Config struct {
 	TurnstileKey     string
 	WebAuthnRPID     string
 	WebAuthnRPOrigin string
+	SMTPHost         string
+	SMTPPort         string
+	SMTPUser         string
+	SMTPPass         string
+	SMTPFrom         string
 }
 
 // MustLoad reads all required env vars. Panics if any required vars are missing.
@@ -49,6 +54,11 @@ func MustLoad() Config {
 		TurnstileKey:     os.Getenv("TURNSTILE_SECRET_KEY"), // Optional for local dev
 		WebAuthnRPID:     getenvDefault("WEBAUTHN_RP_ID", "localhost"),
 		WebAuthnRPOrigin: getenvDefault("WEBAUTHN_RP_ORIGIN", "http://localhost:3000"),
+		SMTPHost:         getenvDefault("SMTP_HOST", ""),
+		SMTPPort:         getenvDefault("SMTP_PORT", "25"),
+		SMTPUser:         os.Getenv("SMTP_USER"),
+		SMTPPass:         os.Getenv("SMTP_PASS"),
+		SMTPFrom:         getenvDefault("SMTP_FROM", "noreply@dogfood.local"),
 	}
 
 	if cfg.AppEnv != "development" && cfg.TurnstileKey == "" {

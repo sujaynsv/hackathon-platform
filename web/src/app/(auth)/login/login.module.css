@@ -1,0 +1,89 @@
+/* Auth form layout — all pages share this */
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.form {
+  width: 100%;
+  max-width: 400px;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.wordmark {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.field {
+  margin-bottom: 1.25rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 0.375rem;
+}
+
+.passwordWrapper {
+  position: relative;
+}
+
+.passwordWrapper .input {
+  padding-right: 2.75rem;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.eyeBtn:hover {
+  color: var(--text);
+}
+
+.errorMsg {
+  margin-bottom: 1rem;
+}
+
+.submitBtn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.footer {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: center;
+}

@@ -15,10 +15,7 @@ func NewStubSender(logger *slog.Logger) *StubSender {
 }
 
 func (s *StubSender) SendVerificationEmail(ctx context.Context, email, token string) error {
-	redacted := "[REDACTED]"
-	if len(token) > 8 {
-		redacted = token[:4] + "..." + token[len(token)-4:]
-	}
-	s.logger.Info("StubSender: would send verification email", "email", email, "token", redacted)
+	verifyURL := "http://localhost:3000/verify-email?token=" + token
+	s.logger.Info("StubSender: verification email generated", "email", email, "verify_url", verifyURL, "token", token)
 	return nil
 }
