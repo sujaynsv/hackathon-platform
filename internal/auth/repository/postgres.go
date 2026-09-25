@@ -195,6 +195,22 @@ func (r *RefreshTokenRepository) RevokeAllForUser(ctx context.Context, userID uu
 	return err
 }
 
+func (r *RefreshTokenRepository) Revoke(ctx context.Context, id uuid.UUID) error {
+	const q = `UPDATE refresh_tokens SET revoked_at = NOW() WHERE id = $1 AND revoked_at IS NULL`
+	res, err := r.db.ExecContext(ctx, q, id)
+	if err != nil {
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return fmt.Errorf("%w: token already revoked or not found", response.ErrTokenRevoked)
+	}
+	return nil
+}
+
 type emailTokenRow struct {
 	ID        uuid.UUID `db:"id"`
 	UserID    uuid.UUID `db:"user_id"`

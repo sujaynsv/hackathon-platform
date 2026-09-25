@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -43,26 +44,31 @@ func NewJWTIssuer(secret string, accessTTLMinutes, refreshTTLDays int) *JWTIssue
 	}
 }
 
-func (j *JWTIssuer) IssueAccessToken(userID, email string, isAdmin bool) (string, error) {
+func (j *JWTIssuer) IssueAccessToken(userID, email string, isAdmin bool) (string, time.Time, error) {
+	exp := time.Now().Add(time.Duration(j.accessTTLMinutes) * time.Minute)
 	claims := jwt.MapClaims{
 		"sub":     userID,
 		"email":   email,
 		"isAdmin": isAdmin,
-		"exp":     time.Now().Add(time.Duration(j.accessTTLMinutes) * time.Minute).Unix(),
+		"jti":     uuid.New().String(),
+		"exp":     exp.Unix(),
 		"iat":     time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(j.secret))
+	tokenStr, err := token.SignedString([]byte(j.secret))
+	return tokenStr, exp, err
 }
 
-func (j *JWTIssuer) IssueRefreshToken(userID string) (string, error) {
+func (j *JWTIssuer) IssueRefreshToken(userID string) (string, time.Time, error) {
+	exp := time.Now().Add(time.Duration(j.refreshTTLDays) * 24 * time.Hour)
 	claims := jwt.MapClaims{
 		"sub": userID,
-		"exp": time.Now().Add(time.Duration(j.refreshTTLDays) * 24 * time.Hour).Unix(),
+		"exp": exp.Unix(),
 		"iat": time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(j.secret))
+	tokenStr, err := token.SignedString([]byte(j.secret))
+	return tokenStr, exp, err
 }
 
 // HIBPValidator implements PasswordValidator using the HaveIBeenPwned k-anonymity API.

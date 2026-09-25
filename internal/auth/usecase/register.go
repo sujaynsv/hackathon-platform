@@ -155,11 +155,11 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 	}
 
 	// 6. Issue tokens (only if verification is not required)
-	accessToken, err := s.tokens.IssueAccessToken(user.ID.String(), user.Email, user.IsAdmin)
+	accessToken, _, err := s.tokens.IssueAccessToken(user.ID.String(), user.Email, user.IsAdmin)
 	if err != nil {
 		return nil, fmt.Errorf("issue access token: %w", err)
 	}
-	refreshToken, err := s.tokens.IssueRefreshToken(user.ID.String())
+	refreshToken, exp, err := s.tokens.IssueRefreshToken(user.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("issue refresh token: %w", err)
 	}
@@ -172,7 +172,7 @@ func (s *RegisterService) Register(ctx context.Context, cmd port.RegisterCommand
 		ID:        uuid.New(),
 		UserID:    user.ID,
 		Hash:      rtHash,
-		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+		ExpiresAt: exp,
 		CreatedAt: time.Now(),
 	}
 	if err := s.refresh.Save(ctx, rt); err != nil {
