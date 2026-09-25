@@ -26,9 +26,9 @@ type WebAuthnService struct {
 }
 
 func NewWebAuthnService(
-	users port.UserRepository, 
-	creds port.WebAuthnRepository, 
-	cache port.Cache, 
+	users port.UserRepository,
+	creds port.WebAuthnRepository,
+	cache port.Cache,
 	tokens port.TokenIssuer,
 	refreshTokens port.RefreshTokenRepository,
 	rpDisplayName, rpID, rpOrigin string) (*WebAuthnService, error) {
@@ -217,12 +217,12 @@ func (s *WebAuthnService) RegisterFinish(ctx context.Context, cmd port.WebAuthnR
 	}
 
 	domainCred := &domain.WebAuthnCredential{
-		ID:                  uuid.New(),
-		UserID:              adapter.u.ID,
-		CredentialID:        cred.ID,
-		PublicKey:           cred.PublicKey,
-		AttestationType:     cred.AttestationType,
-		Transport:           transports,
+		ID:              uuid.New(),
+		UserID:          adapter.u.ID,
+		CredentialID:    cred.ID,
+		PublicKey:       cred.PublicKey,
+		AttestationType: cred.AttestationType,
+		Transport:       transports,
 		Flags: domain.CredentialFlags{
 			UserPresent:    cred.Flags.UserPresent,
 			UserVerified:   cred.Flags.UserVerified,

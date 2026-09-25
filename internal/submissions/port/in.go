@@ -22,19 +22,19 @@ type CreateSubmissionCommand struct {
 }
 
 type SubmissionDTO struct {
-	SubmissionID  uuid.UUID  `json:"submissionId"`
-	Title         string     `json:"title"`
-	Status        string     `json:"status"`
-	TeamID        uuid.UUID  `json:"teamId"`
-	TeamName      string     `json:"teamName"`
-	EventSlug     string     `json:"eventSlug"`
-	Track         *TrackDTO  `json:"track"`
-	RepoURL       *string    `json:"repoUrl"`
-	DemoURL       *string    `json:"demoUrl"`
-	VideoURL      *string    `json:"videoUrl"`
-	CoverURL      *string    `json:"coverImageUrl"`
-	CreatedAt     string     `json:"createdAt"`
-	UpdatedAt     string     `json:"updatedAt"`
+	SubmissionID uuid.UUID `json:"submissionId"`
+	Title        string    `json:"title"`
+	Status       string    `json:"status"`
+	TeamID       uuid.UUID `json:"teamId"`
+	TeamName     string    `json:"teamName"`
+	EventSlug    string    `json:"eventSlug"`
+	Track        *TrackDTO `json:"track"`
+	RepoURL      *string   `json:"repoUrl"`
+	DemoURL      *string   `json:"demoUrl"`
+	VideoURL     *string   `json:"videoUrl"`
+	CoverURL     *string   `json:"coverImageUrl"`
+	CreatedAt    string    `json:"createdAt"`
+	UpdatedAt    string    `json:"updatedAt"`
 }
 
 type TrackDTO struct {

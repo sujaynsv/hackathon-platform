@@ -14,12 +14,12 @@ import (
 )
 
 type AuthHandler struct {
-	register port.RegisterUseCase
-	verify   port.VerifyEmailUseCase
-	login    port.LoginUseCase
-	refresh  port.RefreshUseCase
-	logout   port.LogoutUseCase
-	cache    port.Cache
+	register  port.RegisterUseCase
+	verify    port.VerifyEmailUseCase
+	login     port.LoginUseCase
+	refresh   port.RefreshUseCase
+	logout    port.LogoutUseCase
+	cache     port.Cache
 	jwtSecret string
 }
 
@@ -178,7 +178,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	jti := middleware.GetJTI(r.Context())
 	exp := middleware.GetTokenExpiry(r.Context())
-	
+
 	err := h.logout.Logout(r.Context(), port.LogoutCommand{
 		JTI:             jti,
 		ExpiresAt:       exp,

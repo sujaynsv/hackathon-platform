@@ -66,7 +66,7 @@ func TestVerifyEmailService_Verify_Success(t *testing.T) {
 
 	tokens := &mockEmailTokenRepo{token: tokenDomain}
 	users := &mockUserRepoForVerify{user: user}
-	
+
 	svc := usecase.NewVerifyEmailService(tokens, users)
 
 	err := svc.Verify(context.Background(), port.VerifyEmailCommand{Token: rawToken})
@@ -80,7 +80,7 @@ func TestVerifyEmailService_Verify_Success(t *testing.T) {
 func TestVerifyEmailService_Verify_InvalidToken(t *testing.T) {
 	tokens := &mockEmailTokenRepo{}
 	users := &mockUserRepoForVerify{}
-	
+
 	svc := usecase.NewVerifyEmailService(tokens, users)
 
 	err := svc.Verify(context.Background(), port.VerifyEmailCommand{Token: "invalid_token"})

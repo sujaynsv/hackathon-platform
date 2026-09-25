@@ -26,7 +26,7 @@ func NewSMTPSender(host, port, user, pass, from string) *SMTPSender {
 
 func (s *SMTPSender) SendVerificationEmail(ctx context.Context, emailAddress, token string) error {
 	addr := fmt.Sprintf("%s:%s", s.host, s.port)
-	
+
 	verifyURL := fmt.Sprintf("http://localhost:3000/verify-email?token=%s", token)
 
 	subject := "Subject: Verify your Dogfood Hackathon email\r\n"

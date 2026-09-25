@@ -61,7 +61,7 @@ func TestRefreshService_ValidToken_ReturnsNewTokenPair(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "access_token", pair.AccessToken)
 	assert.Equal(t, "refresh_token", pair.RefreshToken)
-	
+
 	// Should be revoked now
 	assert.NotNil(t, rt.RevokedAt)
 }

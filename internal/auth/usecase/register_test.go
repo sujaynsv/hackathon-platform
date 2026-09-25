@@ -63,7 +63,7 @@ func (m *mockTokenIssuer) IssueRefreshToken(userID string) (string, time.Time, e
 	return "refresh_token", time.Now().Add(24 * time.Hour), nil
 }
 
-type mockRefreshRepo struct{
+type mockRefreshRepo struct {
 	token *domain.RefreshToken
 	err   error
 }
@@ -79,7 +79,7 @@ func (m *mockRefreshRepo) FindByHash(ctx context.Context, hash string) (*domain.
 	return nil, response.ErrNotFound
 }
 func (m *mockRefreshRepo) RevokeAllForUser(ctx context.Context, userID uuid.UUID) error { return nil }
-func (m *mockRefreshRepo) Revoke(ctx context.Context, id uuid.UUID) error { return nil }
+func (m *mockRefreshRepo) Revoke(ctx context.Context, id uuid.UUID) error               { return nil }
 
 type mockPasswordValidator struct {
 	compromised bool

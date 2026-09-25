@@ -19,19 +19,19 @@ func NewPgSubmissionRepository(db *sqlx.DB) *PgSubmissionRepository {
 }
 
 type submissionRow struct {
-	ID          uuid.UUID `db:"id"`
-	TeamID      uuid.UUID `db:"team_id"`
-	EventID     uuid.UUID `db:"event_id"`
-	TrackID     *uuid.UUID `db:"track_id"`
-	Title       string    `db:"title"`
-	Description *string   `db:"description"`
-	DemoURL     *string   `db:"demo_url"`
-	RepoURL     *string   `db:"repo_url"`
-	VideoURL    *string   `db:"video_url"`
-	CoverURL    *string   `db:"cover_image_url"`
-	Status      string    `db:"status"`
-	FinalScore  *float64  `db:"final_score"`
-	Rank        *int      `db:"rank"`
+	ID          uuid.UUID     `db:"id"`
+	TeamID      uuid.UUID     `db:"team_id"`
+	EventID     uuid.UUID     `db:"event_id"`
+	TrackID     *uuid.UUID    `db:"track_id"`
+	Title       string        `db:"title"`
+	Description *string       `db:"description"`
+	DemoURL     *string       `db:"demo_url"`
+	RepoURL     *string       `db:"repo_url"`
+	VideoURL    *string       `db:"video_url"`
+	CoverURL    *string       `db:"cover_image_url"`
+	Status      string        `db:"status"`
+	FinalScore  *float64      `db:"final_score"`
+	Rank        *int          `db:"rank"`
 	SubmittedAt *sql.NullTime `db:"submitted_at"`
 	CreatedAt   sql.NullTime  `db:"created_at"`
 	UpdatedAt   sql.NullTime  `db:"updated_at"`

@@ -32,7 +32,7 @@ func (q *QueueSender) SendVerificationEmail(ctx context.Context, email, token st
 		Email: email,
 		Token: token,
 	}
-	
+
 	payload, err := json.Marshal(task)
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (q *QueueSender) SendVerificationEmail(ctx context.Context, email, token st
 
 func RunWorker(ctx context.Context, rdb *redis.Client, sender port.EmailSender) {
 	slog.Info("starting email queue worker")
-	
+
 	for {
 		select {
 		case <-ctx.Done():

@@ -22,7 +22,7 @@ func runMigrations(t *testing.T, db *sqlx.DB) {
 	// Read migrations relative to project root
 	// Since tests run in internal/auth/repository, we go up 3 levels
 	projectRoot := filepath.Join("..", "..", "..")
-	
+
 	migrations := []string{
 		"migrations/001_create_users.sql",
 		"migrations/007_create_refresh_tokens.sql",
@@ -115,7 +115,7 @@ func TestRefreshTokenRepository_SaveAndFindByHash(t *testing.T) {
 	require.NoError(t, userRepo.Save(context.Background(), user))
 
 	tokenRepo := repository.NewRefreshTokenRepository(db)
-	
+
 	token := &domain.RefreshToken{
 		UserID:    user.ID,
 		Hash:      "hash123",

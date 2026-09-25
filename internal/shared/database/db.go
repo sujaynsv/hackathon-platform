@@ -18,13 +18,13 @@ func MustConnect(url string) *sqlx.DB {
 		slog.Error("Failed to connect to database", "error", err)
 		panic(err)
 	}
-	
+
 	// Ensure connection is valid
 	if err := db.Ping(); err != nil {
 		slog.Error("Failed to ping database", "error", err)
 		panic(err)
 	}
-	
+
 	slog.Info("Successfully connected to database")
 	return db
 }
@@ -38,14 +38,14 @@ func MustMigrate(db *sqlx.DB, migrationsPath string) {
 		slog.Error("Failed to find migrations", "error", err)
 		panic(err)
 	}
-	
+
 	for _, file := range files {
 		content, err := os.ReadFile(file)
 		if err != nil {
 			slog.Error("Failed to read migration file", "file", file, "error", err)
 			panic(err)
 		}
-		
+
 		_, err = db.Exec(string(content))
 		if err != nil {
 			slog.Error("Failed to execute migration", "file", file, "error", err)

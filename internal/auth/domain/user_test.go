@@ -13,7 +13,7 @@ func TestNewUser_ValidInput_ReturnsUser(t *testing.T) {
 	displayName := "Alice Chen"
 
 	user, err := domain.NewUser(email, displayName)
-	
+
 	require.NoError(t, err)
 	assert.Equal(t, "alice@example.com", user.Email)
 	assert.Equal(t, "Alice Chen", user.DisplayName)
