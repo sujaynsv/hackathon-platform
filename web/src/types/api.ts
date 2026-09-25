@@ -58,3 +58,20 @@ export interface VerifyEmailResponse {
   message: string;
 }
 
+// ---- Submissions ----
+
+export interface CreateSubmissionRequest {
+  title: string;
+  description?: string;
+  trackId?: string;
+  repoUrl?: string;
+  demoUrl?: string;
+}
+
+export interface SubmissionDTO {
+  submissionId: string;
+  title: string;
+  status: string;
+  teamId: string;
+}
+
