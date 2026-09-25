@@ -4,13 +4,20 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 
 	"github.com/joho/godotenv"
 
+	"github.com/dogfood-platform/dogfood/internal/auth/handler"
+	"github.com/dogfood-platform/dogfood/internal/auth/repository"
+	"github.com/dogfood-platform/dogfood/internal/auth/usecase"
 	"github.com/dogfood-platform/dogfood/internal/config"
+	"github.com/dogfood-platform/dogfood/internal/shared"
+	"github.com/dogfood-platform/dogfood/internal/shared/cache"
+	"github.com/dogfood-platform/dogfood/internal/shared/database"
 	"github.com/dogfood-platform/dogfood/internal/shared/middleware"
 )
 
@@ -20,11 +27,25 @@ func main() {
 
 	cfg := config.MustLoad() // panics if required vars are missing
 
-	// STUBS: 2-5
-	// db := database.MustConnect(cfg.DatabaseURL)
-	// database.MustMigrate(db, "migrations/")
-	// rdb := cache.MustConnect(cfg.RedisURL)
+	// 2. Connect to Database and Migrate
+	db := database.MustConnect(cfg.DatabaseURL)
+	database.MustMigrate(db, "migrations/")
+	
+	// 3. Connect to Cache
+	rdb := cache.MustConnect(cfg.RedisURL)
+	rateLimiter := middleware.NewRateLimiter(rdb)
+
+	// STUBS: 4-5
 	// mc := storage.MustConnect(cfg.MinioEndpoint, cfg.MinioAccessKey, cfg.MinioSecretKey)
+	
+	// Initialize Auth dependencies
+	userRepo := repository.NewUserRepository(db)
+	hasher := shared.NewBcryptHasher()
+	tokenIssuer := shared.NewJWTIssuer(cfg.JWTSecret, cfg.JWTAccessTTLH*60, cfg.JWTRefreshTTLD)
+	refreshRepo := repository.NewRefreshTokenRepository(db)
+	passwordValidator := shared.NewHIBPValidator()
+	registerSvc := usecase.NewRegisterService(userRepo, hasher, tokenIssuer, refreshRepo, passwordValidator)
+	authHandler := handler.NewAuthHandler(registerSvc)
 
 	// 6. Wire Chi router
 	r := chi.NewRouter()
@@ -46,14 +67,23 @@ func main() {
 
 	// 8. Mount module routers (stubs for now)
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Use(middleware.JWT(cfg.JWTSecret))
-		// auth.Mount(r, authHandler)
-		// events.Mount(r, eventsHandler)
-		// teams.Mount(r, teamsHandler)
-		// submissions.Mount(r, submissionsHandler)
-		// judging.Mount(r, judgingHandler)
-		// voting.Mount(r, votingHandler)
-		// admin.Mount(r, adminHandler)
+		// Public routes
+		r.Group(func(r chi.Router) {
+			// Rate limit: 5 requests per 15 minutes per IP
+			r.Use(rateLimiter.RateLimit(5, 15*time.Minute))
+			r.Mount("/auth", authHandler.Routes())
+		})
+
+		// Protected routes
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.JWT(cfg.JWTSecret))
+			// events.Mount(r, eventsHandler)
+			// teams.Mount(r, teamsHandler)
+			// submissions.Mount(r, submissionsHandler)
+			// judging.Mount(r, judgingHandler)
+			// voting.Mount(r, votingHandler)
+			// admin.Mount(r, adminHandler)
+		})
 	})
 
 	// 9. Start server
