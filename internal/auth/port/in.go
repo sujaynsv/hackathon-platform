@@ -1,6 +1,9 @@
 package port
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // RegisterUseCase is the inbound port for user registration.
 // The handler calls this interface — never the concrete RegisterService struct.
@@ -16,11 +19,37 @@ type VerifyEmailUseCase interface {
 	Verify(ctx context.Context, cmd VerifyEmailCommand) error
 }
 
+type LoginUseCase interface {
+	Login(ctx context.Context, cmd LoginCommand) (*AuthResponse, error)
+}
+
+type RefreshUseCase interface {
+	Refresh(ctx context.Context, cmd RefreshCommand) (*TokenPair, error)
+}
+
+type LogoutUseCase interface {
+	Logout(ctx context.Context, jti string, expiresAt time.Time) error
+}
+
 type RegisterCommand struct {
 	Email        string
 	Password     string
 	DisplayName  string
 	CaptchaToken string
+}
+
+type LoginCommand struct {
+	Email    string
+	Password string
+}
+
+type RefreshCommand struct {
+	RawRefreshToken string
+}
+
+type TokenPair struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type AuthResponse struct {

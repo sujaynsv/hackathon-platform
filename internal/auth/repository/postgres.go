@@ -195,6 +195,12 @@ func (r *RefreshTokenRepository) RevokeAllForUser(ctx context.Context, userID uu
 	return err
 }
 
+func (r *RefreshTokenRepository) Revoke(ctx context.Context, id uuid.UUID) error {
+	const q = `UPDATE refresh_tokens SET revoked_at = NOW() WHERE id = $1 AND revoked_at IS NULL`
+	_, err := r.db.ExecContext(ctx, q, id)
+	return err
+}
+
 type emailTokenRow struct {
 	ID        uuid.UUID `db:"id"`
 	UserID    uuid.UUID `db:"user_id"`
