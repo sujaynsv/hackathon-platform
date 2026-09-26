@@ -104,6 +104,16 @@ export const apiClient = {
     return res.data;
   },
 
+  async listEvents(): Promise<import('../types/api').EventDTO[]> {
+    const res = await api.get<import('../types/api').EventDTO[]>('/events');
+    return res.data;
+  },
+
+  async getEvent(slug: string): Promise<import('../types/api').EventDetailDTO> {
+    const res = await api.get<import('../types/api').EventDetailDTO>(`/events/${slug}`);
+    return res.data;
+  },
+
   async createEvent(req: import('../types/api').CreateEventRequest): Promise<import('../types/api').EventDetailDTO> {
     const res = await api.post<import('../types/api').EventDetailDTO>('/events', req);
     return res.data;
