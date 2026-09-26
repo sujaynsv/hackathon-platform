@@ -107,10 +107,9 @@ export default function EventDetailPage() {
               <p className={styles.actionDesc}>
                 Registration is open! Form a team of up to {event.maxTeamSize} people.
               </p>
-              {/* Note: This will be connected to the team registration flow later */}
-              <button className={styles.primaryBtn}>
+              <Link href={`/events/${event.slug}/participate`} className={styles.primaryBtn}>
                 Register Now
-              </button>
+              </Link>
             </div>
           )}
 
@@ -128,8 +127,8 @@ export default function EventDetailPage() {
             <div className={styles.actionCard}>
               <h3 className={styles.actionTitle}>Participant Hub</h3>
               <p className={styles.actionDesc}>Manage your team and submission.</p>
-              <Link href={`/events/${event.slug}/team`} className={styles.primaryBtn}>
-                My Team
+              <Link href={`/events/${event.slug}/participate`} className={styles.primaryBtn}>
+                Participate / My Team
               </Link>
               <Link href={`/events/${event.slug}/submissions/new`} className={styles.secondaryBtn}>
                 Submit Project
