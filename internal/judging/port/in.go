@@ -17,6 +17,29 @@ type CreateAssignmentsUseCase interface {
     CreateForEvent(ctx context.Context, eventID uuid.UUID) error
 }
 
+type SubmitScoresUseCase interface {
+    SubmitScores(ctx context.Context, cmd SubmitScoresCommand) (*ScoreResultDTO, error)
+}
+
+type SubmitScoresCommand struct {
+    JudgeID      uuid.UUID
+    AssignmentID uuid.UUID
+    Scores       []ScoreInput
+}
+
+type ScoreInput struct {
+    CriterionID uuid.UUID `json:"criterionId"`
+    RawScore    int       `json:"rawScore"`
+    Notes       *string   `json:"notes"`
+}
+
+type ScoreResultDTO struct {
+    AssignmentID  string     `json:"assignmentId"`
+    Status        string     `json:"status"`
+    Scores        []ScoreDTO `json:"scores"`
+    WeightedTotal float64    `json:"weightedTotal"`
+}
+
 type QueueQuery struct {
     EventID *uuid.UUID
     Status  string

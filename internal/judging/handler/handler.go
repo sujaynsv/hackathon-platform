@@ -1,6 +1,7 @@
 package handler
 
 import (
+    "encoding/json"
     "net/http"
     "strconv"
 
@@ -14,12 +15,14 @@ import (
 type JudgingHandler struct {
     getQueue  port.GetQueueUseCase
     getDetail port.GetAssignmentDetailUseCase
+    submit    port.SubmitScoresUseCase
 }
 
-func NewJudgingHandler(q port.GetQueueUseCase, d port.GetAssignmentDetailUseCase) *JudgingHandler {
+func NewJudgingHandler(q port.GetQueueUseCase, d port.GetAssignmentDetailUseCase, s port.SubmitScoresUseCase) *JudgingHandler {
     return &JudgingHandler{
         getQueue:  q,
         getDetail: d,
+        submit:    s,
     }
 }
 
@@ -28,6 +31,7 @@ func (h *JudgingHandler) RegisterRoutes(r chi.Router) {
         // I16 - only judges can see queue? Well, it returns my assignments
         r.Get("/queue", h.GetQueue)
         r.Get("/assignments/{id}", h.GetAssignmentDetail)
+        r.Post("/assignments/{id}/scores", h.SubmitScores)
     })
 }
 
@@ -97,4 +101,40 @@ func (h *JudgingHandler) GetAssignmentDetail(w http.ResponseWriter, r *http.Requ
     }
 
     response.OK(w, r, dto)
+}
+
+func (h *JudgingHandler) SubmitScores(w http.ResponseWriter, r *http.Request) {
+    judgeID, ok := authenticatedUserID(w, r)
+    if !ok {
+        return
+    }
+
+    idStr := chi.URLParam(r, "id")
+    assignmentID, err := uuid.Parse(idStr)
+    if err != nil {
+        response.BadRequest(w, r, "INVALID_ID", "invalid assignment ID format")
+        return
+    }
+
+    var body struct {
+        Scores []port.ScoreInput `json:"scores"`
+    }
+    if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+        response.BadRequest(w, r, "VALIDATION_ERROR", "invalid request body")
+        return
+    }
+
+    cmd := port.SubmitScoresCommand{
+        JudgeID:      judgeID,
+        AssignmentID: assignmentID,
+        Scores:       body.Scores,
+    }
+
+    res, err := h.submit.SubmitScores(r.Context(), cmd)
+    if err != nil {
+        response.HandleDomainError(w, r, err)
+        return
+    }
+
+    response.OK(w, r, res)
 }

@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+    "bytes"
     "context"
     "encoding/json"
     "net/http"
@@ -64,7 +65,7 @@ func TestJudgingHandler_GetQueue(t *testing.T) {
         },
     }
 
-    h := handler.NewJudgingHandler(mockQueue, nil)
+    h := handler.NewJudgingHandler(mockQueue, nil, nil)
     r := setupRouter(h, judgeID.String())
 
     req := httptest.NewRequest(http.MethodGet, "/judging/queue", nil)
@@ -97,7 +98,7 @@ func TestJudgingHandler_GetAssignmentDetail(t *testing.T) {
         },
     }
 
-    h := handler.NewJudgingHandler(nil, mockDetail)
+    h := handler.NewJudgingHandler(nil, mockDetail, nil)
     r := setupRouter(h, judgeID.String())
 
     req := httptest.NewRequest(http.MethodGet, "/judging/assignments/"+assignmentID.String(), nil)
@@ -112,4 +113,54 @@ func TestJudgingHandler_GetAssignmentDetail(t *testing.T) {
     require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &resp))
     assert.Equal(t, assignmentID, resp.Data.ID)
     assert.Equal(t, "in_progress", resp.Data.Status)
+}
+
+type mockSubmitScoresUseCase struct {
+    submitScores func(ctx context.Context, cmd port.SubmitScoresCommand) (*port.ScoreResultDTO, error)
+}
+func (m *mockSubmitScoresUseCase) SubmitScores(ctx context.Context, cmd port.SubmitScoresCommand) (*port.ScoreResultDTO, error) {
+    if m.submitScores != nil {
+        return m.submitScores(ctx, cmd)
+    }
+    return &port.ScoreResultDTO{}, nil
+}
+
+func TestJudgingHandler_SubmitScores(t *testing.T) {
+    judgeID := uuid.New()
+    assignmentID := uuid.New()
+    critID := uuid.New()
+    
+    mockSubmit := &mockSubmitScoresUseCase{
+        submitScores: func(ctx context.Context, cmd port.SubmitScoresCommand) (*port.ScoreResultDTO, error) {
+            assert.Equal(t, judgeID, cmd.JudgeID)
+            assert.Equal(t, assignmentID, cmd.AssignmentID)
+            assert.Len(t, cmd.Scores, 1)
+            assert.Equal(t, critID, cmd.Scores[0].CriterionID)
+            assert.Equal(t, 8, cmd.Scores[0].RawScore)
+            
+            return &port.ScoreResultDTO{
+                AssignmentID: assignmentID.String(),
+                Status: "completed",
+            }, nil
+        },
+    }
+
+    h := handler.NewJudgingHandler(nil, nil, mockSubmit)
+    r := setupRouter(h, judgeID.String())
+
+    body := `{"scores": [{"criterionId": "` + critID.String() + `", "rawScore": 8}]}`
+    req := httptest.NewRequest(http.MethodPost, "/judging/assignments/"+assignmentID.String()+"/scores", bytes.NewBufferString(body))
+    req.Header.Set("Content-Type", "application/json")
+    
+    rr := httptest.NewRecorder()
+    r.ServeHTTP(rr, req)
+
+    assert.Equal(t, http.StatusOK, rr.Code)
+    
+    var resp struct {
+        Data port.ScoreResultDTO `json:"data"`
+    }
+    require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &resp))
+    assert.Equal(t, assignmentID.String(), resp.Data.AssignmentID)
+    assert.Equal(t, "completed", resp.Data.Status)
 }

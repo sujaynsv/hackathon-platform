@@ -78,6 +78,19 @@ func (r *pgRubricReader) FindByID(ctx context.Context, id uuid.UUID) (*port.Rubr
     return &dto, nil
 }
 
+func (r *pgRubricReader) FindCriteriaByRubricID(ctx context.Context, rubricID uuid.UUID) ([]port.CriterionDTO, error) {
+    const q = `
+        SELECT id, name, weight, max_score, description
+        FROM rubric_criteria
+        WHERE rubric_id = $1
+    `
+    var rows []port.CriterionDTO
+    if err := r.db.SelectContext(ctx, &rows, q, rubricID); err != nil {
+        return nil, err
+    }
+    return rows, nil
+}
+
 type pgScoreReader struct {
     db *sqlx.DB
 }
@@ -94,4 +107,14 @@ func (r *pgScoreReader) ListByAssignment(ctx context.Context, assignmentID uuid.
         return nil, err
     }
     return scores, nil
+}
+
+func (r *PgReaders) FindSummaryByID(ctx context.Context, id uuid.UUID) (*port.EventSummary, error) {
+    const q = `SELECT id, judging_deadline_at FROM events WHERE id = $1`
+    var summary port.EventSummary
+    err := r.db.GetContext(ctx, &summary, q, id)
+    if err != nil {
+        return nil, err
+    }
+    return &summary, nil
 }

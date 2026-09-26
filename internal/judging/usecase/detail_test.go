@@ -40,6 +40,9 @@ type mockRubricReader struct {
 func (m *mockRubricReader) FindByID(ctx context.Context, id uuid.UUID) (*port.RubricDTO, error) {
     return m.rubric, nil
 }
+func (m *mockRubricReader) FindCriteriaByRubricID(ctx context.Context, rubricID uuid.UUID) ([]port.CriterionDTO, error) {
+    return []port.CriterionDTO{}, nil
+}
 
 type mockScoreReader struct {
     scores []port.ScoreDTO

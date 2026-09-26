@@ -34,9 +34,23 @@ type SubmissionReader interface {
 
 type RubricReader interface {
     FindByID(ctx context.Context, id uuid.UUID) (*RubricDTO, error)
+    FindCriteriaByRubricID(ctx context.Context, rubricID uuid.UUID) ([]CriterionDTO, error)
 }
 
 type ScoreReader interface {
     ListByAssignment(ctx context.Context, assignmentID uuid.UUID) ([]ScoreDTO, error)
+}
+
+type ScoreWriter interface {
+    UpsertAll(ctx context.Context, assignmentID, judgeID uuid.UUID, scores []ScoreInput) error
+}
+
+type EventSummary struct {
+    ID                uuid.UUID
+    JudgingDeadlineAt *time.Time
+}
+
+type EventReader interface {
+    FindSummaryByID(ctx context.Context, id uuid.UUID) (*EventSummary, error)
 }
 

@@ -152,11 +152,13 @@ func main() {
 	jReaders := judgingRepo.NewPgReaders(db)
 	jRubricReader := judgingRepo.NewPgRubricReader(db)
 	jScoreReader := judgingRepo.NewPgScoreReader(db)
+	jScoreWriter := judgingRepo.NewPgScoreRepository(db)
 
 	jGetQueueSvc := judgingUsecase.NewGetQueueService(jAssignmentsRepo)
 	jGetDetailSvc := judgingUsecase.NewGetDetailService(jAssignmentsRepo, jReaders, jRubricReader, jScoreReader)
+	jSubmitScoresSvc := judgingUsecase.NewSubmitScoresService(jAssignmentsRepo, jReaders, jRubricReader, jScoreWriter)
 	
-	judgingHandler := judgingHandlerPkg.NewJudgingHandler(jGetQueueSvc, jGetDetailSvc)
+	judgingHandler := judgingHandlerPkg.NewJudgingHandler(jGetQueueSvc, jGetDetailSvc, jSubmitScoresSvc)
 
 	// 6. Wire Chi router
 	r := chi.NewRouter()
