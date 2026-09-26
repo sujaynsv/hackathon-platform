@@ -40,8 +40,12 @@ func (s *CreateEventService) Create(ctx context.Context, cmd port.CreateEventCom
 	event.Description = cmd.Description
 	event.RegistrationOpensAt = cmd.RegistrationOpensAt
 	event.RegistrationClosesAt = cmd.RegistrationClosesAt
-	event.SubmissionDeadlineAt = cmd.SubmissionDeadlineAt
-	event.JudgingDeadlineAt = cmd.JudgingDeadlineAt
+	if cmd.SubmissionDeadlineAt != nil {
+		event.SubmissionDeadlineAt = cmd.SubmissionDeadlineAt
+	}
+	if cmd.JudgingDeadlineAt != nil {
+		event.JudgingDeadlineAt = cmd.JudgingDeadlineAt
+	}
 	event.VotingOpensAt = cmd.VotingOpensAt
 	event.VotingClosesAt = cmd.VotingClosesAt
 
