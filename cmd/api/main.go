@@ -117,7 +117,12 @@ func main() {
 
 	// Basic middlewares for stub
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{cfg.AllowedOrigins},
+		AllowedOrigins:   []string{cfg.AllowedOrigins},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
 	}))
 	// r.Use(middleware.Logger())
 	// r.Use(middleware.RealIP)
