@@ -65,7 +65,7 @@ func TestRegistrationHTTPFlow(t *testing.T) {
 
 	register := usecase.NewRegisterService(flowEventReader{event: event}, participants)
 	unregister := usecase.NewUnregisterService(flowEventReader{event: event}, participants, teamMembers)
-	teamsHandler := handler.NewTeamsHandler(register, unregister)
+	teamsHandler := handler.NewTeamsHandler(register, unregister, nil, nil)
 
 	currentUserID := userID
 	router := chi.NewRouter()

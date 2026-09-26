@@ -121,7 +121,10 @@ func main() {
 	participantsRepo := teamRepo.NewPgParticipantRepository(db)
 	registerForEventSvc := teamsUsecase.NewRegisterService(registrationEvents, participantsRepo)
 	unregisterSvc := teamsUsecase.NewUnregisterService(registrationEvents, participantsRepo, teamsRepo)
-	teamsHandler := teamsHandlerPkg.NewTeamsHandler(registerForEventSvc, unregisterSvc)
+	teamRepository := teamRepo.NewPgTeamRepository(db)
+	createTeamSvc := teamsUsecase.NewCreateTeamService(registrationEvents, participantsRepo, teamRepository)
+	getMyTeamSvc := teamsUsecase.NewGetMyTeamService(registrationEvents, teamRepository)
+	teamsHandler := teamsHandlerPkg.NewTeamsHandler(registerForEventSvc, unregisterSvc, createTeamSvc, getMyTeamSvc)
 
 	// 6. Wire Chi router
 	r := chi.NewRouter()
