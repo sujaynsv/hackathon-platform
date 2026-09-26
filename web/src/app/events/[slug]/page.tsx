@@ -5,9 +5,9 @@ import { EventActions } from './EventActions';
 import styles from './detail.module.css';
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default async function EventDetailPage({ params }: Props) {
@@ -15,7 +15,8 @@ export default async function EventDetailPage({ params }: Props) {
   let error: string | null = null;
 
   try {
-    const res = await api.get<EventDetail>(`/events/${params.slug}`);
+    const { slug } = await params;
+    const res = await api.get<EventDetail>(`/events/${slug}`);
     event = res.data ?? null;
   } catch (err: unknown) {
     const e = err as Error;
