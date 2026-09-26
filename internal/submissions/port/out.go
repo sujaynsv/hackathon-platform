@@ -2,6 +2,7 @@ package port
 
 import (
 	"context"
+	"time"
 
 	"github.com/dogfood-platform/dogfood/internal/submissions/domain"
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ type SubmissionRepository interface {
 
 type EventReader interface {
 	FindSummaryBySlug(ctx context.Context, slug string) (*EventSummary, error)
+	FindSummaryByID(ctx context.Context, id uuid.UUID) (*EventSummary, error)
 }
 
 type TeamReader interface {
@@ -27,9 +29,10 @@ type TrackReader interface {
 }
 
 type EventSummary struct {
-	ID     uuid.UUID
-	Status string
-	Slug   string
+	ID                   uuid.UUID
+	Status               string
+	Slug                 string
+	SubmissionDeadlineAt *time.Time
 }
 
 type TeamSummary struct {

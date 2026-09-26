@@ -35,9 +35,36 @@ type SubmissionDTO struct {
 	CoverURL     *string   `json:"coverImageUrl"`
 	CreatedAt    string    `json:"createdAt"`
 	UpdatedAt    string    `json:"updatedAt"`
+	SubmittedAt  *string   `json:"submittedAt,omitempty"`
 }
 
 type TrackDTO struct {
 	TrackID uuid.UUID `json:"trackId"`
 	Name    string    `json:"name"`
+}
+
+type UpdateSubmissionUseCase interface {
+	Update(ctx context.Context, cmd UpdateSubmissionCommand) (*SubmissionDTO, error)
+}
+
+type FinalSubmitUseCase interface {
+	Submit(ctx context.Context, cmd SubmitCommand) (*SubmissionDTO, error)
+}
+
+type GetMySubmissionUseCase interface {
+	GetMine(ctx context.Context, callerID uuid.UUID, eventSlug string) (*SubmissionDTO, error)
+}
+
+type UpdateSubmissionCommand struct {
+	CallerID     uuid.UUID
+	SubmissionID uuid.UUID
+	Title        *string
+	Description  *string
+	RepoURL      *string
+	DemoURL      *string
+}
+
+type SubmitCommand struct {
+	CallerID     uuid.UUID
+	SubmissionID uuid.UUID
 }

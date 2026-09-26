@@ -27,6 +27,15 @@ func (m *mockEventReader) FindSummaryBySlug(ctx context.Context, slug string) (*
 	return res, args.Error(1)
 }
 
+func (m *mockEventReader) FindSummaryByID(ctx context.Context, id uuid.UUID) (*port.EventSummary, error) {
+	args := m.Called(ctx, id)
+	var res *port.EventSummary
+	if args.Get(0) != nil {
+		res = args.Get(0).(*port.EventSummary)
+	}
+	return res, args.Error(1)
+}
+
 type mockTeamReader struct {
 	mock.Mock
 }

@@ -13,16 +13,26 @@ import (
 
 type SubmissionHandler struct {
 	create port.CreateSubmissionUseCase
+	update port.UpdateSubmissionUseCase
+	submit port.FinalSubmitUseCase
 }
 
-func NewSubmissionHandler(create port.CreateSubmissionUseCase) *SubmissionHandler {
+func NewSubmissionHandler(
+	create port.CreateSubmissionUseCase,
+	update port.UpdateSubmissionUseCase,
+	submit port.FinalSubmitUseCase,
+) *SubmissionHandler {
 	return &SubmissionHandler{
 		create: create,
+		update: update,
+		submit: submit,
 	}
 }
 
 func (h *SubmissionHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/events/{slug}/submissions", h.CreateDraft)
+	r.Patch("/submissions/{id}", h.UpdateDraft)
+	r.Post("/submissions/{id}/submit", h.SubmitDraft)
 }
 
 type createDraftRequest struct {
@@ -72,4 +82,79 @@ func (h *SubmissionHandler) CreateDraft(w http.ResponseWriter, r *http.Request) 
 	}
 
 	response.Created(w, r, result)
+}
+
+type updateDraftRequest struct {
+	Title       *string `json:"title"`
+	Description *string `json:"description"`
+	RepoURL     *string `json:"repoUrl"`
+	DemoURL     *string `json:"demoUrl"`
+}
+
+func (h *SubmissionHandler) UpdateDraft(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	subID, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid submission ID")
+		return
+	}
+
+	userIDStr := middleware.GetUserID(r.Context())
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		response.Unauthorized(w, r, "UNAUTHORIZED", "invalid user token")
+		return
+	}
+
+	var body updateDraftRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid request body")
+		return
+	}
+
+	cmd := port.UpdateSubmissionCommand{
+		CallerID:     userID,
+		SubmissionID: subID,
+		Title:        body.Title,
+		Description:  body.Description,
+		RepoURL:      body.RepoURL,
+		DemoURL:      body.DemoURL,
+	}
+
+	result, err := h.update.Update(r.Context(), cmd)
+	if err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
+
+	response.OK(w, r, result)
+}
+
+func (h *SubmissionHandler) SubmitDraft(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	subID, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid submission ID")
+		return
+	}
+
+	userIDStr := middleware.GetUserID(r.Context())
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		response.Unauthorized(w, r, "UNAUTHORIZED", "invalid user token")
+		return
+	}
+
+	cmd := port.SubmitCommand{
+		CallerID:     userID,
+		SubmissionID: subID,
+	}
+
+	result, err := h.submit.Submit(r.Context(), cmd)
+	if err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
+
+	response.OK(w, r, result)
 }

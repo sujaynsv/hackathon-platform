@@ -63,3 +63,29 @@ func CheckCanCreate(eventStatus string) error {
 	}
 	return nil
 }
+
+var ErrDeadlinePassed = errors.New("submission deadline has passed")
+var ErrNotDraft = errors.New("only draft submissions can be edited")
+
+// CheckCanEdit validates that the submission can still be edited (I11 + I13).
+func (s *Submission) CheckCanEdit(deadlineAt *time.Time) error {
+	if s.Status != StatusDraft {
+		return fmt.Errorf("%w", ErrNotDraft)
+	}
+	if deadlineAt != nil && time.Now().UTC().After(*deadlineAt) {
+		return fmt.Errorf("%w: deadline was %s", ErrDeadlinePassed, deadlineAt.Format(time.RFC3339))
+	}
+	return nil
+}
+
+// Submit transitions a draft submission to submitted (I13).
+func (s *Submission) Submit(deadlineAt *time.Time) error {
+	if err := s.CheckCanEdit(deadlineAt); err != nil {
+		return err
+	}
+	now := time.Now().UTC()
+	s.Status = StatusSubmitted
+	s.SubmittedAt = &now
+	s.UpdatedAt = now
+	return nil
+}
