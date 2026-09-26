@@ -19,6 +19,7 @@ var (
 	ErrInvalidTransition = errors.New("invalid state transition")
 	ErrRateLimited       = errors.New("rate limited")
 	ErrDuplicate         = errors.New("duplicate resource")
+	ErrInvalidFileType   = errors.New("invalid file type")
 
 	// Auth errors
 	ErrInvalidCredentials  = errors.New("invalid credentials")
@@ -63,6 +64,8 @@ func mapError(err error) apiError {
 		return apiError{422, "DEADLINE_PASSED", "deadline has passed"}
 	case errors.Is(err, ErrInvariantViolated):
 		return apiError{422, "INVARIANT_VIOLATION", err.Error()}
+	case errors.Is(err, ErrInvalidFileType):
+		return apiError{400, "INVALID_FILE_TYPE", err.Error()}
 	case errors.Is(err, ErrDuplicate):
 		return apiError{409, "DUPLICATE_RESOURCE", "resource already exists"}
 	case errors.Is(err, ErrInvalidCredentials):
@@ -87,6 +90,14 @@ func BadRequest(w http.ResponseWriter, r *http.Request, code, message string) {
 // Unauthorized writes a 401 response with the given machine-readable code and message.
 func Unauthorized(w http.ResponseWriter, r *http.Request, code, message string) {
 	writeJSON(w, http.StatusUnauthorized, ErrorResponse{
+		Error: ErrorBody{Code: code, Message: message},
+		Meta:  newMeta(r),
+	})
+}
+
+// PayloadTooLarge writes a 413 response.
+func PayloadTooLarge(w http.ResponseWriter, r *http.Request, code, message string) {
+	writeJSON(w, http.StatusRequestEntityTooLarge, ErrorResponse{
 		Error: ErrorBody{Code: code, Message: message},
 		Meta:  newMeta(r),
 	})

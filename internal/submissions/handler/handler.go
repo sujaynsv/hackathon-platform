@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/dogfood-platform/dogfood/internal/shared/middleware"
 	"github.com/dogfood-platform/dogfood/internal/shared/response"
@@ -15,17 +16,23 @@ type SubmissionHandler struct {
 	create port.CreateSubmissionUseCase
 	update port.UpdateSubmissionUseCase
 	submit port.FinalSubmitUseCase
+	upload port.UploadUseCase
+	list   port.ListFilesUseCase
 }
 
 func NewSubmissionHandler(
 	create port.CreateSubmissionUseCase,
 	update port.UpdateSubmissionUseCase,
 	submit port.FinalSubmitUseCase,
+	upload port.UploadUseCase,
+	list port.ListFilesUseCase,
 ) *SubmissionHandler {
 	return &SubmissionHandler{
 		create: create,
 		update: update,
 		submit: submit,
+		upload: upload,
+		list:   list,
 	}
 }
 
@@ -33,6 +40,8 @@ func (h *SubmissionHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/events/{slug}/submissions", h.CreateDraft)
 	r.Patch("/submissions/{id}", h.UpdateDraft)
 	r.Post("/submissions/{id}/submit", h.SubmitDraft)
+	r.Post("/submissions/{id}/upload", h.UploadFile)
+	r.Get("/submissions/{id}/files", h.ListFiles)
 }
 
 type createDraftRequest struct {
@@ -157,4 +166,80 @@ func (h *SubmissionHandler) SubmitDraft(w http.ResponseWriter, r *http.Request) 
 	}
 
 	response.OK(w, r, result)
+}
+
+func (h *SubmissionHandler) UploadFile(w http.ResponseWriter, r *http.Request) {
+	subID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid submission ID")
+		return
+	}
+	
+	userIDStr := middleware.GetUserID(r.Context())
+	callerID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		response.Unauthorized(w, r, "UNAUTHORIZED", "invalid user token")
+		return
+	}
+
+	// Max 50MB + 10MB overhead for form fields
+	r.Body = http.MaxBytesReader(w, r.Body, (50+10)*1024*1024)
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		if strings.Contains(err.Error(), "too large") {
+			response.PayloadTooLarge(w, r, "FILE_TOO_LARGE", "file exceeds 50MB limit")
+			return
+		}
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid multipart form")
+		return
+	}
+
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "missing file in form data")
+		return
+	}
+	defer file.Close()
+
+	if header.Size > 50*1024*1024 {
+		response.PayloadTooLarge(w, r, "FILE_TOO_LARGE", "file exceeds 50MB limit")
+		return
+	}
+
+	uploadType := r.FormValue("type")
+	if uploadType != "cover" && uploadType != "attachment" {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "type must be cover or attachment")
+		return
+	}
+
+	cmd := port.UploadCommand{
+		CallerID:     callerID,
+		SubmissionID: subID,
+		FileName:     header.Filename,
+		ContentType:  header.Header.Get("Content-Type"),
+		SizeBytes:    header.Size,
+		UploadType:   uploadType,
+		File:         file,
+	}
+
+	res, err := h.upload.Upload(r.Context(), cmd)
+	if err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
+	response.Created(w, r, res)
+}
+
+func (h *SubmissionHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
+	subID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid submission ID")
+		return
+	}
+
+	res, err := h.list.ListFiles(r.Context(), subID)
+	if err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
+	response.OK(w, r, res)
 }
