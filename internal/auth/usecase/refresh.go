@@ -83,5 +83,16 @@ func (s *RefreshService) Refresh(ctx context.Context, cmd port.RefreshCommand) (
 		return nil, fmt.Errorf("save new refresh token: %w", err)
 	}
 
-	return &port.TokenPair{AccessToken: newAccess, RefreshToken: newRaw}, nil
+	return &port.TokenPair{
+		AccessToken:  newAccess,
+		RefreshToken: newRaw,
+		User: port.UserDTO{
+			ID:          user.ID.String(),
+			Email:       user.Email,
+			DisplayName: user.DisplayName,
+			AvatarURL:   user.AvatarURL,
+			IsAdmin:     user.IsAdmin,
+			CreatedAt:   user.CreatedAt.Format(time.RFC3339),
+		},
+	}, nil
 }

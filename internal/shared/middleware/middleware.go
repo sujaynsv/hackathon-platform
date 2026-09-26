@@ -131,3 +131,18 @@ func JWTMiddleware(secret string, cache port.Cache) func(http.Handler) http.Hand
 		})
 	}
 }
+
+// OptionalJWTMiddleware validates a bearer token when one is supplied, while
+// allowing anonymous requests through for public resources.
+func OptionalJWTMiddleware(secret string, cache port.Cache) func(http.Handler) http.Handler {
+	requireJWT := JWTMiddleware(secret, cache)
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.TrimSpace(r.Header.Get("Authorization")) == "" {
+				next.ServeHTTP(w, r)
+				return
+			}
+			requireJWT(next).ServeHTTP(w, r)
+		})
+	}
+}

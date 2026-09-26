@@ -3,7 +3,7 @@ id: T-001
 title: Register for Event + Unregister — Participant Registration
 epic: teams
 owner: Sujay (backend)
-status: "[ ] not-started"
+status: "[ ] in-progress"
 branch: story/T-001-event-registration
 blocks: T-002
 blocked-by: E-001
@@ -259,7 +259,7 @@ func (s *UnregisterService) Unregister(ctx context.Context, cmd port.UnregisterC
 - Create team → try unregister → 422 (I19)
 
 ## Definition of Done
-- [ ] `go test ./internal/teams/...` → 100% green
+- [x] `go test ./internal/teams/...` → 100% green
 - [ ] `POST /events/{slug}/register` → 201 when event is open
 - [ ] Status != `registration_open` → 422 `INVARIANT_VIOLATION`
 - [ ] Past deadline → 422 `DEADLINE_PASSED`

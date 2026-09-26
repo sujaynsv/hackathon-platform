@@ -48,6 +48,7 @@ export interface AuthResponse {
 export interface TokenPair {
   accessToken: string;
   refreshToken: string;
+  user: UserProfile;
 }
 
 export interface VerifyEmailRequest {

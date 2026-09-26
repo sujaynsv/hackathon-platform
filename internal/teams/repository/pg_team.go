@@ -41,3 +41,10 @@ func (r *PgTeamReader) FindByEventAndUser(ctx context.Context, eventID, userID u
 		Name: row.Name,
 	}, nil
 }
+
+func (r *PgTeamReader) HasTeamInEvent(ctx context.Context, userID, eventID uuid.UUID) (bool, error) {
+	const q = `SELECT EXISTS(SELECT 1 FROM team_members WHERE user_id = $1 AND event_id = $2)`
+	var exists bool
+	err := r.db.GetContext(ctx, &exists, q, userID, eventID)
+	return exists, err
+}
