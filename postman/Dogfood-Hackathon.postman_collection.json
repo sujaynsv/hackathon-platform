@@ -236,6 +236,38 @@
                             ]
                         }
                     }
+                },
+                {
+                    "name": "Update Event",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Updated Test Hackathon\",\n    \"description\": \"An updated test event description\",\n    \"status\": \"registration_open\",\n    \"maxTeamSize\": 10\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/events/test-hackathon",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "events",
+                                "test-hackathon"
+                            ]
+                        }
+                    }
                 }
             ]
         }

@@ -57,7 +57,7 @@ func (m *MockGet) GetBySlug(ctx context.Context, slug string, callerID *uuid.UUI
 
 func TestCreateEventHandler_ValidBody_Returns201(t *testing.T) {
 	m := new(MockCreate)
-	h := handler.NewEventHandler(m, nil, nil)
+	h := handler.NewEventHandler(m, nil, nil, nil)
 
 	body := map[string]interface{}{
 		"slug":  "test-event",
@@ -83,7 +83,7 @@ func TestCreateEventHandler_ValidBody_Returns201(t *testing.T) {
 }
 
 func TestCreateEventHandler_MissingTitle_Returns400(t *testing.T) {
-	h := handler.NewEventHandler(nil, nil, nil)
+	h := handler.NewEventHandler(nil, nil, nil, nil)
 
 	body := map[string]interface{}{
 		"slug": "test-event",
@@ -101,7 +101,7 @@ func TestCreateEventHandler_MissingTitle_Returns400(t *testing.T) {
 }
 
 func TestCreateEventHandler_UnauthenticatedUser_Returns401(t *testing.T) {
-	h := handler.NewEventHandler(nil, nil, nil)
+	h := handler.NewEventHandler(nil, nil, nil, nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/events", nil)
 	rec := httptest.NewRecorder()
@@ -112,7 +112,7 @@ func TestCreateEventHandler_UnauthenticatedUser_Returns401(t *testing.T) {
 
 func TestGetEventHandler_UnknownSlug_Returns404(t *testing.T) {
 	m := new(MockGet)
-	h := handler.NewEventHandler(nil, nil, m)
+	h := handler.NewEventHandler(nil, nil, m, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/events/unknown", nil)
 	// chi route param stub
@@ -126,4 +126,78 @@ func TestGetEventHandler_UnknownSlug_Returns404(t *testing.T) {
 	h.GetEventBySlug(rec, req)
 
 	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+type MockUpdate struct {
+	mock.Mock
+}
+
+func (m *MockUpdate) Update(ctx context.Context, cmd port.UpdateEventCommand) (*port.EventDetailDTO, error) {
+	args := m.Called(ctx, cmd)
+	var e *port.EventDetailDTO
+	if args.Get(0) != nil {
+		e = args.Get(0).(*port.EventDetailDTO)
+	}
+	return e, args.Error(1)
+}
+
+func TestUpdateEventHandler_ValidBody_Returns200(t *testing.T) {
+	m := new(MockUpdate)
+	h := handler.NewEventHandler(nil, nil, nil, m)
+
+	body := map[string]interface{}{
+		"title": "New Title",
+	}
+	jsonBody, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPatch, "/events/test-event", bytes.NewReader(jsonBody))
+	ctx := context.WithValue(req.Context(), "user_id", uuid.New().String())
+	req = req.WithContext(ctx)
+
+	m.On("Update", mock.Anything, mock.AnythingOfType("port.UpdateEventCommand")).Return(&port.EventDetailDTO{}, nil)
+
+	rec := httptest.NewRecorder()
+	h.UpdateEvent(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+}
+
+func TestUpdateEventHandler_Unauthenticated_Returns401(t *testing.T) {
+	h := handler.NewEventHandler(nil, nil, nil, nil)
+	req := httptest.NewRequest(http.MethodPatch, "/events/test-event", bytes.NewReader([]byte("{}")))
+	rec := httptest.NewRecorder()
+	h.UpdateEvent(rec, req)
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
+func TestUpdateEventHandler_NonOrganizer_Returns403(t *testing.T) {
+	m := new(MockUpdate)
+	h := handler.NewEventHandler(nil, nil, nil, m)
+
+	req := httptest.NewRequest(http.MethodPatch, "/events/test-event", bytes.NewReader([]byte("{}")))
+	ctx := context.WithValue(req.Context(), "user_id", uuid.New().String())
+	req = req.WithContext(ctx)
+
+	m.On("Update", mock.Anything, mock.Anything).Return(nil, response.ErrForbidden)
+
+	rec := httptest.NewRecorder()
+	h.UpdateEvent(rec, req)
+
+	assert.Equal(t, http.StatusForbidden, rec.Code)
+}
+
+func TestUpdateEventHandler_InvalidTransition_Returns422(t *testing.T) {
+	m := new(MockUpdate)
+	h := handler.NewEventHandler(nil, nil, nil, m)
+
+	req := httptest.NewRequest(http.MethodPatch, "/events/test-event", bytes.NewReader([]byte("{}")))
+	ctx := context.WithValue(req.Context(), "user_id", uuid.New().String())
+	req = req.WithContext(ctx)
+
+	m.On("Update", mock.Anything, mock.Anything).Return(nil, response.ErrInvalidTransition)
+
+	rec := httptest.NewRecorder()
+	h.UpdateEvent(rec, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
 }

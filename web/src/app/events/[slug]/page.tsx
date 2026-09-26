@@ -42,11 +42,20 @@ export default async function EventDetailPage({ params }: Props) {
       <Link href="/events" className={styles.backLink}>← All Events</Link>
       
       <header className={styles.header}>
-        <h1 className={styles.title}>{event.title}</h1>
-        <div className={styles.meta}>
-          <span className={styles.status}>{event.status.replace('_', ' ')}</span>
-          {event.myRole && (
-            <span className={styles.role}>Your role: {event.myRole}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h1 className={styles.title}>{event.title}</h1>
+            <div className={styles.meta}>
+              <span className={styles.status}>{event.status.replace('_', ' ')}</span>
+              {event.myRole && (
+                <span className={styles.role}>Your role: {event.myRole}</span>
+              )}
+            </div>
+          </div>
+          {event.myRole === 'organizer' && (
+            <Link href={`/events/${event.slug}/edit`} className={styles.primaryButton}>
+              Edit Event
+            </Link>
           )}
         </div>
       </header>

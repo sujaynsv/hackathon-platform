@@ -97,10 +97,12 @@ func main() {
 
 	eventsRepo := eventRepo.NewPgEventRepository(db)
 	eventsRoleRepo := eventRepo.NewPgEventRoleRepository(db)
+	eventsTrackRepo := eventRepo.NewPgTrackRepository(db)
 	eventsCreateSvc := eventsUsecase.NewCreateEventService(eventsRepo, eventsRoleRepo)
 	eventsListSvc := eventsUsecase.NewListEventsService(eventsRepo)
 	eventsGetSvc := eventsUsecase.NewGetEventService(eventsRepo)
-	eventsHandler := eventsHandlerPkg.NewEventHandler(eventsCreateSvc, eventsListSvc, eventsGetSvc)
+	eventsUpdateSvc := eventsUsecase.NewUpdateEventService(eventsRepo, eventsRoleRepo, eventsTrackRepo)
+	eventsHandler := eventsHandlerPkg.NewEventHandler(eventsCreateSvc, eventsListSvc, eventsGetSvc, eventsUpdateSvc)
 
 	// Submissions module
 	subEventsReader := eventRepo.NewPgEventReader(db)
