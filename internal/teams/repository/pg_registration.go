@@ -26,6 +26,16 @@ func (r *PgParticipantRepository) HasRole(ctx context.Context, userID, eventID u
 	return exists, err
 }
 
+func (r *PgParticipantRepository) GetRole(ctx context.Context, userID, eventID uuid.UUID) (string, error) {
+	const q = `SELECT role FROM event_roles WHERE user_id = $1 AND event_id = $2 LIMIT 1`
+	var role string
+	err := r.db.GetContext(ctx, &role, q, userID, eventID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "unregistered", nil
+	}
+	return role, err
+}
+
 func (r *PgParticipantRepository) GrantParticipantRole(ctx context.Context, userID, eventID uuid.UUID) (time.Time, error) {
 	const q = `
 		INSERT INTO event_roles (user_id, event_id, role)

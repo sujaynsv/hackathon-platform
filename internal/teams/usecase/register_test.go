@@ -33,6 +33,13 @@ func (r *registrationParticipants) HasRole(_ context.Context, _, _ uuid.UUID, ro
 	return r.roles[role], nil
 }
 
+func (r *registrationParticipants) GetRole(_ context.Context, _, _ uuid.UUID) (string, error) {
+	if r.roles["participant"] {
+		return "participant", nil
+	}
+	return "unregistered", nil
+}
+
 func (r *registrationParticipants) GrantParticipantRole(context.Context, uuid.UUID, uuid.UUID) (time.Time, error) {
 	if r.grantErr != nil {
 		return time.Time{}, r.grantErr
