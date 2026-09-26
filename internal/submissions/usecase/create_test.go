@@ -94,6 +94,11 @@ func (m *mockSubmissionRepo) Update(ctx context.Context, sub *domain.Submission)
 	return args.Error(0)
 }
 
+func (m *mockSubmissionRepo) ListGallery(ctx context.Context, eventID uuid.UUID, trackID *uuid.UUID, page, pageSize int) ([]*port.SubmissionGalleryRow, int, error) {
+	args := m.Called(ctx, eventID, trackID, page, pageSize)
+	return args.Get(0).([]*port.SubmissionGalleryRow), args.Int(1), args.Error(2)
+}
+
 func TestCreateSubmission_Success(t *testing.T) {
 	events := new(mockEventReader)
 	teams := new(mockTeamReader)

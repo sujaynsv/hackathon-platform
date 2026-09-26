@@ -14,6 +14,26 @@ type SubmissionRepository interface {
 	FindByTeamAndEvent(ctx context.Context, teamID, eventID uuid.UUID) (*domain.Submission, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*domain.Submission, error)
 	Update(ctx context.Context, sub *domain.Submission) error
+	ListGallery(ctx context.Context, eventID uuid.UUID, trackID *uuid.UUID, page, pageSize int) ([]*SubmissionGalleryRow, int, error)
+}
+
+type SubmissionGalleryRow struct {
+	SubmissionID uuid.UUID
+	Title        string
+	Status       string
+	TeamID       uuid.UUID
+	TeamName     string
+	EventID      uuid.UUID
+	TrackID      *uuid.UUID
+	TrackName    *string
+	RepoURL      *string
+	DemoURL      *string
+	VideoURL     *string
+	CoverURL     *string
+	FinalScore   *float64
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	SubmittedAt  *time.Time
 }
 
 type UploadRepository interface {
@@ -56,4 +76,20 @@ type TrackSummary struct {
 	ID      uuid.UUID
 	EventID uuid.UUID
 	Name    string
+}
+
+type AuditLogWriter interface {
+	Write(ctx context.Context, entry *AuditEntry) error
+}
+
+type AuditEntry struct {
+	ActorID      uuid.UUID
+	Action       string
+	ResourceType string
+	ResourceID   uuid.UUID
+	Changes      map[string]any
+}
+
+type UserReader interface {
+	IsAdmin(ctx context.Context, userID uuid.UUID) (bool, error)
 }

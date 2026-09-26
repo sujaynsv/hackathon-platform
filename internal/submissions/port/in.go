@@ -99,3 +99,23 @@ type ListFilesUseCase interface {
 	ListFiles(ctx context.Context, submissionID uuid.UUID) ([]*UploadDTO, error)
 }
 
+type ListSubmissionsQuery struct {
+	EventSlug string
+	TrackID   *uuid.UUID
+	Page      int
+	PageSize  int
+}
+
+type ListSubmissionsUseCase interface {
+	List(ctx context.Context, query ListSubmissionsQuery) ([]*SubmissionDTO, int, error)
+}
+
+type DisqualifyCommand struct {
+	AdminID      uuid.UUID
+	SubmissionID uuid.UUID
+	Reason       string
+}
+
+type DisqualifyUseCase interface {
+	Disqualify(ctx context.Context, cmd DisqualifyCommand) error
+}
