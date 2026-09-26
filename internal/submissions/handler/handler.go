@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/dogfood-platform/dogfood/internal/shared/middleware"
@@ -13,11 +14,13 @@ import (
 )
 
 type SubmissionHandler struct {
-	create port.CreateSubmissionUseCase
-	update port.UpdateSubmissionUseCase
-	submit port.FinalSubmitUseCase
-	upload port.UploadUseCase
-	list   port.ListFilesUseCase
+	create     port.CreateSubmissionUseCase
+	update     port.UpdateSubmissionUseCase
+	submit     port.FinalSubmitUseCase
+	upload     port.UploadUseCase
+	listFiles  port.ListFilesUseCase
+	listGallery port.ListSubmissionsUseCase
+	disqualify port.DisqualifyUseCase
 }
 
 func NewSubmissionHandler(
@@ -25,14 +28,18 @@ func NewSubmissionHandler(
 	update port.UpdateSubmissionUseCase,
 	submit port.FinalSubmitUseCase,
 	upload port.UploadUseCase,
-	list port.ListFilesUseCase,
+	listFiles port.ListFilesUseCase,
+	listGallery port.ListSubmissionsUseCase,
+	disqualify port.DisqualifyUseCase,
 ) *SubmissionHandler {
 	return &SubmissionHandler{
-		create: create,
-		update: update,
-		submit: submit,
-		upload: upload,
-		list:   list,
+		create:      create,
+		update:      update,
+		submit:      submit,
+		upload:      upload,
+		listFiles:   listFiles,
+		listGallery: listGallery,
+		disqualify:  disqualify,
 	}
 }
 
@@ -42,6 +49,8 @@ func (h *SubmissionHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/submissions/{id}/submit", h.SubmitDraft)
 	r.Post("/submissions/{id}/upload", h.UploadFile)
 	r.Get("/submissions/{id}/files", h.ListFiles)
+	r.Get("/events/{slug}/submissions", h.ListGallery)
+	r.Post("/submissions/{id}/disqualify", h.Disqualify)
 }
 
 type createDraftRequest struct {
@@ -236,10 +245,93 @@ func (h *SubmissionHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.list.ListFiles(r.Context(), subID)
+	res, err := h.listFiles.ListFiles(r.Context(), subID)
 	if err != nil {
 		response.HandleDomainError(w, r, err)
 		return
 	}
 	response.OK(w, r, res)
+}
+
+func (h *SubmissionHandler) ListGallery(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if page < 1 {
+		page = 1
+	}
+	pageSize, _ := strconv.Atoi(r.URL.Query().Get("pageSize"))
+	if pageSize < 1 {
+		pageSize = 50
+	}
+
+	var trackID *uuid.UUID
+	trackIDStr := r.URL.Query().Get("trackId")
+	if trackIDStr != "" {
+		if id, err := uuid.Parse(trackIDStr); err == nil {
+			trackID = &id
+		}
+	}
+
+	query := port.ListSubmissionsQuery{
+		EventSlug: slug,
+		TrackID:   trackID,
+		Page:      page,
+		PageSize:  pageSize,
+	}
+
+	dtos, total, err := h.listGallery.List(r.Context(), query)
+	if err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
+
+	totalPages := total / pageSize
+	if total%pageSize != 0 {
+		totalPages++
+	}
+
+	response.OKList(w, r, dtos, page, totalPages, total)
+}
+
+type disqualifyRequest struct {
+	Reason string `json:"reason"`
+}
+
+func (h *SubmissionHandler) Disqualify(w http.ResponseWriter, r *http.Request) {
+	subID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid submission ID")
+		return
+	}
+
+	userIDStr := middleware.GetUserID(r.Context())
+	adminID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		response.Unauthorized(w, r, "UNAUTHORIZED", "invalid user token")
+		return
+	}
+
+	var req disqualifyRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid request body")
+		return
+	}
+	if req.Reason == "" {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "reason is required")
+		return
+	}
+
+	cmd := port.DisqualifyCommand{
+		AdminID:      adminID,
+		SubmissionID: subID,
+		Reason:       req.Reason,
+	}
+
+	err = h.disqualify.Disqualify(r.Context(), cmd)
+	if err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
+
+	response.OK(w, r, map[string]string{"status": "disqualified"})
 }

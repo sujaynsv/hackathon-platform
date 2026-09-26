@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/dogfood-platform/dogfood/internal/submissions/domain"
+	"github.com/dogfood-platform/dogfood/internal/submissions/port"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -159,4 +161,92 @@ func (r *PgSubmissionRepository) toDomain(row *submissionRow) *domain.Submission
 		sub.UpdatedAt = row.UpdatedAt.Time
 	}
 	return sub
+}
+
+type galleryRow struct {
+	ID          uuid.UUID     `db:"id"`
+	Title       string        `db:"title"`
+	Status      string        `db:"status"`
+	TeamID      uuid.UUID     `db:"team_id"`
+	TeamName    string        `db:"team_name"`
+	EventID     uuid.UUID     `db:"event_id"`
+	TrackID     *uuid.UUID    `db:"track_id"`
+	TrackName   *string       `db:"track_name"`
+	RepoURL     *string       `db:"repo_url"`
+	DemoURL     *string       `db:"demo_url"`
+	VideoURL    *string       `db:"video_url"`
+	CoverURL    *string       `db:"cover_image_url"`
+	FinalScore  *float64      `db:"final_score"`
+	CreatedAt   sql.NullTime  `db:"created_at"`
+	UpdatedAt   sql.NullTime  `db:"updated_at"`
+	SubmittedAt *sql.NullTime `db:"submitted_at"`
+	TotalCount  int           `db:"total_count"`
+}
+
+func (r *PgSubmissionRepository) ListGallery(ctx context.Context, eventID uuid.UUID, trackID *uuid.UUID, page, pageSize int) ([]*port.SubmissionGalleryRow, int, error) {
+	q := `
+		SELECT 
+			s.id, s.title, s.status, s.team_id, t.name AS team_name, s.event_id, 
+			s.track_id, tr.name AS track_name, s.repo_url, s.demo_url, s.video_url, s.cover_image_url, 
+			s.final_score, s.created_at, s.updated_at, s.submitted_at,
+			COUNT(*) OVER() AS total_count
+		FROM submissions s
+		LEFT JOIN teams t ON t.id = s.team_id
+		LEFT JOIN tracks tr ON tr.id = s.track_id
+		WHERE s.event_id = $1 AND s.status IN ('submitted', 'disqualified')
+	`
+	args := []interface{}{eventID}
+	
+	if trackID != nil {
+		args = append(args, *trackID)
+		q += ` AND s.track_id = $2`
+	}
+
+	q += ` ORDER BY s.final_score DESC NULLS LAST, s.created_at DESC`
+
+	offset := (page - 1) * pageSize
+	args = append(args, pageSize, offset)
+	
+	if trackID != nil {
+		q += ` LIMIT $3 OFFSET $4`
+	} else {
+		q += ` LIMIT $2 OFFSET $3`
+	}
+
+	var rows []galleryRow
+	if err := r.db.SelectContext(ctx, &rows, q, args...); err != nil {
+		return nil, 0, err
+	}
+
+	if len(rows) == 0 {
+		return []*port.SubmissionGalleryRow{}, 0, nil
+	}
+
+	total := rows[0].TotalCount
+	result := make([]*port.SubmissionGalleryRow, len(rows))
+	for i, row := range rows {
+		var submittedAt *time.Time
+		if row.SubmittedAt != nil && row.SubmittedAt.Valid {
+			submittedAt = &row.SubmittedAt.Time
+		}
+		result[i] = &port.SubmissionGalleryRow{
+			SubmissionID: row.ID,
+			Title:        row.Title,
+			Status:       row.Status,
+			TeamID:       row.TeamID,
+			TeamName:     row.TeamName,
+			EventID:      row.EventID,
+			TrackID:      row.TrackID,
+			TrackName:    row.TrackName,
+			RepoURL:      row.RepoURL,
+			DemoURL:      row.DemoURL,
+			VideoURL:     row.VideoURL,
+			CoverURL:     row.CoverURL,
+			FinalScore:   row.FinalScore,
+			CreatedAt:    row.CreatedAt.Time,
+			UpdatedAt:    row.UpdatedAt.Time,
+			SubmittedAt:  submittedAt,
+		}
+	}
+	return result, total, nil
 }

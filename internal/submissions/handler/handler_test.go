@@ -53,7 +53,7 @@ func setupRouter(upload *mockUploadSvc, list *mockListSvc, userID uuid.UUID) *ch
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	})
-	h := handler.NewSubmissionHandler(nil, nil, nil, upload, list)
+	h := handler.NewSubmissionHandler(nil, nil, nil, upload, list, nil, nil)
 	h.RegisterRoutes(r)
 	return r
 }
