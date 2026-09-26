@@ -120,7 +120,13 @@ func (r *PgEventRepository) Save(ctx context.Context, event *domain.Event) error
 }
 
 func (r *PgEventRepository) FindBySlug(ctx context.Context, slug string) (*domain.Event, error) {
-	const q = `SELECT * FROM events WHERE slug = $1`
+	const q = `
+		SELECT id, slug, title, description, banner_url, created_by,
+			status, normalization_status, registration_opens_at, registration_closes_at,
+			submission_deadline_at, judging_deadline_at, voting_opens_at, voting_closes_at,
+			max_team_size, created_at, updated_at
+		FROM events WHERE slug = $1
+	`
 	var row eventRow
 	err := r.db.GetContext(ctx, &row, q, slug)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -141,7 +147,10 @@ func (r *PgEventRepository) ExistsBySlug(ctx context.Context, slug string) (bool
 
 func (r *PgEventRepository) ListPublished(ctx context.Context, page, pageSize int) ([]*domain.Event, int, error) {
 	const q = `
-		SELECT *, COUNT(*) OVER() AS total_count
+		SELECT id, slug, title, description, banner_url, created_by,
+			status, normalization_status, registration_opens_at, registration_closes_at,
+		submission_deadline_at, judging_deadline_at, voting_opens_at, voting_closes_at,
+		max_team_size, created_at, updated_at, COUNT(*) OVER() AS total_count
 		FROM events
 		WHERE status != 'draft'
 		ORDER BY created_at DESC
@@ -174,7 +183,10 @@ func (r *PgEventRepository) ListPublished(ctx context.Context, page, pageSize in
 func (r *PgEventRepository) GetEventDetail(ctx context.Context, slug string, callerID *uuid.UUID) (*domain.Event, []domain.Track, *string, error) {
 	const q = `
 		SELECT
-			e.*,
+			e.id, e.slug, e.title, e.description, e.banner_url, e.created_by,
+			e.status, e.normalization_status, e.registration_opens_at, e.registration_closes_at,
+			e.submission_deadline_at, e.judging_deadline_at, e.voting_opens_at, e.voting_closes_at,
+			e.max_team_size, e.created_at, e.updated_at,
 			t.id AS track_id, t.name AS track_name, t.description AS track_desc, t.created_at AS track_created_at,
 			er.role AS my_role
 		FROM events e

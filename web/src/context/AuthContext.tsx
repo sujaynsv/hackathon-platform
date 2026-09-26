@@ -35,15 +35,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
       return;
     }
+
     apiClient
       .refresh(storedRefresh)
-      .then(() => {
-        // After refresh we don't have the user object back — 
-        // for now mark as loading done. Future: add /auth/me endpoint.
+      .then((tokens) => {
+        setUser(tokens.user);
         setIsLoading(false);
       })
       .catch(() => {
         sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+        setUser(null);
         setIsLoading(false);
       });
   }, []);

@@ -49,9 +49,10 @@ func TestRefreshService_ValidToken_ReturnsNewTokenPair(t *testing.T) {
 	userRepo := &mockUserRepo{
 		exists: true,
 		saved: &domain.User{
-			ID:       userID,
-			Email:    "user@example.com",
-			IsActive: true,
+			ID:          userID,
+			Email:       "user@example.com",
+			DisplayName: "Refresh User",
+			IsActive:    true,
 		},
 	}
 	refreshRepo := &mockRefreshRepoAdvanced{rt: rt}
@@ -61,6 +62,9 @@ func TestRefreshService_ValidToken_ReturnsNewTokenPair(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "access_token", pair.AccessToken)
 	assert.Equal(t, "refresh_token", pair.RefreshToken)
+	assert.Equal(t, userID.String(), pair.User.ID)
+	assert.Equal(t, "user@example.com", pair.User.Email)
+	assert.Equal(t, "Refresh User", pair.User.DisplayName)
 
 	// Should be revoked now
 	assert.NotNil(t, rt.RevokedAt)

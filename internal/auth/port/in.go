@@ -54,8 +54,9 @@ type RefreshCommand struct {
 }
 
 type TokenPair struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
+	AccessToken  string  `json:"accessToken"`
+	RefreshToken string  `json:"refreshToken"`
+	User         UserDTO `json:"user"`
 }
 
 type AuthResponse struct {

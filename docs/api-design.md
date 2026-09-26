@@ -180,17 +180,27 @@ Also sets `Set-Cookie: refresh_token=<token>; HttpOnly; SameSite=Strict; Max-Age
 ### POST /auth/refresh
 Exchange refresh token for a new access token.
 
-**Auth required:** No (uses httpOnly cookie)
+**Auth required:** No (uses the refresh token in the request body)
 
-**Request:** No body. Reads `refresh_token` cookie automatically.
+**Request:**
+```json
+{ "refreshToken": "opaque-refresh-token" }
+```
 
 **Response 200:**
 ```json
 {
   "data": {
     "accessToken": "eyJhbGci...",
-    "tokenType": "Bearer",
-    "expiresIn": 86400
+    "refreshToken": "rotated-refresh-token",
+    "user": {
+      "id": "uuid",
+      "email": "alice@example.com",
+      "displayName": "Alice Chen",
+      "avatarUrl": null,
+      "isAdmin": false,
+      "createdAt": "2026-09-14T08:00:00Z"
+    }
   }
 }
 ```

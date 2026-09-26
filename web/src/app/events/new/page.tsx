@@ -81,7 +81,7 @@ export default function CreateEventPage() {
             onChange={handleChange}
             placeholder="e.g. dogfood-2026"
             className={styles.input}
-            pattern="^[a-z0-9-]+$"
+            pattern="^[a-z0-9]+(-[a-z0-9]+)*$"
             title="Only lowercase letters, numbers, and hyphens are allowed"
           />
           <span className={styles.helpText}>This will be used in the URL: /events/your-slug</span>

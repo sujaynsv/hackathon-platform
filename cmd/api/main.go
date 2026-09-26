@@ -30,7 +30,9 @@ import (
 	subHandlerPkg "github.com/dogfood-platform/dogfood/internal/submissions/handler"
 	subRepo "github.com/dogfood-platform/dogfood/internal/submissions/repository"
 	subUsecase "github.com/dogfood-platform/dogfood/internal/submissions/usecase"
+	teamsHandlerPkg "github.com/dogfood-platform/dogfood/internal/teams/handler"
 	teamRepo "github.com/dogfood-platform/dogfood/internal/teams/repository"
+	teamsUsecase "github.com/dogfood-platform/dogfood/internal/teams/usecase"
 )
 
 func main() {
@@ -114,6 +116,13 @@ func main() {
 	submitSubSvc := subUsecase.NewFinalSubmitService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
 	subHandler := subHandlerPkg.NewSubmissionHandler(createSubSvc, updateSubSvc, submitSubSvc)
 
+	// Event registration and unregistration
+	registrationEvents := teamRepo.NewPgEventReader(db)
+	participantsRepo := teamRepo.NewPgParticipantRepository(db)
+	registerForEventSvc := teamsUsecase.NewRegisterService(registrationEvents, participantsRepo)
+	unregisterSvc := teamsUsecase.NewUnregisterService(registrationEvents, participantsRepo, teamsRepo)
+	teamsHandler := teamsHandlerPkg.NewTeamsHandler(registerForEventSvc, unregisterSvc)
+
 	// 6. Wire Chi router
 	r := chi.NewRouter()
 
@@ -145,6 +154,12 @@ func main() {
 			r.Use(rateLimiter.RateLimit(5, 15*time.Minute))
 			r.Mount("/auth", authHandler.Routes())
 			webAuthnHandler.RegisterPublicRoutes(r)
+		})
+
+		r.Group(func(r chi.Router) {
+			// Public reads are used by server-rendered pages and have a separate, higher limit.
+			r.Use(middleware.OptionalJWTMiddleware(cfg.JWTSecret, redisCache))
+			r.Use(rateLimiter.RateLimit(120, time.Minute))
 			eventsHandler.RegisterPublicRoutes(r)
 		})
 
@@ -154,7 +169,7 @@ func main() {
 			webAuthnHandler.RegisterProtectedRoutes(r)
 			subHandler.RegisterRoutes(r)
 			eventsHandler.RegisterProtectedRoutes(r)
-			// teams.Mount(r, teamsHandler)
+			teamsHandler.RegisterRoutes(r)
 			// judging.Mount(r, judgingHandler)
 			// voting.Mount(r, votingHandler)
 			// admin.Mount(r, adminHandler)

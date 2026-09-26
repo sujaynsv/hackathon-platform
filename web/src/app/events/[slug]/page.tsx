@@ -54,11 +54,6 @@ export default async function EventDetailPage({ params }: Props) {
               )}
             </div>
           </div>
-          {event.myRole === 'organizer' && (
-            <Link href={`/events/${event.slug}/edit`} className={styles.primaryButton}>
-              Edit Event
-            </Link>
-          )}
         </div>
       </header>
 
