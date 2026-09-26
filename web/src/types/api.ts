@@ -59,6 +59,73 @@ export interface VerifyEmailResponse {
   message: string;
 }
 
+// ---- Events ----
+
+export type EventStatus = 
+  | 'draft'
+  | 'registration_open'
+  | 'submissions_open'
+  | 'judging'
+  | 'voting'
+  | 'results_published'
+  | 'archived';
+
+export interface EventDTO {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string;
+  bannerUrl?: string;
+  organizerId: string;
+  status: EventStatus;
+  maxTeamSize: number;
+  registrationOpensAt?: string;
+  registrationClosesAt?: string;
+  submissionDeadlineAt?: string;
+  judgingDeadlineAt?: string;
+  votingOpensAt?: string;
+  votingClosesAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrackDTO {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface EventDetailDTO extends EventDTO {
+  tracks: TrackDTO[];
+  myRole?: string;
+}
+
+export interface CreateEventRequest {
+  slug: string;
+  title: string;
+  description?: string;
+  maxTeamSize: number;
+  registrationOpensAt?: string;
+  registrationClosesAt?: string;
+  submissionDeadlineAt?: string;
+  judgingDeadlineAt?: string;
+  votingOpensAt?: string;
+  votingClosesAt?: string;
+}
+
+export interface UpdateEventRequest {
+  title?: string;
+  description?: string;
+  status?: EventStatus;
+  maxTeamSize?: number;
+  registrationOpensAt?: string;
+  registrationClosesAt?: string;
+  submissionDeadlineAt?: string;
+  judgingDeadlineAt?: string;
+  votingOpensAt?: string;
+  votingClosesAt?: string;
+}
+
 // ---- Submissions ----
 
 export interface CreateSubmissionRequest {
