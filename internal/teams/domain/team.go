@@ -21,6 +21,7 @@ var (
 	ErrInvalidTeamName = errors.New("team name is required")
 	ErrAlreadyOnTeam   = errors.New("user is already on a team in this event")
 	ErrTeamNameTaken   = errors.New("team name already taken in this event")
+	ErrInviteCodeTaken = errors.New("invite code already exists")
 	ErrEventNotRegOpen = errors.New("team creation only allowed during registration_open")
 	ErrNotParticipant  = errors.New("user must be a registered participant to create a team")
 )
