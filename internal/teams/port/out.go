@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/dogfood-platform/dogfood/internal/teams/domain"
 	"github.com/google/uuid"
 )
 
@@ -26,4 +27,10 @@ type ParticipantRepository interface {
 
 type TeamMemberRepository interface {
 	HasTeamInEvent(ctx context.Context, userID, eventID uuid.UUID) (bool, error)
+}
+
+type TeamRepository interface {
+	CreateWithLeader(ctx context.Context, team *domain.Team, leader *domain.TeamMember) (*domain.Team, error)
+	FindByEventAndUser(ctx context.Context, eventID, userID uuid.UUID) (*domain.Team, error)
+	ExistsByName(ctx context.Context, eventID uuid.UUID, name string) (bool, error)
 }
