@@ -138,6 +138,11 @@ func main() {
 	unregisterSvc := teamsUsecase.NewUnregisterService(registrationEvents, participantsRepo, teamsRepo)
 	teamsHandler := teamsHandlerPkg.NewTeamsHandler(registerForEventSvc, unregisterSvc)
 
+	teamsWriteRepo := teamRepo.NewPgTeamRepository(db)
+	createTeamSvc := teamsUsecase.NewCreateTeamService(registrationEvents, participantsRepo, teamsWriteRepo)
+	getMyTeamSvc := teamsUsecase.NewGetMyTeamService(registrationEvents, teamsWriteRepo)
+	teamHandler := teamsHandlerPkg.NewTeamHandler(createTeamSvc, getMyTeamSvc)
+
 	// 6. Wire Chi router
 	r := chi.NewRouter()
 
@@ -185,6 +190,7 @@ func main() {
 			subHandler.RegisterRoutes(r)
 			eventsHandler.RegisterProtectedRoutes(r)
 			teamsHandler.RegisterRoutes(r)
+			teamHandler.RegisterRoutes(r)
 			// judging.Mount(r, judgingHandler)
 			// voting.Mount(r, votingHandler)
 			// admin.Mount(r, adminHandler)

@@ -35,6 +35,13 @@ func (r *flowParticipants) HasRole(_ context.Context, userID, _ uuid.UUID, role 
 	return r.roles[userID][role], nil
 }
 
+func (r *flowParticipants) GetRole(_ context.Context, userID, _ uuid.UUID) (string, error) {
+	if r.roles[userID]["participant"] {
+		return "participant", nil
+	}
+	return "unregistered", nil
+}
+
 func (r *flowParticipants) GrantParticipantRole(_ context.Context, userID, _ uuid.UUID) (time.Time, error) {
 	if r.roles[userID] == nil {
 		r.roles[userID] = make(map[string]bool)
