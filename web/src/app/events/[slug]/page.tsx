@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import type { EventDetail } from '@/types/events';
+import { EventActions } from './EventActions';
 import styles from './detail.module.css';
 
 interface Props {
@@ -103,16 +104,7 @@ export default async function EventDetailPage({ params }: Props) {
             )}
           </dl>
           
-          <div className={styles.actions}>
-            {event.status === 'registration_open' && !event.myRole && (
-              <button className={styles.primaryButton}>Register Now</button>
-            )}
-            {event.status === 'submissions_open' && (
-               <Link href={`/events/${event.slug}/submissions/new`} className={styles.primaryButton}>
-                 Submit Project
-               </Link>
-            )}
-          </div>
+          <EventActions event={event} />
         </section>
       </div>
     </div>
