@@ -34,6 +34,10 @@ import (
 	teamsHandlerPkg "github.com/dogfood-platform/dogfood/internal/teams/handler"
 	teamRepo "github.com/dogfood-platform/dogfood/internal/teams/repository"
 	teamsUsecase "github.com/dogfood-platform/dogfood/internal/teams/usecase"
+
+	judgingHandlerPkg "github.com/dogfood-platform/dogfood/internal/judging/handler"
+	judgingRepo "github.com/dogfood-platform/dogfood/internal/judging/repository"
+	judgingUsecase "github.com/dogfood-platform/dogfood/internal/judging/usecase"
 )
 
 func main() {
@@ -143,6 +147,17 @@ func main() {
 	getMyTeamSvc := teamsUsecase.NewGetMyTeamService(registrationEvents, teamsWriteRepo)
 	teamHandler := teamsHandlerPkg.NewTeamHandler(createTeamSvc, getMyTeamSvc)
 
+	// Judging module
+	jAssignmentsRepo := judgingRepo.NewPgAssignmentRepository(db)
+	jReaders := judgingRepo.NewPgReaders(db)
+	jRubricReader := judgingRepo.NewPgRubricReader(db)
+	jScoreReader := judgingRepo.NewPgScoreReader(db)
+
+	jGetQueueSvc := judgingUsecase.NewGetQueueService(jAssignmentsRepo)
+	jGetDetailSvc := judgingUsecase.NewGetDetailService(jAssignmentsRepo, jReaders, jRubricReader, jScoreReader)
+	
+	judgingHandler := judgingHandlerPkg.NewJudgingHandler(jGetQueueSvc, jGetDetailSvc)
+
 	// 6. Wire Chi router
 	r := chi.NewRouter()
 
@@ -191,7 +206,7 @@ func main() {
 			eventsHandler.RegisterProtectedRoutes(r)
 			teamsHandler.RegisterRoutes(r)
 			teamHandler.RegisterRoutes(r)
-			// judging.Mount(r, judgingHandler)
+			judgingHandler.RegisterRoutes(r)
 			// voting.Mount(r, votingHandler)
 			// admin.Mount(r, adminHandler)
 		})
