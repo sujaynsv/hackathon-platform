@@ -119,6 +119,7 @@ func main() {
 	uploadRepo := subRepo.NewPgUploadRepository(db)
 
 	createSubSvc := subUsecase.NewCreateSubmissionService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
+	getSubSvc := subUsecase.NewGetSubmissionService(subsRepo)
 	updateSubSvc := subUsecase.NewUpdateSubmissionService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
 	submitSubSvc := subUsecase.NewFinalSubmitService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
 	uploadSubSvc := subUsecase.NewUploadService(subEventsReader, teamsRepo, subsRepo, uploadRepo, minioStorage)
@@ -128,7 +129,7 @@ func main() {
 	listGallerySvc := subUsecase.NewListSubmissionsService(subsRepo, subEventsReader)
 	disqualifySvc := subUsecase.NewDisqualifyService(subsRepo, subUserReader, subAuditLog)
 
-	subHandler := subHandlerPkg.NewSubmissionHandler(createSubSvc, updateSubSvc, submitSubSvc, uploadSubSvc, uploadSubSvc, listGallerySvc, disqualifySvc)
+	subHandler := subHandlerPkg.NewSubmissionHandler(createSubSvc, getSubSvc, updateSubSvc, submitSubSvc, uploadSubSvc, uploadSubSvc, listGallerySvc, disqualifySvc)
 
 	// Event registration and unregistration
 	registrationEvents := teamRepo.NewPgEventReader(db)

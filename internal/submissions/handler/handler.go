@@ -14,17 +14,19 @@ import (
 )
 
 type SubmissionHandler struct {
-	create     port.CreateSubmissionUseCase
-	update     port.UpdateSubmissionUseCase
-	submit     port.FinalSubmitUseCase
-	upload     port.UploadUseCase
-	listFiles  port.ListFilesUseCase
+	create      port.CreateSubmissionUseCase
+	get         port.GetSubmissionUseCase
+	update      port.UpdateSubmissionUseCase
+	submit      port.FinalSubmitUseCase
+	upload      port.UploadUseCase
+	listFiles   port.ListFilesUseCase
 	listGallery port.ListSubmissionsUseCase
-	disqualify port.DisqualifyUseCase
+	disqualify  port.DisqualifyUseCase
 }
 
 func NewSubmissionHandler(
 	create port.CreateSubmissionUseCase,
+	get port.GetSubmissionUseCase,
 	update port.UpdateSubmissionUseCase,
 	submit port.FinalSubmitUseCase,
 	upload port.UploadUseCase,
@@ -34,6 +36,7 @@ func NewSubmissionHandler(
 ) *SubmissionHandler {
 	return &SubmissionHandler{
 		create:      create,
+		get:         get,
 		update:      update,
 		submit:      submit,
 		upload:      upload,
@@ -45,6 +48,7 @@ func NewSubmissionHandler(
 
 func (h *SubmissionHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/events/{slug}/submissions", h.CreateDraft)
+	r.Get("/submissions/{id}", h.GetSubmission)
 	r.Patch("/submissions/{id}", h.UpdateDraft)
 	r.Post("/submissions/{id}/submit", h.SubmitDraft)
 	r.Post("/submissions/{id}/upload", h.UploadFile)
@@ -100,6 +104,22 @@ func (h *SubmissionHandler) CreateDraft(w http.ResponseWriter, r *http.Request) 
 	}
 
 	response.Created(w, r, result)
+}
+
+func (h *SubmissionHandler) GetSubmission(w http.ResponseWriter, r *http.Request) {
+	subID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid submission ID")
+		return
+	}
+
+	sub, err := h.get.Get(r.Context(), subID)
+	if err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
+
+	response.OK(w, r, sub)
 }
 
 type updateDraftRequest struct {
