@@ -2,6 +2,8 @@ package port
 
 import (
 	"context"
+	"io"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -68,3 +70,32 @@ type SubmitCommand struct {
 	CallerID     uuid.UUID
 	SubmissionID uuid.UUID
 }
+
+type UploadDTO struct {
+	ID           uuid.UUID `json:"id"`
+	SubmissionID uuid.UUID `json:"submissionId"`
+	URL          string    `json:"url"`
+	ContentType  string    `json:"contentType"`
+	SizeBytes    int64     `json:"sizeBytes"`
+	Type         string    `json:"type"`
+	UploadedAt   time.Time `json:"uploadedAt"`
+}
+
+type UploadCommand struct {
+	CallerID     uuid.UUID
+	SubmissionID uuid.UUID
+	FileName     string
+	ContentType  string
+	SizeBytes    int64
+	UploadType   string
+	File         io.Reader
+}
+
+type UploadUseCase interface {
+	Upload(ctx context.Context, cmd UploadCommand) (*UploadDTO, error)
+}
+
+type ListFilesUseCase interface {
+	ListFiles(ctx context.Context, submissionID uuid.UUID) ([]*UploadDTO, error)
+}
+

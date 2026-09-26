@@ -23,6 +23,7 @@ import (
 	"github.com/dogfood-platform/dogfood/internal/shared/database"
 	"github.com/dogfood-platform/dogfood/internal/shared/email"
 	"github.com/dogfood-platform/dogfood/internal/shared/middleware"
+	"github.com/dogfood-platform/dogfood/internal/shared/storage"
 
 	eventsHandlerPkg "github.com/dogfood-platform/dogfood/internal/events/handler"
 	eventRepo "github.com/dogfood-platform/dogfood/internal/events/repository"
@@ -50,7 +51,11 @@ func main() {
 	rateLimiter := middleware.NewRateLimiter(rdb)
 
 	// STUBS: 4-5
-	// mc := storage.MustConnect(cfg.MinioEndpoint, cfg.MinioAccessKey, cfg.MinioSecretKey)
+	minioStorage, err := storage.NewMinIOStorage(cfg.MinioEndpoint, cfg.MinioAccessKey, cfg.MinioSecretKey, cfg.MinioUseSSL)
+	if err != nil {
+		slog.Error("failed to connect to minio", "err", err)
+		panic(err)
+	}
 
 	// Initialize Auth dependencies
 	userRepo := repository.NewUserRepository(db)
@@ -111,10 +116,14 @@ func main() {
 	teamsRepo := teamRepo.NewPgTeamReader(db)
 	tracksRepo := eventRepo.NewPgTrackReader(db)
 	subsRepo := subRepo.NewPgSubmissionRepository(db)
+	uploadRepo := subRepo.NewPgUploadRepository(db)
+
 	createSubSvc := subUsecase.NewCreateSubmissionService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
 	updateSubSvc := subUsecase.NewUpdateSubmissionService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
 	submitSubSvc := subUsecase.NewFinalSubmitService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
-	subHandler := subHandlerPkg.NewSubmissionHandler(createSubSvc, updateSubSvc, submitSubSvc)
+	uploadSubSvc := subUsecase.NewUploadService(subEventsReader, teamsRepo, subsRepo, uploadRepo, minioStorage)
+
+	subHandler := subHandlerPkg.NewSubmissionHandler(createSubSvc, updateSubSvc, submitSubSvc, uploadSubSvc, uploadSubSvc)
 
 	// Event registration and unregistration
 	registrationEvents := teamRepo.NewPgEventReader(db)
