@@ -13,7 +13,7 @@ type PgTrackRepository struct {
 }
 
 func NewPgTrackRepository(db *sqlx.DB) *PgTrackRepository {
-	return &PgTrackRepository{db: db}
+	return &PgTrackRepository{db: db.Unsafe()}
 }
 
 func (r *PgTrackRepository) FindByEventID(ctx context.Context, eventID uuid.UUID) ([]*domain.Track, error) {

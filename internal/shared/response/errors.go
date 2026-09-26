@@ -2,6 +2,7 @@ package response
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -34,6 +35,7 @@ type apiError struct {
 // HandleDomainError maps a domain/service error to the correct HTTP status + error envelope.
 // This is the single place where error-to-HTTP mapping lives — never duplicate this logic in handlers.
 func HandleDomainError(w http.ResponseWriter, r *http.Request, err error) {
+	log.Printf("Domain error: %v", err)
 	ae := mapError(err)
 	writeJSON(w, ae.status, ErrorResponse{
 		Error: ErrorBody{Code: ae.code, Message: ae.message},

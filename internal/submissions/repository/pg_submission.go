@@ -15,7 +15,7 @@ type PgSubmissionRepository struct {
 }
 
 func NewPgSubmissionRepository(db *sqlx.DB) *PgSubmissionRepository {
-	return &PgSubmissionRepository{db: db}
+	return &PgSubmissionRepository{db: db.Unsafe()}
 }
 
 type submissionRow struct {
