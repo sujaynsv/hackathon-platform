@@ -17,7 +17,7 @@ type PgEventRepository struct {
 }
 
 func NewPgEventRepository(db *sqlx.DB) *PgEventRepository {
-	return &PgEventRepository{db: db}
+	return &PgEventRepository{db: db.Unsafe()}
 }
 
 func toEventRow(e *domain.Event) map[string]interface{} {
