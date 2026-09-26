@@ -19,11 +19,12 @@ func NewPgEventReader(db *sqlx.DB) *PgEventReader {
 }
 
 func (r *PgEventReader) FindSummaryBySlug(ctx context.Context, slug string) (*port.EventSummary, error) {
-	const q = `SELECT id, status, slug FROM events WHERE slug = $1`
+	const q = `SELECT id, status, slug, submission_deadline_at FROM events WHERE slug = $1`
 	var row struct {
-		ID     uuid.UUID `db:"id"`
-		Status string    `db:"status"`
-		Slug   string    `db:"slug"`
+		ID                   uuid.UUID    `db:"id"`
+		Status               string       `db:"status"`
+		Slug                 string       `db:"slug"`
+		SubmissionDeadlineAt sql.NullTime `db:"submission_deadline_at"`
 	}
 	err := r.db.GetContext(ctx, &row, q, slug)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -32,11 +33,41 @@ func (r *PgEventReader) FindSummaryBySlug(ctx context.Context, slug string) (*po
 	if err != nil {
 		return nil, err
 	}
-	return &port.EventSummary{
+	summary := &port.EventSummary{
 		ID:     row.ID,
 		Status: row.Status,
 		Slug:   row.Slug,
-	}, nil
+	}
+	if row.SubmissionDeadlineAt.Valid {
+		summary.SubmissionDeadlineAt = &row.SubmissionDeadlineAt.Time
+	}
+	return summary, nil
+}
+
+func (r *PgEventReader) FindSummaryByID(ctx context.Context, id uuid.UUID) (*port.EventSummary, error) {
+	const q = `SELECT id, status, slug, submission_deadline_at FROM events WHERE id = $1`
+	var row struct {
+		ID                   uuid.UUID    `db:"id"`
+		Status               string       `db:"status"`
+		Slug                 string       `db:"slug"`
+		SubmissionDeadlineAt sql.NullTime `db:"submission_deadline_at"`
+	}
+	err := r.db.GetContext(ctx, &row, q, id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, errors.New("event not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	summary := &port.EventSummary{
+		ID:     row.ID,
+		Status: row.Status,
+		Slug:   row.Slug,
+	}
+	if row.SubmissionDeadlineAt.Valid {
+		summary.SubmissionDeadlineAt = &row.SubmissionDeadlineAt.Time
+	}
+	return summary, nil
 }
 
 type PgTrackReader struct {

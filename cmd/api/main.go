@@ -110,7 +110,9 @@ func main() {
 	tracksRepo := eventRepo.NewPgTrackReader(db)
 	subsRepo := subRepo.NewPgSubmissionRepository(db)
 	createSubSvc := subUsecase.NewCreateSubmissionService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
-	subHandler := subHandlerPkg.NewSubmissionHandler(createSubSvc)
+	updateSubSvc := subUsecase.NewUpdateSubmissionService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
+	submitSubSvc := subUsecase.NewFinalSubmitService(subEventsReader, teamsRepo, tracksRepo, subsRepo)
+	subHandler := subHandlerPkg.NewSubmissionHandler(createSubSvc, updateSubSvc, submitSubSvc)
 
 	// 6. Wire Chi router
 	r := chi.NewRouter()

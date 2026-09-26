@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/dogfood-platform/dogfood/internal/shared/response"
 	"github.com/dogfood-platform/dogfood/internal/submissions/domain"
@@ -92,19 +91,5 @@ func (s *CreateSubmissionService) Create(ctx context.Context, cmd port.CreateSub
 		}
 	}
 
-	return &port.SubmissionDTO{
-		SubmissionID: sub.ID,
-		Title:        sub.Title,
-		Status:       string(sub.Status),
-		TeamID:       team.ID,
-		TeamName:     team.Name,
-		EventSlug:    event.Slug,
-		Track:        trackDTO,
-		RepoURL:      sub.RepoURL,
-		DemoURL:      sub.DemoURL,
-		VideoURL:     sub.VideoURL,
-		CoverURL:     sub.CoverURL,
-		CreatedAt:    sub.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:    sub.UpdatedAt.Format(time.RFC3339),
-	}, nil
+	return toSubmissionDTO(sub, team.Name, event.Slug, trackDTO), nil
 }
