@@ -123,5 +123,27 @@ export const apiClient = {
     const res = await api.patch<import('../types/api').EventDetailDTO>(`/events/${slug}`, req);
     return res.data;
   },
-};
 
+  async registerForEvent(slug: string): Promise<void> {
+    await api.post(`/events/${slug}/register`, {});
+  },
+
+  async createTeam(slug: string, name: string): Promise<import('../types/api').Team> {
+    const res = await api.post<import('../types/api').Team>(`/events/${slug}/teams`, { name });
+    return res.data;
+  },
+
+  async joinTeam(slug: string, inviteCode: string): Promise<import('../types/api').Team> {
+    const res = await api.post<import('../types/api').Team>(`/events/${slug}/teams/join`, { inviteCode });
+    return res.data;
+  },
+
+  async getMyTeam(slug: string): Promise<import('../types/api').Team> {
+    const res = await api.get<import('../types/api').Team>(`/events/${slug}/teams/mine`);
+    return res.data;
+  },
+
+  async leaveTeam(slug: string): Promise<void> {
+    await api.delete(`/events/${slug}/teams/mine`);
+  },
+};

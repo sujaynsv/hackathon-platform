@@ -197,3 +197,21 @@ export interface FileDTO {
   sizeBytes: number;
 }
 
+// ---- Teams ----
+
+export interface TeamMember {
+  id: string;
+  userId: string;
+  role: string;
+  joinedAt: string;
+}
+
+export interface Team {
+  id: string;
+  eventId: string;
+  name: string;
+  inviteCode: string;
+  isLocked: boolean;
+  createdAt: string;
+  members: TeamMember[];
+}
