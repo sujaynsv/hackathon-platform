@@ -69,10 +69,64 @@ export interface CreateSubmissionRequest {
   demoUrl?: string;
 }
 
+export interface UpdateSubmissionRequest {
+  title?: string;
+  description?: string;
+  repoUrl?: string;
+  demoUrl?: string;
+  videoUrl?: string;
+  trackId?: string;
+}
+
 export interface SubmissionDTO {
   submissionId: string;
   title: string;
   status: string;
   teamId: string;
+}
+
+export interface SubmissionDetail {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  teamId: string;
+  eventId: string;
+  trackId: string | null;
+  repoUrl: string;
+  demoUrl: string;
+  videoUrl: string;
+  coverUrl: string;
+  finalScore: number | null;
+  createdAt: string;
+  updatedAt: string;
+  submittedAt: string | null;
+}
+
+export interface SubmissionGalleryRow {
+  SubmissionID: string;
+  Title: string;
+  Status: string;
+  TeamID: string;
+  TeamName: string;
+  EventID: string;
+  TrackID: string | null;
+  TrackName: string | null;
+  RepoURL: string | null;
+  DemoURL: string | null;
+  VideoURL: string | null;
+  CoverURL: string | null;
+  FinalScore: number | null;
+  CreatedAt: string;
+  UpdatedAt: string;
+  SubmittedAt: string | null;
+}
+
+export interface FileDTO {
+  id: string;
+  name: string;
+  url: string;
+  role: string;
+  sizeBytes: number;
 }
 

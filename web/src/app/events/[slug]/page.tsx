@@ -54,6 +54,11 @@ export default async function EventDetailPage({ params }: Props) {
               )}
             </div>
           </div>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <Link href={`/events/${event.slug}/gallery`} className="btn">
+              View Project Gallery
+            </Link>
+          </div>
         </div>
       </header>
 

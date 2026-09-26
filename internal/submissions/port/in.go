@@ -5,6 +5,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/dogfood-platform/dogfood/internal/submissions/domain"
 	"github.com/google/uuid"
 )
 
@@ -55,6 +56,10 @@ type FinalSubmitUseCase interface {
 
 type GetMySubmissionUseCase interface {
 	GetMine(ctx context.Context, callerID uuid.UUID, eventSlug string) (*SubmissionDTO, error)
+}
+
+type GetSubmissionUseCase interface {
+	Get(ctx context.Context, id uuid.UUID) (*domain.Submission, error)
 }
 
 type UpdateSubmissionCommand struct {
