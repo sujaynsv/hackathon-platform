@@ -17,11 +17,9 @@ func NewPgEventRoleRepository(db *sqlx.DB) *PgEventRoleRepository {
 
 func (r *PgEventRoleRepository) GrantRole(ctx context.Context, userID, eventID uuid.UUID, role string) error {
 	const q = `
-		INSERT INTO event_roles (user_id, event_id, role, created_at, updated_at)
-		VALUES ($1, $2, $3, NOW(), NOW())
-		ON CONFLICT (user_id, event_id) DO UPDATE SET
-			role = EXCLUDED.role,
-			updated_at = NOW()
+		INSERT INTO event_roles (user_id, event_id, role)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (event_id, user_id, role) DO NOTHING
 	`
 	_, err := r.db.ExecContext(ctx, q, userID, eventID, role)
 	return err
