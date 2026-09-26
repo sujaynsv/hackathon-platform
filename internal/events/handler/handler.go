@@ -139,10 +139,10 @@ func (h *EventHandler) GetEventBySlug(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *EventHandler) RegisterPublicRoutes(r chi.Router) {
-	r.Get("/api/v1/events", h.ListEvents)
-	r.Get("/api/v1/events/{slug}", h.GetEventBySlug)
+	r.Get("/events", h.ListEvents)
+	r.Get("/events/{slug}", h.GetEventBySlug)
 }
 
 func (h *EventHandler) RegisterProtectedRoutes(r chi.Router) {
-	r.Post("/api/v1/events", h.CreateEvent)
+	r.Post("/events", h.CreateEvent)
 }
