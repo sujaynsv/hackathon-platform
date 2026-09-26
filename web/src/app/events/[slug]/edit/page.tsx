@@ -7,13 +7,17 @@ import type { EventDetail, UpdateEventRequest } from '@/types/events';
 import styles from './edit.module.css';
 import Link from 'next/link';
 
+import { use } from 'react';
+
 interface Props {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default function EditEventPage({ params }: Props) {
+  const unwrappedParams = use(params);
+  const slug = unwrappedParams.slug;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -25,10 +29,10 @@ export default function EditEventPage({ params }: Props) {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await api.get<EventDetail>(`/events/${params.slug}`);
+        const res = await api.get<EventDetail>(`/events/${slug}`);
         if (res.data) {
           if (res.data.myRole !== 'organizer') {
-            router.push(`/events/${params.slug}`);
+            router.push(`/events/${slug}`);
             return;
           }
           setEvent(res.data);
@@ -46,7 +50,7 @@ export default function EditEventPage({ params }: Props) {
       }
     };
     fetchEvent();
-  }, [params.slug, router]);
+  }, [slug, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -59,7 +63,7 @@ export default function EditEventPage({ params }: Props) {
     setError('');
 
     try {
-      const res = await api.patch<EventDetail>(`/events/${params.slug}`, formData);
+      const res = await api.patch<EventDetail>(`/events/${slug}`, formData);
       if (res.data) {
         router.push(`/events/${res.data.slug}`);
       }
@@ -81,7 +85,7 @@ export default function EditEventPage({ params }: Props) {
 
   return (
     <div className={styles.container}>
-      <Link href={`/events/${params.slug}`} className={styles.backLink}>← Back to Event</Link>
+      <Link href={`/events/${slug}`} className={styles.backLink}>← Back to Event</Link>
       
       <header className={styles.header}>
         <h1 className={styles.title}>Edit Event</h1>

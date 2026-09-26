@@ -1,6 +1,9 @@
 import type { ApiResponse, AuthResponse, LoginRequest, RegisterRequest, TokenPair } from '../types/api';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+const IS_SERVER = typeof window === 'undefined';
+const API_BASE = IS_SERVER 
+  ? (process.env.INTERNAL_API_URL ?? 'http://api:8080/api/v1')
+  : (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api/v1');
 
 // In-memory token — never persisted to localStorage (XSS mitigation)
 let _accessToken: string | null = null;
