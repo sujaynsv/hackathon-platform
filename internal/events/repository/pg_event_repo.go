@@ -27,6 +27,7 @@ func toEventRow(e *domain.Event) map[string]interface{} {
 		"title":                  e.Title,
 		"description":            e.Description,
 		"banner_url":             e.BannerURL,
+		"created_by":             e.OrganizerID,
 		"status":                 e.Status,
 		"normalization_status":   e.NormalizationStatus,
 		"registration_opens_at":  e.RegistrationOpensAt,
@@ -52,6 +53,7 @@ type eventRow struct {
 	Title                string     `db:"title"`
 	Description          *string    `db:"description"`
 	BannerURL            *string    `db:"banner_url"`
+	CreatedBy            uuid.UUID  `db:"created_by"`
 	Status               string     `db:"status"`
 	NormalizationStatus  string     `db:"normalization_status"`
 	RegistrationOpensAt  *time.Time `db:"registration_opens_at"`
@@ -72,6 +74,7 @@ func (r *eventRow) toDomain() *domain.Event {
 		Title:                r.Title,
 		Description:          r.Description,
 		BannerURL:            r.BannerURL,
+		OrganizerID:          r.CreatedBy,
 		Status:               domain.EventStatus(r.Status),
 		NormalizationStatus:  r.NormalizationStatus,
 		RegistrationOpensAt:  r.RegistrationOpensAt,
@@ -89,11 +92,11 @@ func (r *eventRow) toDomain() *domain.Event {
 func (r *PgEventRepository) Save(ctx context.Context, event *domain.Event) error {
 	const q = `
 		INSERT INTO events (
-			id, slug, title, description, banner_url, status, normalization_status,
+			id, slug, title, description, banner_url, created_by, status, normalization_status,
 			registration_opens_at, registration_closes_at, submission_deadline_at,
 			judging_deadline_at, voting_opens_at, voting_closes_at, max_team_size, created_at, updated_at
 		) VALUES (
-			:id, :slug, :title, :description, :banner_url, :status, :normalization_status,
+			:id, :slug, :title, :description, :banner_url, :created_by, :status, :normalization_status,
 			:registration_opens_at, :registration_closes_at, :submission_deadline_at,
 			:judging_deadline_at, :voting_opens_at, :voting_closes_at, :max_team_size, :created_at, :updated_at
 		)

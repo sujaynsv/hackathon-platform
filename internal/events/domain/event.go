@@ -78,15 +78,20 @@ func NewEvent(slug, title string, organizerID uuid.UUID, maxTeamSize int) (*Even
 		maxTeamSize = 5
 	}
 	now := time.Now().UTC()
+	subDeadline := now.Add(30 * 24 * time.Hour)
+	judgingDeadline := now.Add(45 * 24 * time.Hour)
+
 	return &Event{
-		ID:                  uuid.New(),
-		Slug:                slug,
-		Title:               title,
-		OrganizerID:         organizerID,
-		Status:              StatusDraft,
-		NormalizationStatus: "awaiting_judging",
-		MaxTeamSize:         maxTeamSize,
-		CreatedAt:           now,
-		UpdatedAt:           now,
+		ID:                   uuid.New(),
+		Slug:                 slug,
+		Title:                title,
+		OrganizerID:          organizerID,
+		Status:               StatusDraft,
+		NormalizationStatus:  "awaiting_judging",
+		MaxTeamSize:          maxTeamSize,
+		SubmissionDeadlineAt: &subDeadline,
+		JudgingDeadlineAt:    &judgingDeadline,
+		CreatedAt:            now,
+		UpdatedAt:            now,
 	}, nil
 }
