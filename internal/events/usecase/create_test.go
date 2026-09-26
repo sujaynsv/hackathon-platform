@@ -36,8 +36,8 @@ func (m *MockEventRepo) ExistsBySlug(ctx context.Context, slug string) (bool, er
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *MockEventRepo) ListPublished(ctx context.Context, page, pageSize int) ([]*domain.Event, int, error) {
-	args := m.Called(ctx, page, pageSize)
+func (m *MockEventRepo) ListEvents(ctx context.Context, page, pageSize int, callerID *uuid.UUID) ([]*domain.Event, int, error) {
+	args := m.Called(ctx, page, pageSize, callerID)
 	var events []*domain.Event
 	if args.Get(0) != nil {
 		events = args.Get(0).([]*domain.Event)

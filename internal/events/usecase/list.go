@@ -28,7 +28,7 @@ func (s *ListEventsService) List(ctx context.Context, q port.ListEventsQuery) (*
 		q.PageSize = 50
 	}
 
-	events, totalCount, err := s.events.ListPublished(ctx, q.Page, q.PageSize)
+	events, totalCount, err := s.events.ListEvents(ctx, q.Page, q.PageSize, q.CallerID)
 	if err != nil {
 		return nil, err
 	}

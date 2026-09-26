@@ -11,7 +11,7 @@ type EventRepository interface {
 	Save(ctx context.Context, event *domain.Event) error
 	FindBySlug(ctx context.Context, slug string) (*domain.Event, error)
 	ExistsBySlug(ctx context.Context, slug string) (bool, error)
-	ListPublished(ctx context.Context, page, pageSize int) ([]*domain.Event, int, error)
+	ListEvents(ctx context.Context, page, pageSize int, callerID *uuid.UUID) ([]*domain.Event, int, error)
 	GetEventDetail(ctx context.Context, slug string, callerID *uuid.UUID) (*domain.Event, []domain.Track, *string, error)
 	Update(ctx context.Context, event *domain.Event) error
 }

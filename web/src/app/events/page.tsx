@@ -1,18 +1,27 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import type { Event } from '@/types/events';
 import styles from './events.module.css';
+import { useAuth } from '@/context/AuthContext';
 
+export default function EventsPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const { isLoading: authLoading } = useAuth();
 
+  useEffect(() => {
+    if (authLoading) return;
+    
+    api.get<Event[]>('/events?page=1&pageSize=50')
+      .then(res => setEvents(res.data ?? []))
+      .catch(err => console.error('Failed to load events', err))
+      .finally(() => setDataLoading(false));
+  }, [authLoading]);
 
-export default async function EventsPage() {
-  let events: Event[] = [];
-  try {
-    const res = await api.get<Event[]>('/events?page=1&pageSize=50');
-    events = res.data ?? [];
-  } catch (err) {
-    console.error('Failed to load events', err);
-  }
+  if (authLoading || dataLoading) return <div className={styles.container}><div className={styles.emptyState}>Loading...</div></div>;
 
   return (
     <div className={styles.container}>

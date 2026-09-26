@@ -145,14 +145,14 @@ func (r *PgEventRepository) ExistsBySlug(ctx context.Context, slug string) (bool
 	return exists, err
 }
 
-func (r *PgEventRepository) ListPublished(ctx context.Context, page, pageSize int) ([]*domain.Event, int, error) {
+func (r *PgEventRepository) ListEvents(ctx context.Context, page, pageSize int, callerID *uuid.UUID) ([]*domain.Event, int, error) {
 	const q = `
 		SELECT id, slug, title, description, banner_url, created_by,
 			status, normalization_status, registration_opens_at, registration_closes_at,
 		submission_deadline_at, judging_deadline_at, voting_opens_at, voting_closes_at,
 		max_team_size, created_at, updated_at, COUNT(*) OVER() AS total_count
 		FROM events
-		WHERE status != 'draft'
+		WHERE status != 'draft' OR (created_by = $3 AND $3 IS NOT NULL)
 		ORDER BY created_at DESC
 		LIMIT $1 OFFSET $2
 	`
@@ -164,7 +164,7 @@ func (r *PgEventRepository) ListPublished(ctx context.Context, page, pageSize in
 
 	offset := (page - 1) * pageSize
 	var rows []listRow
-	err := r.db.SelectContext(ctx, &rows, q, pageSize, offset)
+	err := r.db.SelectContext(ctx, &rows, q, pageSize, offset, callerID)
 	if err != nil {
 		return nil, 0, err
 	}
