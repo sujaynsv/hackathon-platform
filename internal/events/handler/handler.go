@@ -17,13 +17,15 @@ type EventHandler struct {
 	create port.CreateEventUseCase
 	list   port.ListEventsUseCase
 	get    port.GetEventUseCase
+	update port.UpdateEventUseCase
 }
 
-func NewEventHandler(create port.CreateEventUseCase, list port.ListEventsUseCase, get port.GetEventUseCase) *EventHandler {
+func NewEventHandler(create port.CreateEventUseCase, list port.ListEventsUseCase, get port.GetEventUseCase, update port.UpdateEventUseCase) *EventHandler {
 	return &EventHandler{
 		create: create,
 		list:   list,
 		get:    get,
+		update: update,
 	}
 }
 
@@ -138,6 +140,62 @@ func (h *EventHandler) GetEventBySlug(w http.ResponseWriter, r *http.Request) {
 	response.OK(w, r, dto)
 }
 
+type updateEventRequest struct {
+	Title                *string    `json:"title"`
+	Description          *string    `json:"description"`
+	Status               *string    `json:"status"`
+	MaxTeamSize          *int       `json:"maxTeamSize"`
+	RegistrationOpensAt  *time.Time `json:"registrationOpensAt"`
+	RegistrationClosesAt *time.Time `json:"registrationClosesAt"`
+	SubmissionDeadlineAt *time.Time `json:"submissionDeadlineAt"`
+	JudgingDeadlineAt    *time.Time `json:"judgingDeadlineAt"`
+	VotingOpensAt        *time.Time `json:"votingOpensAt"`
+	VotingClosesAt       *time.Time `json:"votingClosesAt"`
+}
+
+func (h *EventHandler) UpdateEvent(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
+	callerIDStr := middleware.GetUserID(r.Context())
+	var callerID uuid.UUID
+	if callerIDStr != "" {
+		callerID, _ = uuid.Parse(callerIDStr)
+	}
+
+	if callerID == uuid.Nil {
+		response.Unauthorized(w, r, "UNAUTHORIZED", "authentication required")
+		return
+	}
+
+	var body updateEventRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		response.BadRequest(w, r, "VALIDATION_ERROR", "invalid request body")
+		return
+	}
+
+	cmd := port.UpdateEventCommand{
+		CallerID:             callerID,
+		Slug:                 slug,
+		Title:                body.Title,
+		Description:          body.Description,
+		NewStatus:            body.Status,
+		MaxTeamSize:          body.MaxTeamSize,
+		RegistrationOpensAt:  body.RegistrationOpensAt,
+		RegistrationClosesAt: body.RegistrationClosesAt,
+		SubmissionDeadlineAt: body.SubmissionDeadlineAt,
+		JudgingDeadlineAt:    body.JudgingDeadlineAt,
+		VotingOpensAt:        body.VotingOpensAt,
+		VotingClosesAt:       body.VotingClosesAt,
+	}
+
+	result, err := h.update.Update(r.Context(), cmd)
+	if err != nil {
+		response.HandleDomainError(w, r, err)
+		return
+	}
+
+	response.OK(w, r, result)
+}
+
 func (h *EventHandler) RegisterPublicRoutes(r chi.Router) {
 	r.Get("/events", h.ListEvents)
 	r.Get("/events/{slug}", h.GetEventBySlug)
@@ -145,4 +203,5 @@ func (h *EventHandler) RegisterPublicRoutes(r chi.Router) {
 
 func (h *EventHandler) RegisterProtectedRoutes(r chi.Router) {
 	r.Post("/events", h.CreateEvent)
+	r.Patch("/events/{slug}", h.UpdateEvent)
 }

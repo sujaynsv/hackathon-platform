@@ -13,6 +13,7 @@ type EventRepository interface {
 	ExistsBySlug(ctx context.Context, slug string) (bool, error)
 	ListPublished(ctx context.Context, page, pageSize int) ([]*domain.Event, int, error)
 	GetEventDetail(ctx context.Context, slug string, callerID *uuid.UUID) (*domain.Event, []domain.Track, *string, error)
+	Update(ctx context.Context, event *domain.Event) error
 }
 
 type EventRoleRepository interface {

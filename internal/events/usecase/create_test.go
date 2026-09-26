@@ -62,6 +62,11 @@ func (m *MockEventRepo) GetEventDetail(ctx context.Context, slug string, callerI
 	return e, t, r, args.Error(3)
 }
 
+func (m *MockEventRepo) Update(ctx context.Context, event *domain.Event) error {
+	args := m.Called(ctx, event)
+	return args.Error(0)
+}
+
 type MockEventRoleRepo struct {
 	mock.Mock
 }

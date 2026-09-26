@@ -40,3 +40,16 @@ export interface CreateEventRequest {
   votingOpensAt?: string;
   votingClosesAt?: string;
 }
+
+export interface UpdateEventRequest {
+  title?: string;
+  description?: string;
+  status?: string;
+  maxTeamSize?: number;
+  registrationOpensAt?: string;
+  registrationClosesAt?: string;
+  submissionDeadlineAt?: string;
+  judgingDeadlineAt?: string;
+  votingOpensAt?: string;
+  votingClosesAt?: string;
+}

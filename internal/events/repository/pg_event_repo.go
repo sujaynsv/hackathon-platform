@@ -224,3 +224,20 @@ func (r *PgEventRepository) GetEventDetail(ctx context.Context, slug string, cal
 
 	return event, tracks, myRole, nil
 }
+
+func (r *PgEventRepository) Update(ctx context.Context, event *domain.Event) error {
+	const q = `
+		UPDATE events
+		SET title=$2, description=$3, status=$4, max_team_size=$5,
+			registration_opens_at=$6, registration_closes_at=$7,
+			submission_deadline_at=$8, judging_deadline_at=$9,
+			voting_opens_at=$10, voting_closes_at=$11, updated_at=$12
+		WHERE id=$1`
+	_, err := r.db.ExecContext(ctx, q,
+		event.ID, event.Title, event.Description, event.Status, event.MaxTeamSize,
+		event.RegistrationOpensAt, event.RegistrationClosesAt,
+		event.SubmissionDeadlineAt, event.JudgingDeadlineAt,
+		event.VotingOpensAt, event.VotingClosesAt, event.UpdatedAt,
+	)
+	return err
+}

@@ -77,3 +77,22 @@ type EventDetailDTO struct {
 	Tracks []TrackDTO `json:"tracks"`
 	MyRole *string    `json:"myRole,omitempty"`
 }
+
+type UpdateEventUseCase interface {
+	Update(ctx context.Context, cmd UpdateEventCommand) (*EventDetailDTO, error)
+}
+
+type UpdateEventCommand struct {
+	CallerID             uuid.UUID
+	Slug                 string
+	Title                *string
+	Description          *string
+	NewStatus            *string
+	MaxTeamSize          *int
+	RegistrationOpensAt  *time.Time
+	RegistrationClosesAt *time.Time
+	SubmissionDeadlineAt *time.Time
+	JudgingDeadlineAt    *time.Time
+	VotingOpensAt        *time.Time
+	VotingClosesAt       *time.Time
+}
