@@ -103,5 +103,15 @@ export const apiClient = {
     const res = await api.post<{ message: string }>('/auth/verify-email', { token });
     return res.data;
   },
+
+  async createEvent(req: import('../types/api').CreateEventRequest): Promise<import('../types/api').EventDetailDTO> {
+    const res = await api.post<import('../types/api').EventDetailDTO>('/events', req);
+    return res.data;
+  },
+
+  async updateEvent(slug: string, req: import('../types/api').UpdateEventRequest): Promise<import('../types/api').EventDetailDTO> {
+    const res = await api.patch<import('../types/api').EventDetailDTO>(`/events/${slug}`, req);
+    return res.data;
+  },
 };
 
